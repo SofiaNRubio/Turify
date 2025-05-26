@@ -147,6 +147,63 @@ router.delete("/:id", async (req, res) => {
 /**
  * @swagger
  * /empresas:
+ *   post:
+ *     summary: Crea una nueva empresa
+ *     tags: [Empresas]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nombre
+ *               - descripcion
+ *               - email
+ *               - telefono
+ *               - sitio_web
+ *               - direccion
+ *               - latitud
+ *               - longitud
+ *               - tipo
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               descripcion:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               telefono:
+ *                 type: string
+ *               sitio_web:
+ *                 type: string
+ *               direccion:
+ *                 type: string
+ *               latitud:
+ *                 type: number
+ *               longitud:
+ *                 type: number
+ *               tipo:
+ *                 type: string
+ *     responses:
+ *       '201':
+ *         description: Empresa creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 nombre:
+ *                   type: string
+ *       '500':
+ *         description: Error al crear empresa
+ */
+
+/**
+ * @swagger
+ * /empresas:
  *   get:
  *     summary: Obtiene la lista de todas las empresas
  *     tags: [Empresas]
