@@ -122,6 +122,6 @@ Elimina una empresa por su ID.
 
 ## 🔐 Seguridad
 
->[!Warning] **Nota importante:**
+>[!warning] **Nota importante:**
 > Por ahora **los endpoints del backend no están protegidos**, hasta definir cómo se manejará la autenticación/autorización en la API.
 
