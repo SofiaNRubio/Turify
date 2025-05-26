@@ -35,7 +35,7 @@ Este proyecto se encuentra en desarrollo activo. Actualmente estamos trabajando 
 - [Julieta Sotelo](https://github.com/JuuSotelo)
 - [Ana Paula Toledo](https://github.com/paulytoledoo)
 - [Dominguez Joaquin](http://github.com/DOMINGUEZJOACOO)
-- [Santiago Suarez]()
+- [Santiago Suarez](http://github.com/SantiagoSuarez9)
 
 ---
 
