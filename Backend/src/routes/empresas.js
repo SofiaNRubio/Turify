@@ -144,5 +144,114 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ error: "Error al eliminar empresa" });
     }
 });
+/**
+ * @swagger
+ * /empresas:
+ *   get:
+ *     summary: Obtiene la lista de todas las empresas
+ *     tags: [Empresas]
+ *     responses:
+ *       '200':
+ *         description: Lista de empresas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+
+/**
+ * @swagger
+ * /empresas/{id}:
+ *   get:
+ *     summary: Obtiene una empresa por su ID
+ *     tags: [Empresas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la empresa
+ *     responses:
+ *       '200':
+ *         description: Datos de la empresa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       '404':
+ *         description: Empresa no encontrada
+ */
+
+/**
+ * @swagger
+ * /empresas/{id}:
+ *   put:
+ *     summary: Actualiza una empresa por su ID
+ *     tags: [Empresas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la empresa a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               descripcion:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               telefono:
+ *                 type: string
+ *               sitio_web:
+ *                 type: string
+ *               direccion:
+ *                 type: string
+ *               latitud:
+ *                 type: number
+ *               longitud:
+ *                 type: number
+ *               tipo:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Empresa actualizada
+ *       '404':
+ *         description: Empresa no encontrada
+ *       '500':
+ *         description: Error al actualizar empresa
+ */
+
+/**
+ * @swagger
+ * /empresas/{id}:
+ *   delete:
+ *     summary: Elimina una empresa por su ID
+ *     tags: [Empresas]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la empresa a eliminar
+ *     responses:
+ *       '200':
+ *         description: Empresa eliminada
+ *       '404':
+ *         description: Empresa no encontrada
+ *       '500':
+ *         description: Error al eliminar empresa
+ */
 
 export default router;

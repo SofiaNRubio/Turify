@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import swaggerUi from "swagger-ui-express";
+import specs from "../swaggerConfig.js";
 import empresasRoutes from "./routes/empresas.js";
 
 dotenv.config();
@@ -15,6 +17,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
     res.send("Turify API funcionando 🚀");
 });
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use("/api/empresas", empresasRoutes);
 
