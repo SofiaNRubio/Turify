@@ -1,0 +1,98 @@
+---
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+---
+
+<script>
+    import { marked } from "marked";
+    import DOMPurify from "dompurify";
+
+    let messages = [];
+    const messagesDiv = document.getElementById("messages") as HTMLDivElement;
+    const chatForm = document.getElementById("chat-form") as HTMLFormElement;
+    const userInput = document.getElementById("user-input") as HTMLInputElement;
+    let typingMessage: HTMLDivElement | null = null;
+
+    // 🆔 ID único por sesión (simple, para este ejemplo)
+    const sessionId =
+        localStorage.getItem("chat-session-id") || Date.now().toString();
+    localStorage.setItem("chat-session-id", sessionId);
+
+    function appendMessage(content: string, role: string) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${role}`;
+
+        // 🧠 Convertir Markdown a HTML y sanitizarlo
+        const html = DOMPurify.sanitize(marked.parse(content));
+        messageDiv.innerHTML = html;
+
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        typingMessage = document.createElement("div");
+        typingMessage.className = "message assistant typing-indicator";
+        typingMessage.textContent = "Escribiendo...";
+        messagesDiv.appendChild(typingMessage);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        if (typingMessage) {
+            messagesDiv.removeChild(typingMessage);
+            typingMessage = null;
+        }
+    }
+
+    chatForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userMessage = userInput?.value.trim();
+        if (!userMessage) return;
+
+        // Mostrar mensaje del usuario
+        appendMessage(userMessage, "user");
+        messages.push({ role: "user", content: userMessage });
+        userInput.value = "";
+
+        showTypingIndicator();
+
+        try {
+            const response = await fetch("http://localhost:3001/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    sessionId,
+                    message: userMessage, // ⬅️ Solo el mensaje actual
+                }),
+            });
+
+            const data = await response.json();
+
+            hideTypingIndicator();
+
+            if (data.response) {
+                appendMessage(data.response, "assistant");
+                messages.push({
+                    role: "assistant",
+                    content: data.response,
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            appendMessage(
+                "Lo siento, hubo un error al procesar tu mensaje.",
+                "error"
+            );
+            hideTypingIndicator();
+        }
+    });
+</script>
+<style>
+    .typing-indicator {
+        font-style: italic;
+        opacity: 0.7;
+    }
+</style>
