@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import specs from "../swaggerConfig.js";
 import empresasRoutes from "./routes/empresas.js";
+import usuariosAdminRoutes from "./pages/api/admin/usuarios.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use("/api/empresas", empresasRoutes);
+app.use("/api/admin/usuarios", usuariosAdminRoutes);
 
 // Servidor
 const PORT = process.env.PORT;
