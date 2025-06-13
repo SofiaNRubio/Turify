@@ -1,0 +1,48 @@
+---
+/* 
+  Cuando tengas la función real, reemplaza este mock:
+  import { getAtractivos } from '../../lib/db';
+  const atractivos = await getAtractivos();
+
+  Ejemplo para consumir tu API REST (fetch):
+  const res = await fetch('http://localhost:3000/api/atractivos');
+  const atractivos = await res.json();
+*/
+import AdminPanel from "../../components/AdminPanel.astro";
+import { AdminMenu } from "../../components/AdminMenu";
+
+const atractivos = [
+  { id: 1, nombre: "Cataratas del Iguazú", ubicacion: "Misiones", categoria: "Naturaleza" },
+  { id: 2, nombre: "Glaciar Perito Moreno", ubicacion: "Santa Cruz", categoria: "Naturaleza" },
+  { id: 3, nombre: "Obelisco", ubicacion: "Buenos Aires", categoria: "Monumento" },
+];
+---
+
+<link rel="stylesheet" href="/src/style/atractivos.css">
+
+<AdminPanel menu={AdminMenu}>
+    <div class="admin-content">
+      <div class="header">
+        <h1>Atractivos Turísticos</h1>
+        <a href="/admin/atractivos-nuevo" class="btn-nuevo">+ Nuevo atractivo</a>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Ubicación</th>
+            <th>Categoría</th>
+          </tr>
+        </thead>
+        <tbody>
+          {atractivos.map((a) => (
+            <tr>
+              <td>{a.nombre}</td>
+              <td>{a.ubicacion}</td>
+              <td>{a.categoria}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+</AdminPanel>
