@@ -1,0 +1,75 @@
+---
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/astro/components";
+---
+<header class="header">
+    <nav class="navbar">
+        <div class="logo">Turify</div>
+        <div class="nav-auth">
+            <SignedOut>
+                <SignInButton mode="modal" />
+            </SignedOut>
+            <SignedIn>
+                <UserButton />
+            </SignedIn>
+        </div>
+    </nav>
+    <div class="hero">
+        <img src="/actividades/laberinto.png" alt="San Rafael" class="hero-img" />
+        <div class="hero-text">
+            <h1>Turify</h1>
+            <h2>Vivi San Rafael</h2>
+        </div>
+    </div>
+</header>
+<style>
+    .header {
+        background: #fff;
+    }
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: #f8faf7;
+    }
+    .logo {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2e6c4d;
+    }
+    .nav-auth {
+        display: flex;
+        gap: 1rem;
+    }
+    .hero {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+    }
+    .hero-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        filter: brightness(0.7);
+    }
+    .hero-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        text-align: center;
+    }
+    .hero-text h1 {
+        font-size: 2.5rem;
+        margin: 0;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+    .hero-text h2 {
+        font-size: 1.3rem;
+        margin: 0;
+        font-weight: 400;
+    }
+</style>
