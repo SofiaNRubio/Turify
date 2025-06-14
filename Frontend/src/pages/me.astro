@@ -12,4 +12,8 @@ const user = await Astro.locals.currentUser();
 ---
 
 <!-- Use `user` to render user details or create UI elements -->
-<div>Welcome, {user.firstName}!</div>
+{user ? (
+  <div>Welcome, {user.firstName}!</div>
+) : (
+  <div>Loading user information...</div>
+)}
