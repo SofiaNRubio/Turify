@@ -1,32 +1,32 @@
----
+    ---
 
----
+    ---
 
-<nav>
-    <a href="/">Inicio</a>
-    <a href="/empresas">Empresas</a>
-    <span id="auth-section"></span>
+    <nav>
+        <a href="/">Inicio</a>
+        <a href="/empresas">Empresas</a>
+        <span id="auth-section"></span>
 
-    <script type="module" is:inline>
-        import { Clerk } from "@clerk/clerk-js";
+        <script type="module" is:inline>
+            import { Clerk } from "@clerk/clerk-js";
 
-        const clerk = new Clerk(import.meta.env.PUBLIC_CLERK_FRONTEND_API);
-        await clerk.load();
+            const clerk = new Clerk(import.meta.env.PUBLIC_CLERK_FRONTEND_API);
+            await clerk.load();
 
-        const authSection = document.getElementById("auth-section");
+            const authSection = document.getElementById("auth-section");
 
-        const user = await clerk.user;
+            const user = await clerk.user;
 
-        if (user) {
-            const logoutBtn = document.createElement("button");
-            logoutBtn.textContent = "Cerrar sesión";
-            logoutBtn.onclick = () => clerk.signOut();
-            authSection.appendChild(logoutBtn);
-        } else {
-            const loginBtn = document.createElement("button");
-            loginBtn.textContent = "Iniciar sesión";
-            loginBtn.onclick = () => clerk.openSignIn();
-            authSection.appendChild(loginBtn);
-        }
-    </script>
-</nav>
+            if (user) {
+                const logoutBtn = document.createElement("button");
+                logoutBtn.textContent = "Cerrar sesión";
+                logoutBtn.onclick = () => clerk.signOut();
+                authSection.appendChild(logoutBtn);
+            } else {
+                const loginBtn = document.createElement("button");
+                loginBtn.textContent = "Iniciar sesión";
+                loginBtn.onclick = () => clerk.openSignIn();
+                authSection.appendChild(loginBtn);
+            }
+        </script>
+    </nav>

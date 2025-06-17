@@ -1,0 +1,18 @@
+:root {
+  --color-bg-panel: #A9D9C3;
+  --color-bg-input: #FFFFFF;
+  --color-primary: #1A513B;
+  --color-primary-hover: #A9C7D9;
+  --color-text: #1A513B;
+  --color-table-header: #1A513B;
+  --color-table-row-even: #FFD3D3;
+  --color-table-row-odd: #FFFFFF;
+}
+
+body {
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  background: #f6f3ee;
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
