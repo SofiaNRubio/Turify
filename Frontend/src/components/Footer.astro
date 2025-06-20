@@ -8,11 +8,12 @@
         </div>
         <div class="right">
             <h2>Enlaces Rápidos</h2>
-            <p>Indicaciones<br>
-                <span style="color: red;">Emergencias</span><br>
-                Servicios<br>
-                Hospedaje<br> 
-                Información util 
+            <p>
+                <span class="footer-link">Indicaciones</span><br>
+                <span class="footer-link" style="color: red;">Emergencias</span><br>
+                <span class="footer-link">Servicios</span><br>
+                <span class="footer-link">Hospedaje</span><br>
+                <span class="footer-link">Información util</span>
             </p>
         </div>
     </div>
@@ -47,6 +48,13 @@
         min-width: 220px;
         text-align: left;
         margin-bottom: 1rem;
+    }
+    .footer-link {
+        cursor: pointer;
+        transition: text-decoration 0.2s;
+    }
+    .footer-link:hover {
+        text-decoration: underline;
     }
     @media (max-width: 700px) {
         .footer-content {

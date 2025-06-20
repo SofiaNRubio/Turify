@@ -6,9 +6,27 @@ const currentPath = Astro.url.pathname;
     <nav class="navbar">
         <div class="logo">
             <a href="/"><img src="../../public/logo.png" class="logo-img"></a></div>
+        <!-- Botón hamburguesa CSS only -->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle" hidden>
+        <label for="menu-toggle" class="hamburger" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
         <div class="nav-links">
             <a href="/" class={currentPath === '/' ? 'active' : ''}>Inicio</a>
-            <a href="/indicaciones" class={currentPath === '/indicaciones' ? 'active' : ''}>Indicaciones</a>
+            <div class="dropdown-btn">
+                <button id="indicaciones-menu-button" aria-haspopup="true" aria-expanded="false" class="indicaciones-btn">
+                    Indicaciones
+                    <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon octicon-triangle-down" style="vertical-align: middle; margin-left: 4px;">
+                        <path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"></path>
+                    </svg>
+                </button>
+                <div class="dropdown-content-btn">
+                    <a href="/moverte">Moverte en San Rafael</a>
+                    <a href="/llegar">Llegar a San Rafael</a>
+                </div>
+            </div>
             <a href="/emergencias" class={currentPath === '/emergencias' ? 'active emergencias' : 'emergencias'}>Emergencias</a>
             <a href="/servicios" class={currentPath === '/servicios' ? 'active' : ''}>Servicios</a>
             <a href="/hospedaje" class={currentPath === '/hospedaje' ? 'active' : ''}>Hospedaje</a>
@@ -104,5 +122,108 @@ const currentPath = Astro.url.pathname;
     }
     .nav-links a.active {
         color: #4BAF49;
+    }
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        z-index: 1100;
+        margin-left: 1rem;
+    }
+    .hamburger span {
+        display: block;
+        width: 26px;
+        height: 3px;
+        background: #333;
+        margin: 4px 0;
+        border-radius: 2px;
+        transition: 0.3s;
+    }
+    .menu-toggle {
+        display: none;
+    }
+    @media (max-width: 900px) {
+        .nav-links {
+            position: fixed;
+            top: 70px;
+            right: 0;
+            background: #fff;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 70vw;
+            max-width: 300px;
+            height: 100vh;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 2rem 1.5rem;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 1050;
+            display: flex;
+        }
+        .menu-toggle:checked ~ .hamburger + .nav-links,
+        .menu-toggle:checked + .hamburger + .nav-links {
+            transform: translateX(0);
+        }
+        .navbar {
+            gap: 0.5rem;
+        }
+        .hamburger {
+            display: flex;
+        }
+        .nav-auth {
+            margin-right: 0;
+        }
+    }
+    .dropdown-btn {
+        position: relative;
+        display: inline-block;
+    }
+    .indicaciones-btn {
+        background: none;
+        border: none;
+        color: #333;
+        font-weight: 500;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        transition: color 0.2s;
+    }
+    .indicaciones-btn:hover {
+        color: #4BAF49;
+    }
+    .dropdown-content-btn {
+        display: none;
+        position: absolute;
+        background: #fff;
+        min-width: 200px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        z-index: 2000;
+        border-radius: 6px;
+        padding: 0.5rem 0;
+        top: 100%;
+        left: 0;
+    }
+    .dropdown-content-btn a {
+        color: #333;
+        padding: 0.5rem 1.2rem;
+        text-decoration: none;
+        display: block;
+        transition: background 0.2s;
+    }
+    .dropdown-content-btn a:hover {
+        background: #f0f0f0;
+        color: #4BAF49;
+    }
+    .dropdown-btn:hover .dropdown-content-btn,
+    .dropdown-btn:focus-within .dropdown-content-btn {
+        display: block;
     }
 </style>
