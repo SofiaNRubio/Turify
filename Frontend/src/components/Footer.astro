@@ -1,10 +1,24 @@
 <footer class="footer">
-      <div>
-        <p>Dirección de Turismo San Rafael</p>
-        <p>Av. San Martín 123, San Rafael, Mendoza</p>
+    <div class="footer-content">
+        <div class="left">
+            <h2>Dirección de Turismo San Rafael</h2>
+            <p style="max-width: 350px; margin: 0 auto;">
+                Descubre el paraíso natural de San Rafael, con sus paisajes impresionantes, aventuras al aire libre y la mejor gastronomía de la región.
+            </p>
+        </div>
+        <div class="right">
+            <h2>Enlaces Rápidos</h2>
+            <p>Indicaciones<br>
+                <span style="color: red;">Emergencias</span><br>
+                Servicios<br>
+                Hospedaje<br> 
+                Informacion util
+            </p>
+        </div>
     </div>
+    <hr style="border: none; border-top: 0.5px solid #fff; margin: 0px; width: 100%;" />
     <div>
-        <p>© {new Date().getFullYear()} Turify. Todos los derechos reservados.</p>
+        <p>© {new Date().getFullYear()} San Rafael Turismo. Todos los derechos reservados. Hecho con 🤍 en San Rafael.</p>
     </div>
 </footer>
 <style>
@@ -13,8 +27,35 @@
         color: #fff;
         text-align: center;
         padding: 1.5rem 1rem 1rem 1rem;
-        border-radius: 12px 12px 0 0;
+        
         font-size: 0.95rem;
         margin-top: 2rem;
+    }
+    .footer-content {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 5rem;
+        text-align: left;
+    }
+    .left {
+        flex: 0 1 auto;
+        min-width: 220px;
+    }
+    .right {
+        flex: 0 1 auto;
+        min-width: 220px;
+        text-align: left;
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 700px) {
+        .footer-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+        .right, .left {
+            text-align: center;
+        }
     }
 </style>
