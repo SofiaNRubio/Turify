@@ -1,9 +1,19 @@
 ---
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/astro/components";
+const currentPath = Astro.url.pathname;
 ---
 <header class="header">
     <nav class="navbar">
-        <div class="logo">Turify</div>
+        <div class="logo">
+            <a href="/"><img src="../../public/logo.png" class="logo-img"></a></div>
+        <div class="nav-links">
+            <a href="/" class={currentPath === '/' ? 'active' : ''}>Inicio</a>
+            <a href="/indicaciones" class={currentPath === '/indicaciones' ? 'active' : ''}>Indicaciones</a>
+            <a href="/emergencias" class={currentPath === '/emergencias' ? 'active emergencias' : 'emergencias'}>Emergencias</a>
+            <a href="/servicios" class={currentPath === '/servicios' ? 'active' : ''}>Servicios</a>
+            <a href="/hospedaje" class={currentPath === '/hospedaje' ? 'active' : ''}>Hospedaje</a>
+            <a href="/info" class={currentPath === '/info' ? 'active' : ''}>Información útil</a>
+        </div>
         <div class="nav-auth">
             <SignedOut>
                 <SignInButton mode="modal" />
@@ -13,63 +23,86 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/astro/comp
             </SignedIn>
         </div>
     </nav>
-    <div class="hero">
-        <img src="/actividades/laberinto.png" alt="San Rafael" class="hero-img" />
-        <div class="hero-text">
-            <h1>Turify</h1>
-            <h2>Vivi San Rafael</h2>
-        </div>
-    </div>
 </header>
 <style>
     .header {
         background: #fff;
+        padding-top: 100px;
     }
     .navbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 1rem 2rem;
-        background: #f8faf7;
+        background: rgba(255,255,255,0.8);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%; 
+        min-width: unset;
+        max-width: unset;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+        z-index: 1000;
+        gap: 2rem;
     }
     .logo {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #2e6c4d;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        margin-right: 0;
+    }
+    .logo-img {
+        max-width: 120px;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        transition: max-width 0.2s;
+        display: block;
     }
     .nav-auth {
         display: flex;
+        align-items: center;
         gap: 1rem;
+        flex: 0 0 auto;
+        min-width: 48px;
+        margin-right: 4rem;
     }
-    .hero {
-        position: relative;
-        width: 100%;
-        height: 180px;
-        overflow: hidden;
+    @media (max-width: 600px) {
+        .logo-img {
+            max-width: 80px;
+        }
+        .navbar {
+            padding: 0.5rem 1rem;
+            gap: 1rem;
+        }
+        .nav-auth {
+            margin-right: 0.5rem;
+        }
     }
-    .hero-img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        filter: brightness(0.7);
+    .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        flex: 1;
+        justify-content: right;
     }
-    .hero-text {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: #fff;
-        text-align: center;
+    .nav-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        transition: color 0.2s;
     }
-    .hero-text h1 {
-        font-size: 2.5rem;
-        margin: 0;
+    .nav-links a:hover {
+        color: #4BAF49;
+    }   
+    .nav-links a.emergencias {
+        color: #EF4444;
         font-weight: bold;
-        letter-spacing: 2px;
     }
-    .hero-text h2 {
-        font-size: 1.3rem;
-        margin: 0;
-        font-weight: 400;
+    .nav-links a.emergencias:hover {
+        color: #cc0000;
+    }
+    .nav-links a.active {
+        color: #4BAF49;
     }
 </style>
