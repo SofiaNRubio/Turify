@@ -1,10 +1,19 @@
 ---
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/astro/components";
+const currentPath = Astro.url.pathname;
 ---
 <header class="header">
     <nav class="navbar">
         <div class="logo">
-            <a href=""><img src="../../public/logo.png" class="logo-img"></a></div>
+            <a href="/"><img src="../../public/logo.png" class="logo-img"></a></div>
+        <div class="nav-links">
+            <a href="/" class={currentPath === '/' ? 'active' : ''}>Inicio</a>
+            <a href="/indicaciones" class={currentPath === '/indicaciones' ? 'active' : ''}>Indicaciones</a>
+            <a href="/emergencias" class={currentPath === '/emergencias' ? 'active emergencias' : 'emergencias'}>Emergencias</a>
+            <a href="/servicios" class={currentPath === '/servicios' ? 'active' : ''}>Servicios</a>
+            <a href="/hospedaje" class={currentPath === '/hospedaje' ? 'active' : ''}>Hospedaje</a>
+            <a href="/info" class={currentPath === '/info' ? 'active' : ''}>Información útil</a>
+        </div>
         <div class="nav-auth">
             <SignedOut>
                 <SignInButton mode="modal" />
@@ -70,5 +79,30 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/astro/comp
         .nav-auth {
             margin-right: 0.5rem;
         }
+    }
+    .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        flex: 1;
+        justify-content: right;
+    }
+    .nav-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    .nav-links a:hover {
+        color: #4BAF49;
+    }   
+    .nav-links a.emergencias {
+        color: #EF4444;
+        font-weight: bold;
+    }
+    .nav-links a.emergencias:hover {
+        color: #cc0000;
+    }
+    .nav-links a.active {
+        color: #4BAF49;
     }
 </style>
