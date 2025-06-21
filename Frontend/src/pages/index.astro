@@ -31,6 +31,9 @@ const { title } = Astro.props;
         <main>
             <section class="actividades">
                 <h3>Actividades Disponibles</h3>
+                <div class="activity-button-container">
+                    <a class="activity-button" href="/actividades_aire_libre">Ver Todos</a>
+                </div>
                 <div class="cards">
                     <div class="card">
                         <img src="/actividades/airelibre.jpg" alt="Actividad 1" />
@@ -144,6 +147,37 @@ const { title } = Astro.props;
         max-width: 1100px;
         margin: 0 auto;
         padding: 2rem 1rem;
+    }
+    .activity-button {
+        background: #2e6c4d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+    }
+    .activity-button:hover {
+        background: white;
+        color: #2e6c4d;
+        box-shadow: 0 2px 8px rgba(46,108,77,0.1);
+        border: 1px solid #2e6c4d;
+        border-color: #2e6c4d;
+    }
+    .activity-button a {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    .activity-button-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+        margin-top: -3rem;
     }
     .hero {
         position: relative;
