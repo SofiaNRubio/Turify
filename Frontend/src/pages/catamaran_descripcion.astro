@@ -1,0 +1,91 @@
+---
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+---
+<Header />
+<main>
+    <h1 class="title">Catamaran - Los Reyunos</h1>
+    <div class="cards-horizontal">
+        <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore suscipit mollitia quaerat eos libero distinctio excepturi laboriosam amet id at omnis aliquid repellendus, quisquam quia magni aut expedita praesentium officiis!</p>
+        <img src="../../public/actividades/airelibre.jpg" class="image">
+    </div>
+    <section class="historia">
+                <div class="historia-content">
+                    <h3>Ubicacion</h3>
+                    <p>
+                        San Rafael es una ciudad con una rica historia y tradiciones. Fundada en el siglo XIX, es reconocida por su hospitalidad, paisajes y actividades turísticas.
+                    </p>
+                </div>
+                <div class="historia-mapa">
+                    <div id="map" style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;"></div>
+                </div>
+            </section>
+</main>
+<Footer />
+
+<style>
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f8faf7;
+    color: #222;
+}
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+.title {
+    font-size: 60px;
+    margin-bottom: 1rem;
+    color: #1A513B;
+    text-align: center;
+    margin-bottom: 170px;
+}
+.cards-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+.description {
+    font-size: 1.2rem;
+    color: black;
+    text-align: left;
+    margin-bottom: 2rem;
+    max-width: 600px;
+}
+.image {
+    width: 25%;
+    height: auto;
+    border-radius: 12px;
+    min-width: 180px;
+}
+.historia {
+    display: flex;
+    background: #eaf7f0;
+    border-radius: 12px;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.historia-content {
+    flex: 2;
+    min-width: 220px;
+}
+.historia-content h3 {
+    margin-top: 0;
+    color: #2e6c4d;
+}
+.historia-mapa {
+    flex: 1;
+    min-width: 180px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+</style>

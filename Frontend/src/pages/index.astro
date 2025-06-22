@@ -11,11 +11,19 @@ const { title } = Astro.props;
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/logo-turify.png" />
         <meta name="generator" content={Astro.generator} />
         <link rel="stylesheet"
               href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         />
+        <div class="hero" style="margin-top: 60px;">
+            <img src="/actividades/laberinto.png" alt="San Rafael" class="hero-img" />
+            <div class="hero-text">
+                <h1>Turify</h1>
+                <h2>Vivi San Rafael</h2>
+            </div>
+        </div>
+</header>
         <title>Turify | Vivi San Rafael</title>
     </head>
     <body>
@@ -23,6 +31,9 @@ const { title } = Astro.props;
         <main>
             <section class="actividades">
                 <h3>Actividades Disponibles</h3>
+                <div class="activity-button-container">
+                    <a class="activity-button" href="/actividades_aire_libre">Ver Todos</a>
+                </div>
                 <div class="cards">
                     <div class="card">
                         <img src="/actividades/airelibre.jpg" alt="Actividad 1" />
@@ -97,7 +108,6 @@ const { title } = Astro.props;
                 </div>
             </section>
         </main>
-
         <Footer />
 
         <script 
@@ -137,6 +147,68 @@ const { title } = Astro.props;
         max-width: 1100px;
         margin: 0 auto;
         padding: 2rem 1rem;
+    }
+    .activity-button {
+        background: #2e6c4d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+    }
+    .activity-button:hover {
+        background: white;
+        color: #2e6c4d;
+        box-shadow: 0 2px 8px rgba(46,108,77,0.1);
+        border: 1px solid #2e6c4d;
+        border-color: #2e6c4d;
+    }
+    .activity-button a {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    .activity-button-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+        margin-top: -3rem;
+    }
+    .hero {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+    }
+    .hero-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        filter: brightness(0.7);
+    }
+    .hero-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        text-align: center;
+    }
+    .hero-text h1 {
+        font-size: 2.5rem;
+        margin: 0;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+    .hero-text h2 {
+        font-size: 1.3rem;
+        margin: 0;
+        font-weight: 400;
     }
     .actividades {
         margin-bottom: 2rem;

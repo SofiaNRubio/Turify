@@ -8,6 +8,9 @@ import gestionRoutes from "./routes/gestion.js";
 import categoriasRoutes from "./routes/categorias.js";
 import rutasRoutes from "./routes/rutas.js";
 import usuariosRoutes from "./routes/usuarios.js";
+import resenasRouter from './api/admin/resenas.js';
+import estadisticasRouter from './api/admin/estadisticas.js';
+import usuariosRouter from './api/admin/usuarios.js';
 
 dotenv.config();
 
@@ -28,6 +31,9 @@ app.use("/api/atractivos", gestionRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/rutas", rutasRoutes);
 app.use("/api/usuarios", usuariosRoutes);
+app.use('/api/admin/resenas', resenasRouter);
+app.use('/api/admin/estadisticas', estadisticasRouter);
+app.use('/api/admin/usuarios', usuariosRouter);
 
 // Servidor
 const PORT = process.env.PORT;
