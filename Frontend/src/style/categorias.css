@@ -1,0 +1,50 @@
+/* Mejoras adicionales para la página de categorías */
+.acciones {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-editar, .btn-eliminar {
+  font-family: var(--font-primary);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9em;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 768px) {
+  .filtro-nombre {
+    max-width: 100%;
+  }
+  
+  .acciones {
+    flex-direction: row;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  .btn-editar, .btn-eliminar {
+    padding: 4px 6px;
+    font-size: 0.8em;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .acciones {
+    flex-direction: row;
+    gap: 3px;
+  }
+  
+  .btn-editar, .btn-eliminar {
+    padding: 3px 5px;
+    font-size: 0.75em;
+  }
+}

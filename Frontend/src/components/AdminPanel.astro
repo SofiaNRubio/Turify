@@ -15,24 +15,26 @@ import '../style/paneladmin.css';
                 <span></span>
                 <span></span>
                 <span></span>
-            </button>
-            <aside class="sidebar" id="sidebar">
-                <h2>Menú Administrador</h2>
-                <nav>
-                    <ul>
-                        {menu.map((item) => (
-                            <li>
-                                <a href={item.href}>{item.label}</a>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-                <a href="/" class="sidebar-logo-link" aria-label="Volver a Turify">
-                    <div class="sidebar-logo">
-                        <img src="/logo-turify.png" alt="Logo Turify" class="logo-img" />
-                        <span class="logo-text">Volver a Turify</span>
-                    </div>
-                </a>
+            </button>            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-content">
+                    <h2>Menú Administrador</h2>
+                    <nav>
+                        <ul>
+                            {menu.map((item) => (
+                                <li>
+                                    <a href={item.href}>{item.label}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>                <div class="sidebar-footer">
+                    <a href="/" class="sidebar-logo-link" aria-label="Volver a Turify">
+                        <div class="sidebar-logo">
+                            <img src="/logo-turify.png" alt="Logo Turify" class="logo-img" />
+                            <span class="logo-text">VOLVER A TURIFY</span>
+                        </div>
+                    </a>
+                </div>
             </aside>
             <main class="main-content">
                 <div class="welcome-message">

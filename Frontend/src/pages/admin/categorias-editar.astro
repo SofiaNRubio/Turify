@@ -1,0 +1,161 @@
+---
+import AdminPanel from "../../components/AdminPanel.astro";
+import { AdminMenu } from "../../components/AdminMenu";
+
+// Obtener el ID de la categoría de la URL
+const { searchParams } = Astro.url;
+const id = searchParams.get('id');
+
+// Cargar datos de la categoría
+let categoria = null;
+let error = null;
+
+if (id) {
+  try {
+    const response = await fetch(`http://localhost:3000/api/categorias/${id}`);
+    if (response.ok) {
+      categoria = await response.json();
+    } else {
+      error = 'No se pudo cargar la categoría';
+    }
+  } catch (err) {
+    console.error('Error al cargar la categoría:', err);
+    error = 'Error al cargar la categoría';
+  }
+}
+---
+
+<link rel="stylesheet" href="/src/style/form-editar.css">
+<link rel="stylesheet" href="/src/style/modal.css">
+
+<AdminPanel menu={AdminMenu}>
+  <div class="admin-content">
+    <div class="header">
+      <h1>Editar Categoría</h1>
+    </div>
+    
+    {error && (
+      <div class="error-message">
+        <p>{error}</p>
+        <a href="/admin/categorias" class="btn-volver">Volver a Categorías</a>
+      </div>
+    )}
+    
+    {categoria && (
+      <div class="form-container">
+        <form id="form-editar-categoria">
+          <input type="hidden" id="categoria-id" value={categoria.id}>
+          
+          <div class="form-group">
+            <label for="nombre">Nombre de la Categoría</label>
+            <input type="text" id="nombre" name="nombre" value={categoria.nombre} required>
+          </div>
+          
+          <div class="form-actions">
+            <a href="/admin/categorias" class="btn-cancelar">Cancelar</a>
+            <button type="submit" class="btn-guardar">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    )}
+  </div>
+  <!-- Modal de notificación -->
+  <div id="modal-notificacion" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="titulo-notificacion">Notificación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-notificacion"></p>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminPanel>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {    const formEditarCategoria = document.getElementById('form-editar-categoria');
+    const modalNotificacion = document.getElementById('modal-notificacion');
+    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');
+      // Función para mostrar notificación
+    function mostrarNotificacion(titulo: string, mensaje: string, esExito: boolean = true, redirigir: boolean = false) {
+      const tituloNotificacion = document.getElementById('titulo-notificacion');
+      const textoNotificacion = document.getElementById('texto-notificacion');
+      
+      if (tituloNotificacion) {
+        tituloNotificacion.textContent = titulo;
+        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
+      }
+      
+      if (textoNotificacion) {
+        textoNotificacion.textContent = mensaje;
+      }
+      
+      if (modalNotificacion) {
+        modalNotificacion.classList.remove('hidden');
+        
+        if (btnAceptarNotificacion) {
+          btnAceptarNotificacion.onclick = () => {
+            modalNotificacion.classList.add('hidden');
+            if (redirigir) {
+              window.location.href = '/admin/categorias';
+            }
+          };
+        }
+      }
+    }
+    
+    // Enviar formulario
+    if (formEditarCategoria) {
+      formEditarCategoria.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const categoriaIdInput = document.getElementById('categoria-id') as HTMLInputElement;
+        const nombreInput = document.getElementById('nombre') as HTMLInputElement;
+        
+        if (!categoriaIdInput || !nombreInput) return;
+        
+        const id = categoriaIdInput.value;
+        const nombre = nombreInput.value;
+        
+        if (!nombre) {
+          mostrarNotificacion('Error', 'El nombre de la categoría es obligatorio', false);
+          return;
+        }
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/categorias/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombre })
+          });
+          
+          if (response.ok) {
+            mostrarNotificacion('¡Éxito!', `Categoría actualizada correctamente`, true, true);
+          } else {
+            const errorData = await response.json();
+            mostrarNotificacion('Error', errorData.error || 'No se pudo actualizar la categoría', false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', 'Ha ocurrido un error al actualizar la categoría', false);
+        }
+      });
+    }
+      // Cerrar modales haciendo clic fuera
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      }
+    });
+  });
+</script>
