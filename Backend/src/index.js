@@ -13,6 +13,7 @@ import estadisticasRouter from './api/admin/estadisticas.js';
 import usuariosRouter from './api/admin/usuarios.js';
 import rutas from './routes/rutas.js';
 import favoritos from './routes/favoritos.js';
+import reseñasRoutes from './pages/api/reseñas.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/admin/estadisticas', estadisticasRouter);
 app.use('/api/admin/usuarios', usuariosRouter);
 app.use('/api/rutas', rutas);
 app.use('/api/favoritos', favoritos);
+app.use('/api/reseñas', reseñasRoutes);
 // Servidor
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

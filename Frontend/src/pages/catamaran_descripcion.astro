@@ -11,7 +11,7 @@ import Header from "../components/Header.astro";
     </div>
     <section class="historia">
                 <div class="historia-content">
-                    <h3>Ubicacion</h3>
+                    <h2 class="subtitles">Ubicacion</h2>
                     <p>
                         San Rafael es una ciudad con una rica historia y tradiciones. Fundada en el siglo XIX, es reconocida por su hospitalidad, paisajes y actividades turísticas.
                     </p>
@@ -19,9 +19,401 @@ import Header from "../components/Header.astro";
                 <div class="historia-mapa">
                     <div id="map" style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;"></div>
                 </div>
-            </section>
+    </section>
+    <div class="resena-section">
+        <div class="resena-container">
+            <div class="rating-section">
+                <h3 class="subtitles">Deja tu Resena:</h3>
+                <div class="stars">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+            </div>
+            <div class="comentario-section">
+                <h3 class="subtitles">Comentario:</h3>
+                <textarea id="comentario" placeholder="Escribe tu opinion aqui"></textarea>
+            </div>
+        </div>
+        <div class="button-container">
+            <button class="submit-button">Enviar comentario
+                <img src="../../public/actividades/send-line.svg" class="send-icon">
+            </button>
+        </div>
+    </div>
+    
+    <div class="opiniones-section">
+        <h2 class="section-title">Opiniones:</h2>
+        <div class="rating-summary"> 
+        </div>
+    </div>
+    
+    <div class="contacto-section">
+        <h2 class="section-title">Contáctanos</h2>
+        <p class="contacto-text">¿Tienes alguna pregunta o necesitas ayuda para planificar tu visita? Estamos aquí para asistirte.</p>
+        <div class="button-container-center">
+            <button class="mensaje-button">Enviar mensaje
+                <img src="../../public/actividades/send-line.svg" class="send-icon">
+            </button>
+        </div>
+    </div>
 </main>
 <Footer />
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.resena-section .star');
+        let rating = 0;
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                rating = index + 1;
+                updateStars();
+            });
+            
+            star.addEventListener('mouseover', () => {
+                highlightStars(index);
+            });
+            
+            star.addEventListener('mouseout', () => {
+                updateStars();
+            });
+        });
+        
+        function highlightStars(index) {
+            stars.forEach((star, i) => {
+                if (i <= index) {
+                    star.textContent = "★";
+                    star.classList.add("hover");
+                } else {
+                    star.textContent = "☆";
+                    star.classList.remove("hover");
+                }
+            });
+        }
+        
+        function updateStars() {
+            stars.forEach((star, i) => {
+                if (i < rating) {
+                    star.textContent = "★";
+                    star.classList.add("active");
+                } else {
+                    star.textContent = "☆";
+                    star.classList.remove("active", "hover");
+                }
+            });
+        }
+        
+        let reviews = [
+            { 
+                id: 1, 
+                author: 'Usuario1', 
+                date: '', 
+                rating: 4, 
+                comment: ''
+            }
+        ];
+        
+        let stats = {
+            totalReviews: 1,
+            averageRating: 4.5,
+            distribution: {
+                '1': 2,
+                '2': 3,
+                '3': 5,
+                '4': 15,
+                '5': 75
+            } as Record<string, number>
+        };
+        
+        // Función para enviar una reseña al backend
+        async function enviarResena(comentario: string, puntaje: number, atractivoId = '1') {
+            try {
+                const token = 'token_simulado';
+                
+                const response = await fetch('/api/reseñas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        atractivo_id: atractivoId,
+                        comentario: comentario,
+                        puntaje: puntaje
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al enviar la reseña');
+                }
+                
+                return await response.json();
+            } catch (error: any) {
+                console.error('Error al enviar reseña:', error);
+                if (error.message && error.message.includes('Ya has reseñado')) {
+                    alert('Ya has enviado una reseña para este atractivo');
+                } else {
+                    console.log('Continuando con simulación local debido a error de conexión');
+                    return { id: Date.now(), mensaje: 'Simulación: Reseña creada correctamente' };
+                }
+            }
+        }
+        
+        // Función para cargar reseñas del backend
+        async function cargarResenas(atractivoId = '1') {
+            try {
+                const response = await fetch(`/api/reseñas/${atractivoId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar las reseñas');
+                }
+                
+                const data = await response.json();
+                
+                return data.map((item: any) => ({
+                    id: item.id,
+                    author: item.usuario || 'Usuario anónimo',
+                    date: formatearFecha(item.fecha),
+                    rating: item.puntaje,
+                    comment: item.comentario
+                }));
+            } catch (error) {
+                console.error('Error al cargar reseñas:', error);
+                console.log('Usando datos simulados debido a error de conexión');
+                return reviews; 
+            }
+        }
+        
+        // Función para formatear fecha
+        function formatearFecha(fechaStr: string) {
+            if (!fechaStr) return 'Fecha desconocida';
+            
+            try {
+                const fecha = new Date(fechaStr);
+                const ahora = new Date();
+                const diferencia = ahora.getTime() - fecha.getTime();
+                
+                // Menos de un día
+                if (diferencia < 86400000) {
+                    return 'Hoy';
+                }
+                // Menos de una semana
+                else if (diferencia < 604800000) {
+                    const dias = Math.floor(diferencia / 86400000);
+                    return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
+                }
+                // Menos de un mes
+                else if (diferencia < 2592000000) {
+                    const semanas = Math.floor(diferencia / 604800000);
+                    return `Hace ${semanas} semana${semanas > 1 ? 's' : ''}`;
+                }
+                // Menos de un año
+                else if (diferencia < 31536000000) {
+                    const meses = Math.floor(diferencia / 2592000000);
+                    return `Hace ${meses} mes${meses > 1 ? 'es' : ''}`;
+                }
+                // Más de un año
+                else {
+                    const años = Math.floor(diferencia / 31536000000);
+                    return `Hace ${años} año${años > 1 ? 's' : ''}`;
+                }
+            } catch (e) {
+                console.error('Error al formatear fecha:', e);
+                return 'Fecha inválida';
+            }
+        }
+
+        // Cargar reseñas al iniciar
+        (async function() {
+            try {
+                const resenasBackend = await cargarResenas();
+                if (resenasBackend && resenasBackend.length > 0) {
+                    reviews = resenasBackend;
+                    updateInterface();
+                }
+            } catch (e) {
+                console.error('Error al cargar reseñas iniciales:', e);
+            }
+        })();
+        
+        const submitButton = document.querySelector('.submit-button');
+        if (submitButton) {
+            submitButton.addEventListener('click', () => {
+                const comentarioElement = document.getElementById('comentario');
+                if (!comentarioElement) return;
+                
+                const comentario = (comentarioElement as HTMLTextAreaElement).value.trim();
+                const nombre = 'Usuario' + Math.floor(Math.random() * 1000);
+                
+                if (rating === 0) {
+                    alert('Por favor selecciona una calificación');
+                    return;
+                }
+                if (!comentario) {
+                    alert('Por favor escribe un comentario');
+                    return;
+                }
+                
+                // Crear una nueva reseña
+                const newReview = {
+                    id: Date.now(),
+                    author: nombre,
+                    date: 'Ahora mismo',
+                    rating: rating,
+                    comment: comentario
+                };
+                
+                // Agregar a la lista de reseñas (al final)
+                reviews.push(newReview);
+                
+                // Actualizar estadísticas
+                updateStats(rating);
+                
+                // Actualizar la interfaz
+                updateInterface();
+                
+                // Limpiar el formulario
+                const comentarioInput = document.getElementById('comentario') as HTMLTextAreaElement;
+                if (comentarioInput) {
+                    comentarioInput.value = '';
+                }
+                rating = 0;
+                updateStars();
+                
+                // Mostrar mensaje de éxito
+                showSuccessMessage();
+                
+                // Hacer scroll a la sección de reseñas
+                scrollToReviews();
+            });
+        }
+        
+        // Función para actualizar estadísticas con una nueva calificación
+        function updateStats(newRating: number) {
+            stats.totalReviews++;
+            
+            // Recalcular promedio
+            const totalPoints = stats.averageRating * (stats.totalReviews - 1) + newRating;
+            stats.averageRating = totalPoints / stats.totalReviews;
+            
+            // Actualizar distribución
+            const ratingKey = String(newRating);
+            const currentCount = stats.distribution[ratingKey] || 0;
+            const newPercentage = ((currentCount / 100 * (stats.totalReviews - 1)) + 1) / stats.totalReviews * 100;
+            stats.distribution[ratingKey] = Math.round(newPercentage);
+            
+            // Ajustar los demás porcentajes
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                const key = String(i);
+                if (key !== ratingKey) {
+                    total += stats.distribution[key] || 0;
+                }
+            }
+            
+            const adjustment = (100 - stats.distribution[ratingKey]) / (total || 1);
+            for (let i = 1; i <= 5; i++) {
+                const key = String(i);
+                if (key !== ratingKey && stats.distribution[key]) {
+                    stats.distribution[key] = Math.round(stats.distribution[key] * adjustment);
+                }
+            }
+        }
+        
+        // Actualizar la interfaz completa
+        function updateInterface() {
+            // Actualizar puntuación promedio
+            const ratingNumber = document.querySelector('.rating-number');
+            if (ratingNumber) {
+                ratingNumber.textContent = stats.averageRating.toFixed(1);
+            }
+            
+            // Actualizar estrellas
+            const starsRating = document.querySelector('.stars-rating');
+            if (starsRating) {
+                const fullStars = Math.floor(stats.averageRating);
+                const hasHalfStar = stats.averageRating - fullStars >= 0.5;
+                
+                const stars = starsRating.querySelectorAll('.star');
+                stars.forEach((star, i) => {
+                    star.className = 'star';
+                    if (i < fullStars) {
+                        star.classList.add('filled');
+                    } else if (i === fullStars && hasHalfStar) {
+                        star.classList.add('half-filled');
+                    }
+                });
+            }
+
+            // Limpiar reseñas existentes
+            const opinionsSection = document.querySelector('.opiniones-section');
+            if (opinionsSection) {
+                const existingReviews = opinionsSection.querySelectorAll('.review-example');
+                existingReviews.forEach(review => review.remove());
+                
+                // Agregar reseñas
+                const ratingSummary = document.querySelector('.rating-summary');
+                
+                // Mostrar las reseñas en orden (las más recientes al final)
+                reviews.forEach(review => {
+                    const reviewElement = document.createElement('div');
+                    reviewElement.className = 'review-example';
+                    
+                    // Crear cabecera con autor y estrellas
+                    const reviewHeader = document.createElement('div');
+                    reviewHeader.className = 'review-header';
+                    
+                    // Info de usuario y fecha
+                    const authorSpan = document.createElement('span');
+                    authorSpan.className = 'review-author';
+                    authorSpan.textContent = `${review.author} - ${review.date}`;
+                    reviewHeader.appendChild(authorSpan);
+                    
+                    // Estrellas de la reseña
+                    const starsContainer = document.createElement('div');
+                    starsContainer.className = 'review-stars';
+                    for (let i = 0; i < 5; i++) {
+                        const star = document.createElement('span');
+                        star.className = 'star';
+                        star.textContent = '★';
+                        if (i < review.rating) {
+                            star.classList.add('filled');
+                        }
+                        starsContainer.appendChild(star);
+                    }
+                    reviewHeader.appendChild(starsContainer);
+                    
+                    // Texto de la reseña
+                    const reviewText = document.createElement('p');
+                    reviewText.className = 'review-text';
+                    reviewText.textContent = review.comment;
+                    
+                    // Ensamblar todo
+                    reviewElement.appendChild(reviewHeader);
+                    reviewElement.appendChild(reviewText);
+                    
+                    // Agregar al DOM después del resumen de calificaciones
+                    if (ratingSummary && ratingSummary.nextSibling) {
+                        opinionsSection.insertBefore(reviewElement, ratingSummary.nextSibling);
+                    } else {
+                        opinionsSection.appendChild(reviewElement);
+                    }
+                });
+            }
+        }
+        
+        function scrollToReviews() {
+            const opinionsSection = document.querySelector('.opiniones-section');
+            if (opinionsSection) {
+                opinionsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    });
+</script>
 
 <style>
 html, body {
@@ -68,6 +460,7 @@ main {
     background: #eaf7f0;
     border-radius: 12px;
     padding: 2rem 1rem;
+    margin-top: 4rem;
     margin-bottom: 2rem;
     gap: 2rem;
     align-items: center;
@@ -87,5 +480,229 @@ main {
     text-align: center;
     position: relative;
     overflow: hidden;
+}
+.subtitles {
+    font-size: 1.5rem;
+    color: #1A513B;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+.section-title {
+    font-size: 1.8rem;
+    color: #1A513B;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Sección para dejar reseñas */
+.resena-section {
+    background: #F5F7F4;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 3rem 0;
+}
+.resena-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+.rating-section {
+    flex: 1;
+    min-width: 200px;
+}
+.comentario-section {
+    flex: 2;
+    min-width: 300px;
+}
+.stars {
+    display: flex;
+    gap: 0.3rem;
+}
+.star {
+    font-size: 2.5rem;
+    color: #FFD700;
+    cursor: pointer;
+}
+.star:hover, .star.active {
+    color: #FFD700;
+    filter: brightness(1.2);
+}
+textarea#comentario {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+    font-size: 1rem;
+    background-color: #A9D9C3;
+    color: #4B5563;
+}
+
+/* Estilos para el placeholder */
+textarea#comentario::placeholder {
+    color: #4B5563;
+    opacity: 0.7;
+}
+.submit-button, .mensaje-button {
+    background: #1A513B;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+}
+.submit-button:hover, .mensaje-button:hover {
+    background: #14402E;
+}
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    margin-right: 1rem;
+}
+.button-container-center {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+.send-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 0.5rem;
+    filter: brightness(0) invert(1);
+}
+
+/* Sección de opiniones */
+.opiniones-section {
+    background: #F5F7F4;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 3rem 0;
+}
+.rating-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+.rating-number {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #1A513B;
+}
+.stars-rating {
+    display: flex;
+    gap: 0.2rem;
+}
+.stars-rating .star {
+    font-size: 2rem;
+}
+.star.filled {
+    color: #FFD700;
+}
+.star.half-filled {
+    position: relative;
+    color: #ccc;
+}
+.star.half-filled::before {
+    content: '★';
+    position: absolute;
+    color: #FFD700;
+    width: 50%;
+    overflow: hidden;
+}
+.rating-stats {
+    flex: 1;
+    min-width: 250px;
+}
+.rating-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.rating-label {
+    width: 40px;
+    text-align: right;
+    margin-right: 1rem;
+}
+.bar-container {
+    flex: 1;
+    height: 10px;
+    background: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.bar {
+    height: 100%;
+    background: #FFD700;
+}
+.review-example {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: #666;
+}
+.review-author {
+    font-weight: 500;
+}
+.review-stars {
+    display: flex;
+    gap: 4px;
+}
+.review-stars .star {
+    font-size: 1rem;
+    color: #ccc;
+}
+.review-stars .star.filled {
+    color: #FFD700;
+}
+.review-text {
+    line-height: 1.6;
+    color: #4B5563;
+    margin: 0;
+}
+
+/* Sección de contacto */
+.contacto-section {
+    background: #F5F7F4;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    margin: 3rem 0;
+    text-align: center;
+}
+.contacto-text {
+    max-width: 600px;
+    margin: 1rem auto;
+    color: #4B5563;
+}
+.success-message {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background-color: #c8f7d0;
+    color: #1A513B;
+    border-radius: 4px;
+    text-align: center;
+    animation: fadeOut 3s forwards;
+}
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
 }
 </style>
