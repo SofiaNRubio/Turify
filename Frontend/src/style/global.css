@@ -16,3 +16,59 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Ocultar barras de reproducción o controles no deseados */
+audio:not([controls]), video:not([controls]), progress {
+  display: none !important;
+}
+
+/* Asegurarse de que los elementos del sidebar no tengan barras de reproducción */
+.sidebar audio,
+.sidebar video,
+.sidebar progress,
+.sidebar-logo-link audio,
+.sidebar-logo-link video,
+.sidebar-logo-link progress,
+.sidebar-footer audio,
+.sidebar-footer video,
+.sidebar-footer progress,
+.logo-text + audio,
+.logo-text + video,
+.logo-text + progress {
+  display: none !important;
+}
+
+/* Estilos para prevenir clics múltiples */
+.procesando,
+button.procesando,
+a.procesando,
+.btn-nuevo.procesando,
+.btn-editar.procesando,
+.btn-eliminar.procesando,
+.btn-agregar.procesando,
+.btn-guardar.procesando,
+.btn-siguiente.procesando,
+button[type="submit"].procesando {
+  opacity: 0.7 !important;
+  cursor: wait !important;
+  /* Comentamos pointer-events para permitir que el clic se procese
+  pointer-events: none !important; */
+}
+
+/* Estilos para formularios enviando datos */
+form.enviando {
+  opacity: 0.9;
+  position: relative;
+}
+
+form.enviando::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.5);
+  z-index: 1;
+  pointer-events: none;
+}

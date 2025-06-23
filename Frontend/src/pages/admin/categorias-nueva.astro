@@ -1,0 +1,126 @@
+---
+import AdminPanel from "../../components/AdminPanel.astro";
+import { AdminMenu } from "../../components/AdminMenu";
+---
+
+<link rel="stylesheet" href="/src/style/atractivos-nuevo.css">
+<link rel="stylesheet" href="/src/style/modal.css">
+
+<AdminPanel menu={AdminMenu}>
+  <div class="admin-content">
+    <div class="header">
+      <h1>Nueva Categoría</h1>
+    </div>
+    
+    <div class="form-container">
+      <form id="form-categoria">
+        <div class="form-group">
+          <label for="nombre">Nombre de la Categoría</label>
+          <input type="text" id="nombre" name="nombre" required>
+        </div>
+        
+        <div class="form-actions">
+          <a href="/admin/categorias" class="btn-cancelar">Cancelar</a>
+          <button type="submit" class="btn-guardar">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Modal de notificación -->
+  <div id="modal-notificacion" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="titulo-notificacion">Notificación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-notificacion"></p>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminPanel>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {    const formCategoria = document.getElementById('form-categoria');
+    const modalNotificacion = document.getElementById('modal-notificacion');
+    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');
+      // Función para mostrar notificación
+    function mostrarNotificacion(titulo: string, mensaje: string, esExito: boolean = true, redirigir: boolean = false) {
+      const tituloNotificacion = document.getElementById('titulo-notificacion');
+      const textoNotificacion = document.getElementById('texto-notificacion');
+      
+      if (tituloNotificacion) {
+        tituloNotificacion.textContent = titulo;
+        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
+      }
+      
+      if (textoNotificacion) {
+        textoNotificacion.textContent = mensaje;
+      }
+      
+      if (modalNotificacion) {
+        modalNotificacion.classList.remove('hidden');
+        
+        if (btnAceptarNotificacion) {
+          btnAceptarNotificacion.onclick = () => {
+            modalNotificacion.classList.add('hidden');
+            if (redirigir) {
+              window.location.href = '/admin/categorias';
+            }
+          };
+        }
+      }
+    }
+    
+    // Enviar formulario
+    if (formCategoria) {
+      formCategoria.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const nombreInput = document.getElementById('nombre') as HTMLInputElement;
+        if (!nombreInput) return;
+        
+        const nombre = nombreInput.value;
+        
+        if (!nombre) {
+          mostrarNotificacion('Error', 'El nombre de la categoría es obligatorio', false);
+          return;
+        }
+        
+        try {
+          const response = await fetch('http://localhost:3000/api/categorias', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombre })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            mostrarNotificacion('¡Éxito!', `Categoría "${nombre}" creada correctamente con ID: ${data.id}`, true, true);
+          } else {
+            const errorData = await response.json();
+            mostrarNotificacion('Error', errorData.error || 'No se pudo crear la categoría', false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', 'Ha ocurrido un error al crear la categoría', false);
+        }
+      });
+    }
+      // Cerrar modales haciendo clic fuera
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      }
+    });
+  });
+</script>

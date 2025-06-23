@@ -1,0 +1,324 @@
+---
+// TableAdmin.astro - Componente reutilizable para tablas administrativas
+const { 
+  titulo, 
+  btnNuevoLabel = "+ Nuevo", 
+  btnNuevoHref = "", 
+  columnas = [], 
+  datos = [],
+  tipoEntidad = "elemento",
+  entidadSingular = "elemento",
+  entidadPlural = "elementos"
+} = Astro.props;
+---
+
+<div class="admin-content">
+  <div class="header">
+    <h1>{titulo}</h1>
+    {btnNuevoHref && 
+      <a href={btnNuevoHref} class="btn-nuevo">{btnNuevoLabel}</a>
+    }
+  </div>
+  
+  <!-- Tabla de datos -->
+  <table>
+    <thead>
+      <tr>
+        {columnas.map((columna) => (
+          <th>{columna.label}</th>
+        ))}
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {datos.length > 0 ? (
+        datos.map((item) => (
+          <tr>
+            {columnas.map((columna) => (
+              <td>{item[columna.key]}</td>
+            ))}
+            <td class="acciones">
+              <button class="btn-editar" data-id={item.id} data-nombre={item.nombre}>Editar</button>
+              <button class="btn-eliminar" data-id={item.id} data-nombre={item.nombre}>Eliminar</button>
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colspan={columnas.length + 1} class="sin-resultados">
+            No se encontraron {entidadPlural}
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+  <!-- Modal para editar -->
+  <div id="modal-editar" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar</h3>
+      </div>
+      <div class="modal-body">
+        <p>¿Quieres editar este {entidadSingular}?</p>
+        <div id="editar-nombre" class="modal-item-nombre"></div>
+        
+        <form id="form-editar" class="modal-form">
+          <input type="hidden" id="editar-id">
+            {columnas
+            .filter((col: any) => col.editable)
+            .map((col: any) => (
+              <div class="modal-form-group">
+                <label for={`editar-${col.key}`}>{col.label}:</label>
+                <input 
+                  type="text" 
+                  id={`editar-${col.key}`} 
+                  name={col.key} 
+                  required={col.required}
+                />
+              </div>
+            ))
+          }
+          
+          <div class="modal-actions">
+            <button type="button" class="modal-btn modal-btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+            <button type="submit" class="modal-btn modal-btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Modal para eliminar -->
+  <div id="modal-confirmar-eliminar" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Confirmar eliminación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-confirmar-eliminar">¿Estás seguro de que deseas eliminar este {entidadSingular}?</p>
+        <div id="eliminar-nombre" class="modal-item-nombre"></div>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" id="btn-cancelar-confirmar">Cancelar</button>
+          <button class="modal-btn modal-btn-danger" id="btn-confirmar-eliminar">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal de notificación -->
+  <div id="modal-notificacion" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="titulo-notificacion">Notificación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-notificacion"></p>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ tipoEntidad, entidadSingular, columnas }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Referencias a los modales
+    const modalEditar = document.getElementById('modal-editar');
+    const modalConfirmarEliminar = document.getElementById('modal-confirmar-eliminar');
+    const modalNotificacion = document.getElementById('modal-notificacion');
+      // Botones editar
+    const btnEditar = document.querySelectorAll('.btn-editar');
+    const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
+    const formEditar = document.getElementById('form-editar');
+    
+    // Botones eliminar
+    const btnEliminar = document.querySelectorAll('.btn-eliminar');
+    const btnCancelarConfirmar = document.getElementById('btn-cancelar-confirmar');
+    const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar');
+    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');
+    
+    // Variables para almacenar datos del elemento seleccionado
+    let currentId = null;
+    let currentNombre = null;
+    
+    // Función para mostrar una notificación
+    function mostrarNotificacion(titulo, mensaje, esExito = true, recargar = true) {
+      const tituloNotificacion = document.getElementById('titulo-notificacion');
+      const textoNotificacion = document.getElementById('texto-notificacion');
+      
+      if (tituloNotificacion) {
+        tituloNotificacion.textContent = titulo;
+        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
+      }
+      
+      if (textoNotificacion) {
+        textoNotificacion.textContent = mensaje;
+      }
+      
+      if (modalNotificacion) {
+        modalNotificacion.classList.remove('hidden');
+        
+        // Configurar el botón Aceptar
+        if (btnAceptarNotificacion) {
+          btnAceptarNotificacion.onclick = () => {
+            modalNotificacion.classList.add('hidden');
+            if (recargar) {
+              window.location.reload();
+            }
+          };
+        }
+      }
+    }
+    
+    // Modal de Editar
+    if (btnEditar) {
+      btnEditar.forEach(btn => {
+        btn.addEventListener('click', async () => {
+          currentId = btn.getAttribute('data-id');
+          currentNombre = btn.getAttribute('data-nombre');
+          
+          // Mostrar el nombre del elemento en el modal
+          const editarNombre = document.getElementById('editar-nombre');
+          if (editarNombre) {
+            editarNombre.textContent = currentNombre;
+          }
+          
+          // Cargar datos actuales del elemento
+          try {
+            const response = await fetch(`http://localhost:3000/api/${tipoEntidad}/${currentId}`);
+            if (response.ok) {
+              const item = await response.json();
+              
+              // Rellenar el formulario
+              document.getElementById('editar-id').value = currentId;
+              
+              columnas.filter(col => col.editable).forEach(col => {
+                const input = document.getElementById(`editar-${col.key}`);
+                if (input) {
+                  input.value = item[col.key] || '';
+                }
+              });
+              
+              // Mostrar modal
+              if (modalEditar) {
+                modalEditar.classList.remove('hidden');
+              }
+            } else {
+              mostrarNotificacion('Error', `No se pudo obtener la información del ${entidadSingular}`, false, false);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            mostrarNotificacion('Error', `Ha ocurrido un error al cargar los datos del ${entidadSingular}`, false, false);
+          }
+        });
+      });
+    }
+    
+    // Botón Cancelar editar
+    if (btnCancelarEditar && modalEditar) {
+      btnCancelarEditar.addEventListener('click', () => {
+        modalEditar.classList.add('hidden');
+      });
+    }
+    
+    // Formulario de edición
+    if (formEditar) {
+      formEditar.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formEditar);
+        const datos = {};
+        
+        for (const [key, value] of formData.entries()) {
+          datos[key] = value;
+        }
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/${tipoEntidad}/${currentId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+          });
+          
+          if (response.ok) {
+            modalEditar.classList.add('hidden');
+            mostrarNotificacion('¡Éxito!', `${entidadSingular.charAt(0).toUpperCase() + entidadSingular.slice(1)} actualizado correctamente`, true);
+          } else {
+            mostrarNotificacion('Error', `No se pudo actualizar el ${entidadSingular}`, false, false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', `Ha ocurrido un error al actualizar el ${entidadSingular}`, false, false);
+        }
+      });
+    }
+    
+    // Modal de Eliminar
+    if (btnEliminar && modalConfirmarEliminar) {
+      btnEliminar.forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentId = btn.getAttribute('data-id');
+          currentNombre = btn.getAttribute('data-nombre');
+          
+          // Mostrar el nombre del elemento en el modal
+          const eliminarNombre = document.getElementById('eliminar-nombre');
+          if (eliminarNombre) {
+            eliminarNombre.textContent = currentNombre;
+          }
+          
+          // Configurar texto de confirmación
+          const textoConfirmar = document.getElementById('texto-confirmar-eliminar');
+          if (textoConfirmar) {
+            textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar ${entidadSingular === 'categoría' ? 'la' : 'el'} ${entidadSingular} "${currentNombre}"?`;
+          }
+          
+          // Mostrar modal de confirmación
+          modalConfirmarEliminar.classList.remove('hidden');
+        });
+      });
+    }
+    
+    // Botón Cancelar confirmación
+    if (btnCancelarConfirmar && modalConfirmarEliminar) {
+      btnCancelarConfirmar.addEventListener('click', () => {
+        modalConfirmarEliminar.classList.add('hidden');
+      });
+    }
+    
+    // Botón Confirmar eliminación
+    if (btnConfirmarEliminar && modalConfirmarEliminar) {
+      btnConfirmarEliminar.addEventListener('click', async () => {
+        modalConfirmarEliminar.classList.add('hidden');
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/${tipoEntidad}/${currentId}`, {
+            method: 'DELETE'
+          });
+          
+          if (response.ok) {
+            mostrarNotificacion('¡Éxito!', `${entidadSingular.charAt(0).toUpperCase() + entidadSingular.slice(1)} "${currentNombre}" eliminado correctamente`, true);
+          } else {
+            const data = await response.json();
+            mostrarNotificacion('Error', data.error || `No se pudo eliminar ${entidadSingular === 'categoría' ? 'la' : 'el'} ${entidadSingular}`, false, false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', `Ha ocurrido un error durante la eliminación`, false, false);
+        }
+      });
+    }
+      // Cerrar modales haciendo clic fuera
+    [modalEditar, modalConfirmarEliminar, modalNotificacion].forEach(modal => {
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      }
+    });
+  });
+</script>
