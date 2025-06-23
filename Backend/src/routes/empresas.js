@@ -1,6 +1,5 @@
 import express from "express";
 import { db } from "../db.js";
-import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -16,12 +15,53 @@ router.post("/", async (req, res) => {
         latitud,
         longitud,
         tipo,
-    } = req.body;
-
-    const id = uuidv4();
-
-    try {
-        await db.execute({
+    } = req.body;    try {
+        // Primero, intentamos crear una tabla de seguimiento de IDs si no existe
+        try {
+            await db.execute({
+                sql: `CREATE TABLE IF NOT EXISTS id_tracking (
+                    tipo TEXT NOT NULL,
+                    ultimo_numero INTEGER NOT NULL,
+                    PRIMARY KEY (tipo)
+                )`
+            });
+        } catch (createErr) {
+            console.error("Error al crear tabla de seguimiento:", createErr);
+            // Continuamos con la ejecución aunque haya fallado la creación
+        }
+        
+        // Obtener el número más alto utilizado para empresas
+        let nextNum = 1;
+        
+        // Primero verificamos en la tabla de seguimiento
+        const trackingResult = await db.execute({
+            sql: "SELECT ultimo_numero FROM id_tracking WHERE tipo = 'empresa'"
+        });
+        
+        if (trackingResult.rows.length > 0) {
+            // Ya hay un registro de seguimiento, usamos ese número + 1
+            nextNum = trackingResult.rows[0].ultimo_numero + 1;
+        } else {
+            // No hay registro en la tabla de seguimiento, buscamos en la tabla empresas
+            const lastIdResult = await db.execute({
+                sql: "SELECT id FROM empresas WHERE id LIKE 'emp%' ORDER BY CAST(SUBSTR(id, 4) AS INTEGER) DESC LIMIT 1"
+            });
+            
+            if (lastIdResult.rows.length > 0) {
+                const lastId = lastIdResult.rows[0].id;
+                const lastNum = parseInt(lastId.replace('emp', ''));
+                nextNum = lastNum + 1;
+            }
+            
+            // Insertamos un registro inicial en la tabla de seguimiento
+            await db.execute({
+                sql: "INSERT INTO id_tracking (tipo, ultimo_numero) VALUES (?, ?)",
+                args: ['empresa', nextNum]
+            });
+        }
+        
+        const id = `emp${nextNum}`;
+          await db.execute({
             sql: `INSERT INTO empresas 
         (id, nombre, descripcion, email, telefono, sitio_web, direccion, latitud, longitud, tipo)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -37,6 +77,12 @@ router.post("/", async (req, res) => {
                 longitud,
                 tipo,
             ],
+        });
+        
+        // Actualizamos el contador en la tabla de seguimiento
+        await db.execute({
+            sql: "UPDATE id_tracking SET ultimo_numero = ? WHERE tipo = ?",
+            args: [nextNum, 'empresa']
         });
 
         res.status(201).json({ id, nombre });
@@ -129,6 +175,54 @@ router.delete("/:id", async (req, res) => {
     const { id } = req.params;
 
     try {
+        // Identificar primero los atractivos relacionados con esta empresa
+        const atractivos = await db.execute({
+            sql: "SELECT id FROM atractivos WHERE empresa_id = ?",
+            args: [id],
+        });
+        
+        // Para cada atractivo, eliminar registros relacionados
+        for (const atractivo of atractivos.rows) {
+            const atractivoId = atractivo.id;
+            
+            // Eliminar referencias en rutas_atractivos
+            await db.execute({
+                sql: "DELETE FROM rutas_atractivos WHERE atractivo_id = ?",
+                args: [atractivoId],
+            });
+            
+            // Eliminar reseñas relacionadas
+            await db.execute({
+                sql: "DELETE FROM reseñas WHERE atractivo_id = ?",
+                args: [atractivoId],
+            });
+            
+            // Eliminar favoritos relacionados
+            await db.execute({
+                sql: "DELETE FROM favoritos WHERE atractivo_id = ?",
+                args: [atractivoId],
+            });
+            
+            // Eliminar imágenes relacionadas con el atractivo
+            await db.execute({
+                sql: "DELETE FROM imagenes WHERE entidad_tipo = 'atractivo' AND entidad_id = ?",
+                args: [atractivoId],
+            });
+            
+            // Finalmente eliminar el atractivo
+            await db.execute({
+                sql: "DELETE FROM atractivos WHERE id = ?",
+                args: [atractivoId],
+            });
+        }
+        
+        // Eliminar imágenes relacionadas con la empresa
+        await db.execute({
+            sql: "DELETE FROM imagenes WHERE entidad_tipo = 'empresa' AND entidad_id = ?",
+            args: [id],
+        });
+        
+        // Finalmente, eliminar la empresa
         const result = await db.execute({
             sql: "DELETE FROM empresas WHERE id = ?",
             args: [id],
@@ -138,7 +232,7 @@ router.delete("/:id", async (req, res) => {
             return res.status(404).json({ error: "Empresa no encontrada" });
         }
 
-        res.json({ mensaje: "Empresa eliminada" });
+        res.json({ mensaje: "Empresa y sus atractivos eliminados exitosamente" });
     } catch (err) {
         console.error("Error al eliminar empresa:", err);
         res.status(500).json({ error: "Error al eliminar empresa" });

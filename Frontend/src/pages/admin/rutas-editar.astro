@@ -1,0 +1,561 @@
+---
+import AdminPanel from "../../components/AdminPanel.astro";
+import { AdminMenu } from "../../components/AdminMenu";
+
+// Obtener el ID de la ruta a editar
+const { searchParams } = Astro.url;
+const rutaId = searchParams.get('id');
+
+if (!rutaId) {
+  return Astro.redirect('/admin/rutas');
+}
+
+// Obtener la información de la ruta
+let ruta = null;
+let rutaAtractivos = [];
+
+try {
+  const rutaResponse = await fetch(`http://localhost:3000/api/rutas/${rutaId}`);
+  if (rutaResponse.ok) {
+    ruta = await rutaResponse.json();
+    
+    // Obtener los atractivos de la ruta
+    const atractivosResponse = await fetch(`http://localhost:3000/api/rutas/${rutaId}/atractivos`);
+    if (atractivosResponse.ok) {
+      rutaAtractivos = await atractivosResponse.json();
+    }
+  } else {
+    console.error('Error al cargar la ruta:', rutaResponse.statusText);
+    return Astro.redirect('/admin/rutas');
+  }
+} catch (error) {
+  console.error('Error al conectar con la API:', error);
+  return Astro.redirect('/admin/rutas');
+}
+
+// Obtener las empresas para el selector
+let empresas = [];
+try {
+  const response = await fetch('http://localhost:3000/api/empresas');
+  if (response.ok) {
+    empresas = await response.json();
+  } else {
+    console.error('Error al cargar empresas:', response.statusText);
+    // Usar datos de respaldo en caso de error
+    empresas = [
+      { id: 'emp1', nombre: "Bodega Los Toneles" },
+      { id: 'emp2', nombre: "Museo Regional" },
+      { id: 'emp3', nombre: "Hotel Sol Andino" },
+    ];
+  }
+} catch (error) {
+  console.error('Error al conectar con la API de empresas:', error);
+  // Usar datos de respaldo en caso de error
+  empresas = [
+    { id: 'emp1', nombre: "Bodega Los Toneles" },
+    { id: 'emp2', nombre: "Museo Regional" },
+    { id: 'emp3', nombre: "Hotel Sol Andino" },
+  ];
+}
+
+// Obtener todos los atractivos disponibles
+let todosAtractivos = [];
+try {
+  const response = await fetch('http://localhost:3000/api/atractivos');
+  if (response.ok) {
+    todosAtractivos = await response.json();
+  } else {
+    console.error('Error al cargar atractivos:', response.statusText);
+    // Usar datos de respaldo en caso de error
+    todosAtractivos = [
+      { id: 'atr1', nombre: "Viñedos Antiguos", descripcion: "Viñedos con más de 100 años" },
+      { id: 'atr2', nombre: "Mirador de la Montaña", descripcion: "Vista panorámica de la ciudad" },
+      { id: 'atr3', nombre: "Plaza Principal", descripcion: "Centro histórico con arquitectura colonial" },
+    ];
+  }
+} catch (error) {
+  console.error('Error al conectar con la API de atractivos:', error);
+  // Usar datos de respaldo en caso de error
+  todosAtractivos = [
+    { id: 'atr1', nombre: "Viñedos Antiguos", descripcion: "Viñedos con más de 100 años" },
+    { id: 'atr2', nombre: "Mirador de la Montaña", descripcion: "Vista panorámica de la ciudad" },
+    { id: 'atr3', nombre: "Plaza Principal", descripcion: "Centro histórico con arquitectura colonial" },
+  ];
+}
+
+// Separar los atractivos seleccionados y disponibles
+const atractivosSeleccionadosIds = rutaAtractivos.map(a => a.id);
+const atractivosDisponibles = todosAtractivos.filter(a => !atractivosSeleccionadosIds.includes(a.id));
+---
+
+<link rel="stylesheet" href="/src/style/modal.css">
+<link rel="stylesheet" href="/src/style/form-atractivo.css">
+
+<AdminPanel menu={AdminMenu}>
+  <div class="admin-content">
+    <div class="header">
+      <h1>Editar Ruta Turística</h1>
+    </div>
+    
+    <div class="formulario-container">
+      <form id="form-editar-ruta" class="formulario">
+        <input type="hidden" id="ruta-id" value={rutaId}>
+        
+        <div class="form-group">
+          <label for="nombre">Nombre de la Ruta:</label>
+          <input type="text" id="nombre-ruta" name="nombre" required class="form-control" value={ruta?.nombre || ''}>
+        </div>
+        
+        <div class="form-group">
+          <label for="descripcion">Descripción:</label>
+          <textarea id="descripcion" name="descripcion" required class="form-control">{ruta?.descripcion || ''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="creador_empresa_id">Empresa Creadora:</label>
+          <select id="creador_empresa_id" name="creador_empresa_id" required class="form-control">
+            <option value="">Seleccione una empresa</option>
+            {empresas.map((empresa) => (
+              <option value={empresa.id} selected={ruta?.creador_empresa_id === empresa.id}>{empresa.nombre}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Atractivos en la Ruta:</label>
+          <div class="atractivos-seleccion">
+            <div class="atractivos-disponibles">
+              <h4>Atractivos Disponibles</h4>
+              <div class="lista-atractivos" id="atractivos-disponibles">
+                {atractivosDisponibles.map((atractivo) => (
+                  <div class="atractivo-item" data-id={atractivo.id} data-nombre={atractivo.nombre}>
+                    <span class="atractivo-nombre">{atractivo.nombre}</span>
+                    <button type="button" class="btn-agregar-atractivo">+</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div class="atractivos-seleccionados">
+              <h4>Atractivos Seleccionados</h4>
+              <div class="lista-atractivos" id="atractivos-seleccionados">
+                {rutaAtractivos.sort((a, b) => a.orden - b.orden).map((atractivo, index) => (
+                  <div class="atractivo-item seleccionado" data-id={atractivo.id} data-nombre={atractivo.nombre} data-orden={atractivo.orden}>
+                    <span class="orden-numero">{index + 1}</span>
+                    <span class="atractivo-nombre">{atractivo.nombre}</span>
+                    <div class="acciones-atractivo">
+                      <button type="button" class="btn-subir-atractivo" disabled={index === 0}>&uarr;</button>
+                      <button type="button" class="btn-bajar-atractivo" disabled={index === rutaAtractivos.length - 1}>&darr;</button>
+                      <button type="button" class="btn-quitar-atractivo">&times;</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="atractivos-orden" name="atractivos_orden" value="">
+        </div>
+          <div class="form-actions">
+          <button type="submit" class="btn-guardar">Guardar ruta</button>
+          <button type="button" class="btn-cancelar" id="btn-cancelar">Volver</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Modal de notificación -->
+  <div id="modal-notificacion" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="titulo-notificacion">Notificación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-notificacion"></p>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminPanel>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const formEditarRuta = document.getElementById('form-editar-ruta');
+    const btnCancelar = document.getElementById('btn-cancelar');
+    const atractivosDisponiblesContainer = document.getElementById('atractivos-disponibles');
+    const atractivosSeleccionadosContainer = document.getElementById('atractivos-seleccionados');
+    const atractivosOrdenInput = document.getElementById('atractivos-orden') as HTMLInputElement;
+    const modalNotificacion = document.getElementById('modal-notificacion');
+    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');
+    const rutaId = document.getElementById('ruta-id') as HTMLInputElement;
+    
+    // Inicializar array con los atractivos ya seleccionados
+    let atractivosSeleccionados = Array.from(
+      document.querySelectorAll('#atractivos-seleccionados .atractivo-item')
+    ).map(el => ({
+      id: el.getAttribute('data-id'),
+      nombre: el.getAttribute('data-nombre'),
+      orden: parseInt(el.getAttribute('data-orden') || '0')
+    }));
+    
+    // Actualizar el input con los valores iniciales
+    actualizarAtractivosOrden();
+      // Función para mostrar notificación
+    function mostrarNotificacion(titulo: string, mensaje: string, esExito = true) {
+      const tituloNotificacion = document.getElementById('titulo-notificacion');
+      const textoNotificacion = document.getElementById('texto-notificacion');
+      
+      if (tituloNotificacion) {
+        tituloNotificacion.textContent = titulo;
+        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
+      }
+      
+      if (textoNotificacion) {
+        textoNotificacion.textContent = mensaje;
+      }
+      
+      if (modalNotificacion) {
+        modalNotificacion.classList.remove('hidden');
+        
+        if (btnAceptarNotificacion) {
+          btnAceptarNotificacion.onclick = () => {
+            if (modalNotificacion) {
+              modalNotificacion.classList.add('hidden');
+            }
+          };
+        }
+      }
+    }
+    
+    // Función para actualizar el campo oculto con los atractivos seleccionados
+    function actualizarAtractivosOrden() {
+      if (atractivosOrdenInput) {
+        atractivosOrdenInput.value = JSON.stringify(atractivosSeleccionados);
+      }
+    }
+    
+    // Función para renderizar atractivos seleccionados
+    function renderizarAtractivosSeleccionados() {
+      if (atractivosSeleccionadosContainer) {
+        atractivosSeleccionadosContainer.innerHTML = '';
+        
+        // Reordenar según el orden actual
+        atractivosSeleccionados.sort((a, b) => a.orden - b.orden);
+        
+        atractivosSeleccionados.forEach((atractivo, index) => {
+          atractivo.orden = index + 1; // Actualizar el orden
+          
+          const div = document.createElement('div');
+          div.className = 'atractivo-item seleccionado';
+          div.dataset.id = atractivo.id;
+          div.dataset.nombre = atractivo.nombre;
+          div.dataset.orden = atractivo.orden.toString();
+          
+          div.innerHTML = `
+            <span class="orden-numero">${atractivo.orden}</span>
+            <span class="atractivo-nombre">${atractivo.nombre}</span>
+            <div class="acciones-atractivo">
+              <button type="button" class="btn-subir-atractivo" ${index === 0 ? 'disabled' : ''}>&uarr;</button>
+              <button type="button" class="btn-bajar-atractivo" ${index === atractivosSeleccionados.length - 1 ? 'disabled' : ''}>&darr;</button>
+              <button type="button" class="btn-quitar-atractivo">&times;</button>
+            </div>
+          `;
+          
+          atractivosSeleccionadosContainer.appendChild(div);
+        });
+        
+        // Volver a agregar los eventos
+        agregarEventosBotones();
+      }
+    }
+    
+    // Función para agregar eventos a los botones
+    function agregarEventosBotones() {
+      // Botones para subir orden
+      document.querySelectorAll('.btn-subir-atractivo').forEach(btn => {
+        btn.addEventListener('click', function(this: HTMLElement) {
+          const item = this.closest('.atractivo-item');
+          if (!item) return;
+          
+          const id = item.getAttribute('data-id');
+          const index = atractivosSeleccionados.findIndex(a => a.id === id);
+          
+          if (index > 0) {
+            // Intercambiar con el elemento anterior
+            [atractivosSeleccionados[index], atractivosSeleccionados[index - 1]] = 
+            [atractivosSeleccionados[index - 1], atractivosSeleccionados[index]];
+            
+            renderizarAtractivosSeleccionados();
+            actualizarAtractivosOrden();
+          }
+        });
+      });
+      
+      // Botones para bajar orden
+      document.querySelectorAll('.btn-bajar-atractivo').forEach(btn => {
+        btn.addEventListener('click', function(this: HTMLElement) {
+          const item = this.closest('.atractivo-item');
+          if (!item) return;
+          
+          const id = item.getAttribute('data-id');
+          const index = atractivosSeleccionados.findIndex(a => a.id === id);
+          
+          if (index < atractivosSeleccionados.length - 1) {
+            // Intercambiar con el elemento siguiente
+            [atractivosSeleccionados[index], atractivosSeleccionados[index + 1]] = 
+            [atractivosSeleccionados[index + 1], atractivosSeleccionados[index]];
+            
+            renderizarAtractivosSeleccionados();
+            actualizarAtractivosOrden();
+          }
+        });
+      });
+      
+      // Botones para quitar atractivos
+      document.querySelectorAll('.btn-quitar-atractivo').forEach(btn => {
+        btn.addEventListener('click', function(this: HTMLElement) {
+          const item = this.closest('.atractivo-item');
+          if (!item) return;
+          
+          const id = item.getAttribute('data-id');
+          const index = atractivosSeleccionados.findIndex(a => a.id === id);
+          
+          if (index !== -1) {
+            // Quitar el atractivo seleccionado
+            atractivosSeleccionados.splice(index, 1);
+            
+            // Volver a mostrar en la lista de disponibles
+            const atractivoItem = document.querySelector(`#atractivos-disponibles .atractivo-item[data-id="${id}"]`);
+            if (atractivoItem) {
+              (atractivoItem as HTMLElement).style.display = 'flex';
+            } else {
+              // Si no existe, crearlo en la lista de disponibles
+              const nombre = item.getAttribute('data-nombre');
+              if (nombre && atractivosDisponiblesContainer) {
+                const nuevoItem = document.createElement('div');
+                nuevoItem.className = 'atractivo-item';
+                nuevoItem.dataset.id = id;
+                nuevoItem.dataset.nombre = nombre;
+                nuevoItem.innerHTML = `
+                  <span class="atractivo-nombre">${nombre}</span>
+                  <button type="button" class="btn-agregar-atractivo">+</button>
+                `;
+                atractivosDisponiblesContainer.appendChild(nuevoItem);
+              }
+            }
+            
+            renderizarAtractivosSeleccionados();
+            actualizarAtractivosOrden();
+          }
+        });
+      });
+    }
+    
+    // Agregar evento para botones de agregar atractivo
+    if (atractivosDisponiblesContainer) {
+      atractivosDisponiblesContainer.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target && target.classList.contains('btn-agregar-atractivo')) {
+          const item = target.closest('.atractivo-item');
+          if (!item) return;
+          
+          const id = item.getAttribute('data-id');
+          const nombre = item.getAttribute('data-nombre');
+          
+          // Verificar que no esté ya en la lista
+          if (!atractivosSeleccionados.some(a => a.id === id)) {
+            atractivosSeleccionados.push({
+              id,
+              nombre,
+              orden: atractivosSeleccionados.length + 1
+            });
+            
+            // Ocultar el atractivo en la lista de disponibles
+            (item as HTMLElement).style.display = 'none';
+            
+            renderizarAtractivosSeleccionados();
+            actualizarAtractivosOrden();
+          }
+        }
+      });
+    }
+    
+    // Inicializar eventos para los botones existentes
+    agregarEventosBotones();
+    
+    // Botón Cancelar
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', () => {
+        window.location.href = '/admin/rutas';
+      });
+    }
+    
+    // Enviar formulario
+    if (formEditarRuta) {
+      formEditarRuta.addEventListener('submit', async (e) => {
+        e.preventDefault();
+          const id = rutaId?.value;
+        const nombre = (document.getElementById('nombre-ruta') as HTMLInputElement)?.value;
+        const descripcion = (document.getElementById('descripcion') as HTMLTextAreaElement)?.value;
+        const creadorEmpresaId = (document.getElementById('creador_empresa_id') as HTMLSelectElement)?.value;
+        
+        if (!id || !nombre || !descripcion || !creadorEmpresaId) {
+          mostrarNotificacion('Error', 'Por favor complete todos los campos obligatorios', false);
+          return;
+        }
+        
+        // Verificar que haya al menos un atractivo seleccionado
+        if (atractivosSeleccionados.length === 0) {
+          mostrarNotificacion('Error', 'Debe seleccionar al menos un atractivo para la ruta', false);
+          return;
+        }
+        
+        // Preparar datos para enviar
+        const rutaData = {
+          nombre,
+          descripcion,
+          creador_empresa_id: creadorEmpresaId,
+          atractivos: atractivosSeleccionados.map((a) => ({ 
+            id: a.id, 
+            orden: a.orden 
+          }))
+        };
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/rutas/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rutaData)
+          });
+          
+          if (response.ok) {            mostrarNotificacion(
+              '¡Éxito!', 
+              `Ruta "${nombre}" actualizada correctamente`, 
+              true
+            );
+            // Redireccionar después de mostrar la notificación
+            setTimeout(() => {
+              window.location.href = '/admin/rutas';
+            }, 1500);
+          } else {
+            const errorData = await response.json();
+            mostrarNotificacion('Error', errorData.message || 'No se pudo actualizar la ruta', false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', 'Ha ocurrido un error al actualizar la ruta', false);
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  .atractivos-seleccion {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+  }
+  
+  .atractivos-disponibles,
+  .atractivos-seleccionados {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f9f9f9;
+  }
+  
+  .lista-atractivos {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+  
+  .atractivo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+  }
+  
+  .atractivo-item.seleccionado {
+    background-color: #e8f4f0;
+  }
+  
+  .orden-numero {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background-color: #1A513B;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .atractivo-nombre {
+    flex-grow: 1;
+  }
+  
+  .acciones-atractivo {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .btn-agregar-atractivo,
+  .btn-subir-atractivo,
+  .btn-bajar-atractivo,
+  .btn-quitar-atractivo {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 4px;
+  }
+  
+  .btn-agregar-atractivo {
+    background-color: #1A513B;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .btn-subir-atractivo,
+  .btn-bajar-atractivo {
+    background-color: #f0f0f0;
+  }
+  
+  .btn-quitar-atractivo {
+    background-color: #ffeeee;
+    color: #d9534f;
+    font-weight: bold;
+  }
+  
+  .btn-agregar-atractivo:hover {
+    background-color: #14412f;
+  }
+  
+  .btn-subir-atractivo:hover,
+  .btn-bajar-atractivo:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .btn-quitar-atractivo:hover {
+    background-color: #ffd7d7;
+  }
+  
+  [disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

@@ -1,5 +1,7 @@
 @import url('./global.css');
-
+#nombre {
+  width: 90%;
+}
 .admin-content {
   max-width: 900px;
   margin: 40px auto;
@@ -40,6 +42,114 @@
   background: var(--color-primary-hover);
   color: var(--color-primary);
 }
+
+/* Estilos para los filtros */
+.filtros-container {
+  margin-bottom: 20px;
+  background: var(--color-bg-input);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.filtro {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Filtro especial para el nombre (más pequeño) */
+.filtro-nombre {
+  flex: 0.6;
+  max-width: 150px;
+}
+
+.filtro label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--color-primary);
+  font-size: 0.9em;
+}
+
+.filtro input,
+.filtro select {
+  padding: 6px 8px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background-color: #fff;
+  color: var(--color-text);
+}
+
+.filtro input,
+.filtro select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background-color: #fff;
+  color: var(--color-text);
+}
+
+.filtros-botones {
+  display: flex;
+  gap: 10px;
+}
+
+/* Mensaje cuando no hay resultados */
+.sin-resultados {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.btn-filtrar,
+.btn-limpiar {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9em;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.btn-filtrar {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.btn-filtrar:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+}
+
+.btn-limpiar {
+  background: #f8f9fa;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  text-decoration: none;
+}
+
+.btn-limpiar:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.no-resultados {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+  padding: 20px 0 !important;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -63,12 +173,144 @@ tr:nth-child(odd) {
   background: var(--color-table-row-odd);
 }
 
+.acciones {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+  min-width: 220px;
+}
+
+/* Estilos base compartidos para todos los botones de acción */
+.btn-editar, .btn-eliminar, .btn-agregar {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9em;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+  border: none;
+  display: inline-block;
+  min-width: 70px;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  text-decoration: none;
+}
+
+/* Estilos específicos para cada botón */
+.btn-editar {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn-editar:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+}
+
+.btn-eliminar {
+  background: #d9534f;
+  color: #fff;
+}
+
+.btn-eliminar:hover {
+  background: #ffd3d3;
+  color: #d9534f;
+}
+
+.btn-agregar {
+  background: #4A8372;
+  color: #fff;
+}
+
+.btn-agregar:hover {
+  background: var(--color-primary-hover);
+  color: #4A8372;
+}
+
+/* Estilos para botones específicos de edición */
+.btn-editar-atractivo, .btn-editar-empresa {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9em;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  margin-bottom: 5px;
+  display: inline-block;
+  min-width: 70px;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.btn-editar-atractivo:hover, .btn-editar-empresa:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 20px;
+  }
+  
+  .filtros {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filtro {
+    width: 100%;
+  }
+  
+  .filtros-botones {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .btn-filtrar,
+  .btn-limpiar {
+    flex: 1;
+  }
+  
+  table {
+    font-size: 0.9em;
+  }
+  
+  th, td {
+    padding: 10px 8px;
+  }
+    .acciones {
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+  
+  /* Estilos para botones en móvil */
+  .btn-editar, .btn-eliminar, .btn-agregar,
+  .btn-editar-atractivo, .btn-editar-empresa {
+    width: 50%;
+    padding: 8px 10px;
+    font-size: 0.85em;
+    margin: 2px 0;
+    min-width: unset;
+  }
+}
+
 @media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
   .btn-nuevo {
-    padding: 7px 8px;
-    font-size: 0.93em;
-    max-width: 90px;
-    min-width: 70px;
-    line-height: 1.1;
+    margin-left: 0;
+  }
+  
+  table {
+    font-size: 0.85em;
   }
 }

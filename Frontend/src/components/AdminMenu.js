@@ -1,5 +1,6 @@
 export const AdminMenu = [
-  { label: "Atractivos", href: "/admin/atractivos" },
+  { label: "Gestión", href: "/admin/gestion" },
+  { label: "Categorías", href: "/admin/categorias" },
   { label: "Rutas", href: "/admin/rutas" },
   { label: "Usuarios", href: "/admin/usuarios" },
 ];

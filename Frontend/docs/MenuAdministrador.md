@@ -17,10 +17,10 @@
 
 ### 2. Páginas de administración (`src/pages/admin/`)
 
-- **atractivos.astro**  
+- **gestion.astro**  
   Página que muestra el listado de atractivos turísticos y permite acceder a la creación de nuevos atractivos.
 
-- **atractivos-nuevo.astro**  
+- **gestion-nuevo.astro**  
   Página con el formulario para agregar un nuevo atractivo turístico. Incluye mensajes de confirmación tras la creación.
 
 ### 3. Estilos (`src/style/`)
