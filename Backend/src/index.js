@@ -7,6 +7,8 @@ import empresasRoutes from "./routes/empresas.js";
 import resenasRouter from './api/admin/resenas.js';
 import estadisticasRouter from './api/admin/estadisticas.js';
 import usuariosRouter from './api/admin/usuarios.js';
+import rutas from './routes/rutas.js';
+import favoritos from './routes/favoritos.js';
 
 dotenv.config();
 
@@ -26,7 +28,8 @@ app.use("/api/empresas", empresasRoutes);
 app.use('/api/admin/resenas', resenasRouter);
 app.use('/api/admin/estadisticas', estadisticasRouter);
 app.use('/api/admin/usuarios', usuariosRouter);
-
+app.use('/api/rutas', rutas);
+app.use('/api/favoritos', favoritos);
 // Servidor
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
