@@ -1,0 +1,99 @@
+---
+const rutasDestacadas = [
+  {
+    id: 1,
+    titulo: "Ruta del Vino",
+    descripcion: "Recorre las mejores bodegas de San Rafael y descubre la historia del vino mendocino.",
+    imagen: "/carrusel/bodega-abeja.jpg"
+  },
+  {
+    id: 2,
+    titulo: "Aventura en el Cañón",
+    descripcion: "Una experiencia única de deportes extremos en el Cañón del Atuel.",
+    imagen: "/carrusel/canon-atuel.jpg"
+  },
+  {
+    id: 3,
+    titulo: "Tour Histórico",
+    descripcion: "Conoce los lugares más emblemáticos del centro histórico de San Rafael.",
+    imagen: "/carrusel/plaza-san-martin.jpg"
+  },
+  {
+    id: 4,
+    titulo: "Naturaleza y Aventura",
+    descripcion: "Explora Valle Grande y sus increíbles paisajes naturales.",
+    imagen: "/carrusel/valle-grande.jpg"
+  }
+];
+---
+
+<section class="rutas-destacadas">
+  <h2>Rutas temáticas destacadas</h2>
+  <div class="grid-rutas">
+    {rutasDestacadas.map((ruta) => (
+      <div class="card-ruta">
+        <img src={ruta.imagen} alt={ruta.titulo} />
+        <h3>{ruta.titulo}</h3>
+        <p>{ruta.descripcion}</p>
+        <a href="#" class="ver-mas">Ver más</a>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+.rutas-destacadas {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+.rutas-destacadas h2 {
+  color: #2e6c4d;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+.grid-rutas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.card-ruta {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  padding: 1.5rem;
+  transition: transform 0.2s ease;
+}
+.card-ruta:hover {
+  transform: translateY(-6px);
+}
+.card-ruta img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+.card-ruta h3 {
+  margin: 0.5rem 0;
+  color: #2e6c4d;
+  font-size: 1.3rem;
+}
+.card-ruta p {
+  color: #555;
+  margin-bottom: 1rem;
+}
+.ver-mas {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #2e6c4d;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.ver-mas:hover {
+  background: #245239;
+}
+</style>

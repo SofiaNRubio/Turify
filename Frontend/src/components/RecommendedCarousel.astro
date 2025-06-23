@@ -1,39 +1,34 @@
----
-const lugares = [
-  {
-    nombre: "Cañón del Atuel",
-    descripcion: "Paisajes únicos y deportes de aventura.",
-    imagen: "/carrusel/canon-atuel.jpg"
-  },
-  {
-    nombre: "Valle Grande",
-    descripcion: "Ideal para rafting y actividades acuáticas.",
-    imagen: "/carrusel/valle-grande.jpg"
-  },
-  {
-    nombre: "Bodega La Abeja",
-    descripcion: "Historia y vinos de excelencia.",
-    imagen: "/carrusel/bodega-abeja.jpg"
-  },
-  {
-    nombre: "Plaza San Martín",
-    descripcion: "El corazón de la ciudad.",
-    imagen: "/carrusel/plaza-san-martin.jpg"
-  }
-];
----
-
 <section class="recomendados">
   <h3>Lugares Recomendados</h3>
   <div class="carousel-wrapper">
     <button class="carousel-arrow left" id="prevLugar" aria-label="Anterior">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <div class="carousel-item" id="carouselItem">
-      <img src={lugares[0].imagen} alt={lugares[0].nombre} id="carouselImg" />
-      <h4 id="carouselNombre">{lugares[0].nombre}</h4>
-      <p id="carouselDesc">{lugares[0].descripcion}</p>
+    
+    <div class="carousel-track" id="carouselTrack">
+      <!-- Cada tarjeta -->
+      <div class="carousel-card">
+        <img src="/carrusel/canon-atuel.jpg" alt="Cañón del Atuel" />
+        <h4>Cañón del Atuel</h4>
+        <p>Paisajes únicos y deportes de aventura.</p>
+      </div>
+      <div class="carousel-card">
+        <img src="/carrusel/valle-grande.jpg" alt="Valle Grande" />
+        <h4>Valle Grande</h4>
+        <p>Ideal para rafting y actividades acuáticas.</p>
+      </div>
+      <div class="carousel-card">
+        <img src="/carrusel/bodega-abeja.jpg" alt="Bodega La Abeja" />
+        <h4>Bodega La Abeja</h4>
+        <p>Historia y vinos de excelencia.</p>
+      </div>
+      <div class="carousel-card">
+        <img src="/carrusel/plaza-san-martin.jpg" alt="Plaza San Martín" />
+        <h4>Plaza San Martín</h4>
+        <p>El corazón de la ciudad.</p>
+      </div>
     </div>
+    
     <button class="carousel-arrow right" id="nextLugar" aria-label="Siguiente">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
@@ -42,54 +37,35 @@ const lugares = [
 
 <script type="text/javascript">
   document.addEventListener('DOMContentLoaded', function () {
-    const lugares = [
-      {
-        nombre: "Cañón del Atuel",
-        descripcion: "Paisajes únicos y deportes de aventura.",
-        imagen: "/carrusel/canon-atuel.jpg"
-      },
-      {
-        nombre: "Valle Grande",
-        descripcion: "Ideal para rafting y actividades acuáticas.",
-        imagen: "/carrusel/valle-grande.jpg"
-      },
-      {
-        nombre: "Bodega La Abeja",
-        descripcion: "Historia y vinos de excelencia.",
-        imagen: "/carrusel/bodega-abeja.jpg"
-      },
-      {
-        nombre: "Plaza San Martín",
-        descripcion: "El corazón de la ciudad.",
-        imagen: "/carrusel/plaza-san-martin.jpg"
-      }
-    ];
+    const cards = document.querySelectorAll('.carousel-card');
     let current = 0;
-    const img = document.getElementById('carouselImg');
-    const nombre = document.getElementById('carouselNombre');
-    const desc = document.getElementById('carouselDesc');
 
-    const updateSlide = () => {
-      img.classList.remove('fade-in');
-      void img.offsetWidth; // trigger reflow
-      img.classList.add('fade-in');
-      img.src = lugares[current].imagen;
-      img.alt = lugares[current].nombre;
-      nombre.textContent = lugares[current].nombre;
-      desc.textContent = lugares[current].descripcion;
+    const updateClasses = () => {
+      cards.forEach((card, i) => {
+        card.classList.remove('active', 'prev', 'next');
+        if (i === current) {
+          card.classList.add('active');
+        } else if (i === (current - 1 + cards.length) % cards.length) {
+          card.classList.add('prev');
+        } else if (i === (current + 1) % cards.length) {
+          card.classList.add('next');
+        }
+      });
     };
 
     document.getElementById('prevLugar').onclick = () => {
-      current = (current - 1 + lugares.length) % lugares.length;
-      updateSlide();
+      current = (current - 1 + cards.length) % cards.length;
+      updateClasses();
     };
+
     document.getElementById('nextLugar').onclick = () => {
-      current = (current + 1) % lugares.length;
-      updateSlide();
+      current = (current + 1) % cards.length;
+      updateClasses();
     };
+
+    updateClasses();
   });
 </script>
-
 <style>
 .recomendados {
   margin: 3rem auto;
@@ -99,17 +75,81 @@ const lugares = [
   color: #2e6c4d;
   margin-bottom: 1.5rem;
   font-size: 2.2rem;
-  letter-spacing: 1px;
   font-weight: 700;
 }
+
 .carousel-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2rem;
+  position: relative;
   flex-wrap: wrap;
 }
+
+.carousel-track {
+  position: relative;
+  width: 350px;
+  height: 340px;
+  overflow: visible;
+  perspective: 1000px;
+}
+
+.carousel-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.08);
+  transition: all 0.5s ease;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: scale(0.9);
+}
+.carousel-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  background: #eaf7f0;
+  box-shadow: 0 2px 8px rgba(46, 108, 77, 0.12);
+}
+.carousel-card h4 {
+  margin: 0.6rem 0 0.3rem;
+  color: #2e6c4d;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.carousel-card p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.carousel-card.active {
+  opacity: 1;
+  z-index: 3;
+  transform: scale(1) translateX(0);
+  pointer-events: auto;
+}
+.carousel-card.prev {
+  opacity: 0.8;
+  transform: translateX(-100px) scale(0.9) rotateY(5deg);
+  z-index: 2;
+}
+.carousel-card.next {
+  opacity: 0.8;
+  transform: translateX(100px) scale(0.9) rotateY(-5deg);
+  z-index: 2;
+}
+
 .carousel-arrow {
+  margin: 0 120px;
   background: #97c0a5;
   color: #2e6c4d;
   border: none;
@@ -131,48 +171,6 @@ const lugares = [
 .carousel-arrow svg {
   stroke: currentColor;
 }
-.carousel-item {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.08);
-  width: 340px;
-  max-width: 95vw;
-  padding: 1.5rem;
-  text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.carousel-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
-}
-.carousel-item img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 1rem;
-  background: #eaf7f0;
-  box-shadow: 0 2px 8px rgba(46, 108, 77, 0.12);
-  transition: opacity 0.3s ease;
-}
-.fade-in {
-  animation: fade 0.4s ease-in-out;
-}
-@keyframes fade {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
-}
-.carousel-item h4 {
-  margin: 0.6rem 0 0.3rem;
-  color: #2e6c4d;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-.carousel-item p {
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.4;
-}
 
 @media (max-width: 600px) {
   .carousel-wrapper {
@@ -183,9 +181,9 @@ const lugares = [
     width: 44px;
     height: 44px;
   }
-  .carousel-item {
+  .carousel-track {
     width: 90vw;
-    padding: 1rem;
   }
 }
+
 </style>
