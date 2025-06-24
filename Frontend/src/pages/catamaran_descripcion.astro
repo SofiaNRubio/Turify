@@ -2,23 +2,34 @@
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 ---
+
 <Header />
 <main>
     <h1 class="title">Catamaran - Los Reyunos</h1>
     <div class="cards-horizontal">
-        <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore suscipit mollitia quaerat eos libero distinctio excepturi laboriosam amet id at omnis aliquid repellendus, quisquam quia magni aut expedita praesentium officiis!</p>
-        <img src="../../public/actividades/airelibre.jpg" class="image">
+        <p class="description">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore
+            suscipit mollitia quaerat eos libero distinctio excepturi laboriosam
+            amet id at omnis aliquid repellendus, quisquam quia magni aut
+            expedita praesentium officiis!
+        </p>
+        <img src="../../public/actividades/airelibre.jpg" class="image" />
     </div>
     <section class="historia">
-                <div class="historia-content">
-                    <h2 class="subtitles">Ubicacion</h2>
-                    <p>
-                        San Rafael es una ciudad con una rica historia y tradiciones. Fundada en el siglo XIX, es reconocida por su hospitalidad, paisajes y actividades turísticas.
-                    </p>
-                </div>
-                <div class="historia-mapa">
-                    <div id="map" style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;"></div>
-                </div>
+        <div class="historia-content">
+            <h2 class="subtitles">Ubicacion</h2>
+            <p>
+                San Rafael es una ciudad con una rica historia y tradiciones.
+                Fundada en el siglo XIX, es reconocida por su hospitalidad,
+                paisajes y actividades turísticas.
+            </p>
+        </div>
+        <div class="historia-mapa">
+            <div
+                id="map"
+                style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;">
+            </div>
+        </div>
     </section>
     <div class="resena-section">
         <div class="resena-container">
@@ -34,28 +45,46 @@ import Header from "../components/Header.astro";
             </div>
             <div class="comentario-section">
                 <h3 class="subtitles">Comentario:</h3>
-                <textarea id="comentario" placeholder="Escribe tu opinion aqui"></textarea>
+                <textarea id="comentario" placeholder="Escribe tu opinion aqui"
+                ></textarea>
             </div>
         </div>
         <div class="button-container">
-            <button class="submit-button">Enviar comentario
-                <img src="../../public/actividades/send-line.svg" class="send-icon">
+            <button class="submit-button"
+                >Enviar comentario
+                <img
+                    src="../../public/actividades/send-line.svg"
+                    class="send-icon"
+                />
             </button>
         </div>
     </div>
-    
+
     <div class="opiniones-section">
         <h2 class="section-title">Opiniones:</h2>
-        <div class="rating-summary"> 
+        <div class="connection-status" id="connection-status">
+            <span class="status-indicator offline" id="status-indicator">●</span
+            >
+            <span class="status-text" id="status-text"
+                >Verificando conexión...</span
+            >
         </div>
+        <div class="rating-summary"></div>
     </div>
-    
+
     <div class="contacto-section">
         <h2 class="section-title">Contáctanos</h2>
-        <p class="contacto-text">¿Tienes alguna pregunta o necesitas ayuda para planificar tu visita? Estamos aquí para asistirte.</p>
+        <p class="contacto-text">
+            ¿Tienes alguna pregunta o necesitas ayuda para planificar tu visita?
+            Estamos aquí para asistirte.
+        </p>
         <div class="button-container-center">
-            <button class="mensaje-button">Enviar mensaje
-                <img src="../../public/actividades/send-line.svg" class="send-icon">
+            <button class="mensaje-button"
+                >Enviar mensaje
+                <img
+                    src="../../public/actividades/send-line.svg"
+                    class="send-icon"
+                />
             </button>
         </div>
     </div>
@@ -63,26 +92,29 @@ import Header from "../components/Header.astro";
 <Footer />
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const stars = document.querySelectorAll('.resena-section .star');
+    // Configuración del backend
+    const BACKEND_URL = "http://localhost:3000";
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const stars = document.querySelectorAll(".resena-section .star");
         let rating = 0;
-        
+
         stars.forEach((star, index) => {
-            star.addEventListener('click', () => {
+            star.addEventListener("click", () => {
                 rating = index + 1;
                 updateStars();
             });
-            
-            star.addEventListener('mouseover', () => {
+
+            star.addEventListener("mouseover", () => {
                 highlightStars(index);
             });
-            
-            star.addEventListener('mouseout', () => {
+
+            star.addEventListener("mouseout", () => {
                 updateStars();
             });
         });
-        
-        function highlightStars(index) {
+
+        function highlightStars(index: number) {
             stars.forEach((star, i) => {
                 if (i <= index) {
                     star.textContent = "★";
@@ -93,7 +125,7 @@ import Header from "../components/Header.astro";
                 }
             });
         }
-        
+
         function updateStars() {
             stars.forEach((star, i) => {
                 if (i < rating) {
@@ -105,207 +137,365 @@ import Header from "../components/Header.astro";
                 }
             });
         }
-        
+
         let reviews = [
-            { 
-                id: 1, 
-                author: 'Usuario1', 
-                date: '', 
-                rating: 4, 
-                comment: ''
-            }
+            {
+                id: 1,
+                author: "Usuario1",
+                date: "",
+                rating: 4,
+                comment: "",
+            },
         ];
-        
+
         let stats = {
             totalReviews: 1,
             averageRating: 4.5,
             distribution: {
-                '1': 2,
-                '2': 3,
-                '3': 5,
-                '4': 15,
-                '5': 75
-            } as Record<string, number>
+                "1": 2,
+                "2": 3,
+                "3": 5,
+                "4": 15,
+                "5": 75,
+            } as Record<string, number>,
         };
-        
+
         // Función para enviar una reseña al backend
-        async function enviarResena(comentario: string, puntaje: number, atractivoId = '1') {
+        async function enviarResena(
+            comentario: string,
+            puntaje: number,
+            atractivoId = "1"
+        ) {
             try {
-                const token = 'token_simulado';
-                
-                const response = await fetch('/api/reseñas', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                // Intentar obtener el token de Clerk si está disponible
+                let authHeaders: Record<string, string> = {
+                    "Content-Type": "application/json",
+                };
+
+                // Si Clerk está disponible, usar su token
+                if (typeof window !== "undefined" && (window as any).Clerk) {
+                    const clerk = (window as any).Clerk;
+                    if (clerk.session) {
+                        const token = await clerk.session.getToken();
+                        if (token) {
+                            authHeaders["Authorization"] = `Bearer ${token}`;
+                        }
+                    }
+                }
+
+                const response = await fetch(`${BACKEND_URL}/api/resenas`, {
+                    method: "POST",
+                    headers: authHeaders,
                     body: JSON.stringify({
                         atractivo_id: atractivoId,
                         comentario: comentario,
-                        puntaje: puntaje
-                    })
+                        puntaje: puntaje,
+                    }),
                 });
-                
+
+                // Verificar si la respuesta es JSON válida
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error(
+                        "Backend no disponible - respuesta no es JSON"
+                    );
+                }
+
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.error || 'Error al enviar la reseña');
+                    throw new Error(error.error || "Error al enviar la reseña");
                 }
-                
+
                 return await response.json();
             } catch (error: any) {
-                console.error('Error al enviar reseña:', error);
-                if (error.message && error.message.includes('Ya has reseñado')) {
-                    alert('Ya has enviado una reseña para este atractivo');
+                console.error("Error al enviar reseña:", error);
+
+                // Si es un error de conexión o backend no disponible
+                if (
+                    error.message.includes("fetch") ||
+                    error.message.includes("Backend no disponible") ||
+                    error.message.includes("Unexpected token")
+                ) {
+                    console.log(
+                        "Backend no disponible, creando reseña local simulada"
+                    );
+
+                    // Crear una reseña simulada localmente
+                    const nuevaResena = {
+                        id: Date.now(),
+                        author: "Usuario" + Math.floor(Math.random() * 1000),
+                        date: "Ahora mismo",
+                        rating: puntaje,
+                        comment: comentario,
+                    };
+
+                    // Agregar a la lista local
+                    reviews.push(nuevaResena);
+
+                    // Mostrar mensaje indicando que es simulado
+                    alert(
+                        "⚠️ Backend no disponible. La reseña se ha guardado localmente."
+                    );
+
+                    return {
+                        id: nuevaResena.id,
+                        mensaje: "Reseña simulada creada",
+                    };
+                }
+
+                // Si es un error específico del backend
+                if (
+                    error.message &&
+                    error.message.includes("Ya has reseñado")
+                ) {
+                    alert("Ya has enviado una reseña para este atractivo");
+                    return null;
                 } else {
-                    console.log('Continuando con simulación local debido a error de conexión');
-                    return { id: Date.now(), mensaje: 'Simulación: Reseña creada correctamente' };
+                    throw error;
                 }
             }
         }
-        
+
         // Función para cargar reseñas del backend
-        async function cargarResenas(atractivoId = '1') {
+        async function cargarResenas(atractivoId = "1") {
             try {
-                const response = await fetch(`/api/reseñas/${atractivoId}`);
-                
-                if (!response.ok) {
-                    throw new Error('Error al cargar las reseñas');
+                const response = await fetch(
+                    `${BACKEND_URL}/api/resenas/${atractivoId}`
+                );
+
+                // Verificar si la respuesta es JSON válida
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error(
+                        "Backend no disponible - respuesta no es JSON"
+                    );
                 }
-                
+
+                if (!response.ok) {
+                    throw new Error("Error al cargar las reseñas");
+                }
+
                 const data = await response.json();
-                
+
                 return data.map((item: any) => ({
                     id: item.id,
-                    author: item.usuario || 'Usuario anónimo',
+                    author: item.usuario || "Usuario anónimo",
                     date: formatearFecha(item.fecha),
                     rating: item.puntaje,
-                    comment: item.comentario
+                    comment: item.comentario,
                 }));
-            } catch (error) {
-                console.error('Error al cargar reseñas:', error);
-                console.log('Usando datos simulados debido a error de conexión');
-                return reviews; 
+            } catch (error: any) {
+                console.error("Error al cargar reseñas:", error);
+
+                if (
+                    error.message.includes("fetch") ||
+                    error.message.includes("Backend no disponible") ||
+                    error.message.includes("Unexpected token")
+                ) {
+                    console.log(
+                        "Backend no disponible, usando datos simulados"
+                    );
+                } else {
+                    console.log(
+                        "Error del servidor, usando datos simulados como fallback"
+                    );
+                }
+
+                return reviews;
             }
         }
-        
+
         // Función para formatear fecha
         function formatearFecha(fechaStr: string) {
-            if (!fechaStr) return 'Fecha desconocida';
-            
+            if (!fechaStr) return "Fecha desconocida";
+
             try {
                 const fecha = new Date(fechaStr);
                 const ahora = new Date();
                 const diferencia = ahora.getTime() - fecha.getTime();
-                
+
                 // Menos de un día
                 if (diferencia < 86400000) {
-                    return 'Hoy';
+                    return "Hoy";
                 }
                 // Menos de una semana
                 else if (diferencia < 604800000) {
                     const dias = Math.floor(diferencia / 86400000);
-                    return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
+                    return `Hace ${dias} día${dias > 1 ? "s" : ""}`;
                 }
                 // Menos de un mes
                 else if (diferencia < 2592000000) {
                     const semanas = Math.floor(diferencia / 604800000);
-                    return `Hace ${semanas} semana${semanas > 1 ? 's' : ''}`;
+                    return `Hace ${semanas} semana${semanas > 1 ? "s" : ""}`;
                 }
                 // Menos de un año
                 else if (diferencia < 31536000000) {
                     const meses = Math.floor(diferencia / 2592000000);
-                    return `Hace ${meses} mes${meses > 1 ? 'es' : ''}`;
+                    return `Hace ${meses} mes${meses > 1 ? "es" : ""}`;
                 }
                 // Más de un año
                 else {
                     const años = Math.floor(diferencia / 31536000000);
-                    return `Hace ${años} año${años > 1 ? 's' : ''}`;
+                    return `Hace ${años} año${años > 1 ? "s" : ""}`;
                 }
             } catch (e) {
-                console.error('Error al formatear fecha:', e);
-                return 'Fecha inválida';
+                console.error("Error al formatear fecha:", e);
+                return "Fecha inválida";
+            }
+        }
+
+        // Función para verificar conexión con el backend
+        async function verificarConexion() {
+            try {
+                // Crear un controller para timeout manual
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(`${BACKEND_URL}/`, {
+                    method: "GET",
+                    signal: controller.signal,
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                    return true;
+                } else {
+                    updateConnectionStatus(false);
+                    return false;
+                }
+            } catch (error) {
+                console.log("Backend no disponible:", error);
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
+
+        // Función para actualizar el indicador de estado
+        function updateConnectionStatus(isOnline: boolean) {
+            const indicator = document.getElementById("status-indicator");
+            const statusText = document.getElementById("status-text");
+
+            if (indicator && statusText) {
+                if (isOnline) {
+                    indicator.className = "status-indicator online";
+                    statusText.textContent = "Conectado al servidor";
+                } else {
+                    indicator.className = "status-indicator offline";
+                    statusText.textContent =
+                        "Servidor no disponible - Modo local";
+                }
             }
         }
 
         // Cargar reseñas al iniciar
-        (async function() {
+        (async function () {
             try {
+                // Verificar conexión primero
+                await verificarConexion();
+
                 const resenasBackend = await cargarResenas();
                 if (resenasBackend && resenasBackend.length > 0) {
                     reviews = resenasBackend;
                     updateInterface();
                 }
             } catch (e) {
-                console.error('Error al cargar reseñas iniciales:', e);
+                console.error("Error al cargar reseñas iniciales:", e);
             }
         })();
-        
-        const submitButton = document.querySelector('.submit-button');
+
+        const submitButton = document.querySelector(".submit-button");
         if (submitButton) {
-            submitButton.addEventListener('click', () => {
-                const comentarioElement = document.getElementById('comentario');
+            submitButton.addEventListener("click", async () => {
+                const comentarioElement = document.getElementById("comentario");
                 if (!comentarioElement) return;
-                
-                const comentario = (comentarioElement as HTMLTextAreaElement).value.trim();
-                const nombre = 'Usuario' + Math.floor(Math.random() * 1000);
-                
+
+                const comentario = (
+                    comentarioElement as HTMLTextAreaElement
+                ).value.trim();
+
                 if (rating === 0) {
-                    alert('Por favor selecciona una calificación');
+                    alert("Por favor selecciona una calificación");
                     return;
                 }
                 if (!comentario) {
-                    alert('Por favor escribe un comentario');
+                    alert("Por favor escribe un comentario");
                     return;
                 }
-                
-                // Crear una nueva reseña
-                const newReview = {
-                    id: Date.now(),
-                    author: nombre,
-                    date: 'Ahora mismo',
-                    rating: rating,
-                    comment: comentario
-                };
-                
-                // Agregar a la lista de reseñas (al final)
-                reviews.push(newReview);
-                
-                // Actualizar estadísticas
-                updateStats(rating);
-                
-                // Actualizar la interfaz
-                updateInterface();
-                
-                // Limpiar el formulario
-                const comentarioInput = document.getElementById('comentario') as HTMLTextAreaElement;
-                if (comentarioInput) {
-                    comentarioInput.value = '';
+
+                // Deshabilitar el botón mientras se envía
+                const submitBtn = submitButton as HTMLButtonElement;
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Enviando...";
+
+                try {
+                    // Enviar reseña al backend
+                    const resultado = await enviarResena(
+                        comentario,
+                        rating,
+                        "1"
+                    );
+
+                    if (resultado) {
+                        // Recargar las reseñas desde el backend
+                        const resenasActualizadas = await cargarResenas();
+                        if (
+                            resenasActualizadas &&
+                            resenasActualizadas.length > 0
+                        ) {
+                            reviews = resenasActualizadas;
+                            updateInterface();
+                        }
+
+                        // Limpiar el formulario
+                        const comentarioInput = document.getElementById(
+                            "comentario"
+                        ) as HTMLTextAreaElement;
+                        if (comentarioInput) {
+                            comentarioInput.value = "";
+                        }
+                        rating = 0;
+                        updateStars();
+
+                        // Mostrar mensaje de éxito
+                        showSuccessMessage();
+
+                        // Hacer scroll a la sección de reseñas
+                        scrollToReviews();
+                    }
+                } catch (error) {
+                    console.error("Error al enviar reseña:", error);
+                    alert(
+                        "Error al enviar la reseña. Por favor intenta nuevamente."
+                    );
+                } finally {
+                    // Rehabilitar el botón
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML =
+                        'Enviar comentario <img src="../../public/actividades/send-line.svg" class="send-icon">';
                 }
-                rating = 0;
-                updateStars();
-                
-                // Mostrar mensaje de éxito
-                showSuccessMessage();
-                
-                // Hacer scroll a la sección de reseñas
-                scrollToReviews();
             });
         }
-        
+
         // Función para actualizar estadísticas con una nueva calificación
         function updateStats(newRating: number) {
             stats.totalReviews++;
-            
+
             // Recalcular promedio
-            const totalPoints = stats.averageRating * (stats.totalReviews - 1) + newRating;
+            const totalPoints =
+                stats.averageRating * (stats.totalReviews - 1) + newRating;
             stats.averageRating = totalPoints / stats.totalReviews;
-            
+
             // Actualizar distribución
             const ratingKey = String(newRating);
             const currentCount = stats.distribution[ratingKey] || 0;
-            const newPercentage = ((currentCount / 100 * (stats.totalReviews - 1)) + 1) / stats.totalReviews * 100;
+            const newPercentage =
+                (((currentCount / 100) * (stats.totalReviews - 1) + 1) /
+                    stats.totalReviews) *
+                100;
             stats.distribution[ratingKey] = Math.round(newPercentage);
-            
+
             // Ajustar los demás porcentajes
             let total = 0;
             for (let i = 1; i <= 5; i++) {
@@ -314,395 +504,489 @@ import Header from "../components/Header.astro";
                     total += stats.distribution[key] || 0;
                 }
             }
-            
-            const adjustment = (100 - stats.distribution[ratingKey]) / (total || 1);
+
+            const adjustment =
+                (100 - stats.distribution[ratingKey]) / (total || 1);
             for (let i = 1; i <= 5; i++) {
                 const key = String(i);
                 if (key !== ratingKey && stats.distribution[key]) {
-                    stats.distribution[key] = Math.round(stats.distribution[key] * adjustment);
+                    stats.distribution[key] = Math.round(
+                        stats.distribution[key] * adjustment
+                    );
                 }
             }
         }
-        
+
         // Actualizar la interfaz completa
         function updateInterface() {
             // Actualizar puntuación promedio
-            const ratingNumber = document.querySelector('.rating-number');
+            const ratingNumber = document.querySelector(".rating-number");
             if (ratingNumber) {
                 ratingNumber.textContent = stats.averageRating.toFixed(1);
             }
-            
+
             // Actualizar estrellas
-            const starsRating = document.querySelector('.stars-rating');
+            const starsRating = document.querySelector(".stars-rating");
             if (starsRating) {
                 const fullStars = Math.floor(stats.averageRating);
                 const hasHalfStar = stats.averageRating - fullStars >= 0.5;
-                
-                const stars = starsRating.querySelectorAll('.star');
+
+                const stars = starsRating.querySelectorAll(".star");
                 stars.forEach((star, i) => {
-                    star.className = 'star';
+                    star.className = "star";
                     if (i < fullStars) {
-                        star.classList.add('filled');
+                        star.classList.add("filled");
                     } else if (i === fullStars && hasHalfStar) {
-                        star.classList.add('half-filled');
+                        star.classList.add("half-filled");
                     }
                 });
             }
 
             // Limpiar reseñas existentes
-            const opinionsSection = document.querySelector('.opiniones-section');
+            const opinionsSection =
+                document.querySelector(".opiniones-section");
             if (opinionsSection) {
-                const existingReviews = opinionsSection.querySelectorAll('.review-example');
-                existingReviews.forEach(review => review.remove());
-                
+                const existingReviews =
+                    opinionsSection.querySelectorAll(".review-example");
+                existingReviews.forEach((review) => review.remove());
+
                 // Agregar reseñas
-                const ratingSummary = document.querySelector('.rating-summary');
-                
+                const ratingSummary = document.querySelector(".rating-summary");
+
                 // Mostrar las reseñas en orden (las más recientes al final)
-                reviews.forEach(review => {
-                    const reviewElement = document.createElement('div');
-                    reviewElement.className = 'review-example';
-                    
+                reviews.forEach((review) => {
+                    const reviewElement = document.createElement("div");
+                    reviewElement.className = "review-example";
+
                     // Crear cabecera con autor y estrellas
-                    const reviewHeader = document.createElement('div');
-                    reviewHeader.className = 'review-header';
-                    
+                    const reviewHeader = document.createElement("div");
+                    reviewHeader.className = "review-header";
+
                     // Info de usuario y fecha
-                    const authorSpan = document.createElement('span');
-                    authorSpan.className = 'review-author';
+                    const authorSpan = document.createElement("span");
+                    authorSpan.className = "review-author";
                     authorSpan.textContent = `${review.author} - ${review.date}`;
                     reviewHeader.appendChild(authorSpan);
-                    
+
                     // Estrellas de la reseña
-                    const starsContainer = document.createElement('div');
-                    starsContainer.className = 'review-stars';
+                    const starsContainer = document.createElement("div");
+                    starsContainer.className = "review-stars";
                     for (let i = 0; i < 5; i++) {
-                        const star = document.createElement('span');
-                        star.className = 'star';
-                        star.textContent = '★';
+                        const star = document.createElement("span");
+                        star.className = "star";
+                        star.textContent = "★";
                         if (i < review.rating) {
-                            star.classList.add('filled');
+                            star.classList.add("filled");
                         }
                         starsContainer.appendChild(star);
                     }
                     reviewHeader.appendChild(starsContainer);
-                    
+
                     // Texto de la reseña
-                    const reviewText = document.createElement('p');
-                    reviewText.className = 'review-text';
+                    const reviewText = document.createElement("p");
+                    reviewText.className = "review-text";
                     reviewText.textContent = review.comment;
-                    
+
                     // Ensamblar todo
                     reviewElement.appendChild(reviewHeader);
                     reviewElement.appendChild(reviewText);
-                    
+
                     // Agregar al DOM después del resumen de calificaciones
                     if (ratingSummary && ratingSummary.nextSibling) {
-                        opinionsSection.insertBefore(reviewElement, ratingSummary.nextSibling);
+                        opinionsSection.insertBefore(
+                            reviewElement,
+                            ratingSummary.nextSibling
+                        );
                     } else {
                         opinionsSection.appendChild(reviewElement);
                     }
                 });
             }
         }
-        
+
         function scrollToReviews() {
-            const opinionsSection = document.querySelector('.opiniones-section');
+            const opinionsSection =
+                document.querySelector(".opiniones-section");
             if (opinionsSection) {
-                opinionsSection.scrollIntoView({ behavior: 'smooth' });
+                opinionsSection.scrollIntoView({ behavior: "smooth" });
             }
+        }
+
+        // Función para mostrar mensaje de éxito
+        function showSuccessMessage() {
+            // Crear elemento de mensaje
+            const messageElement = document.createElement("div");
+            messageElement.className = "success-message";
+            messageElement.innerHTML = `
+                <div class="success-content">
+                    <span class="success-icon">✓</span>
+                    <span class="success-text">¡Reseña enviada exitosamente!</span>
+                </div>
+            `;
+
+            // Agregar al DOM
+            document.body.appendChild(messageElement);
+
+            // Mostrar con animación
+            setTimeout(() => {
+                messageElement.classList.add("show");
+            }, 100);
+
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                messageElement.classList.remove("show");
+                setTimeout(() => {
+                    document.body.removeChild(messageElement);
+                }, 300);
+            }, 3000);
         }
     });
 </script>
 
 <style>
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f8faf7;
-    color: #222;
-}
-main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-}
-.title {
-    font-size: 60px;
-    margin-bottom: 1rem;
-    color: #1A513B;
-    text-align: center;
-    margin-bottom: 170px;
-}
-.cards-horizontal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-}
-.description {
-    font-size: 1.2rem;
-    color: black;
-    text-align: left;
-    margin-bottom: 2rem;
-    max-width: 600px;
-}
-.image {
-    width: 25%;
-    height: auto;
-    border-radius: 12px;
-    min-width: 180px;
-}
-.historia {
-    display: flex;
-    background: #eaf7f0;
-    border-radius: 12px;
-    padding: 2rem 1rem;
-    margin-top: 4rem;
-    margin-bottom: 2rem;
-    gap: 2rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-.historia-content {
-    flex: 2;
-    min-width: 220px;
-}
-.historia-content h3 {
-    margin-top: 0;
-    color: #2e6c4d;
-}
-.historia-mapa {
-    flex: 1;
-    min-width: 180px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-.subtitles {
-    font-size: 1.5rem;
-    color: #1A513B;
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-.section-title {
-    font-size: 1.8rem;
-    color: #1A513B;
-    margin-top: 3rem;
-    margin-bottom: 1.5rem;
-}
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f8faf7;
+        color: #222;
+    }
+    main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    .title {
+        font-size: 60px;
+        margin-bottom: 1rem;
+        color: #1a513b;
+        text-align: center;
+        margin-bottom: 170px;
+    }
+    .cards-horizontal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+    }
+    .description {
+        font-size: 1.2rem;
+        color: black;
+        text-align: left;
+        margin-bottom: 2rem;
+        max-width: 600px;
+    }
+    .image {
+        width: 25%;
+        height: auto;
+        border-radius: 12px;
+        min-width: 180px;
+    }
+    .historia {
+        display: flex;
+        background: #eaf7f0;
+        border-radius: 12px;
+        padding: 2rem 1rem;
+        margin-top: 4rem;
+        margin-bottom: 2rem;
+        gap: 2rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .historia-content {
+        flex: 2;
+        min-width: 220px;
+    }
+    .historia-content h3 {
+        margin-top: 0;
+        color: #2e6c4d;
+    }
+    .historia-mapa {
+        flex: 1;
+        min-width: 180px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .subtitles {
+        font-size: 1.5rem;
+        color: #1a513b;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+    .section-title {
+        font-size: 1.8rem;
+        color: #1a513b;
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+    }
 
-/* Sección para dejar reseñas */
-.resena-section {
-    background: #F5F7F4;
-    border-radius: 12px;
-    padding: 2rem;
-    margin: 3rem 0;
-}
-.resena-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-.rating-section {
-    flex: 1;
-    min-width: 200px;
-}
-.comentario-section {
-    flex: 2;
-    min-width: 300px;
-}
-.stars {
-    display: flex;
-    gap: 0.3rem;
-}
-.star {
-    font-size: 2.5rem;
-    color: #FFD700;
-    cursor: pointer;
-}
-.star:hover, .star.active {
-    color: #FFD700;
-    filter: brightness(1.2);
-}
-textarea#comentario {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    resize: vertical;
-    min-height: 100px;
-    font-family: inherit;
-    font-size: 1rem;
-    background-color: #A9D9C3;
-    color: #4B5563;
-}
+    /* Sección para dejar reseñas */
+    .resena-section {
+        background: #f5f7f4;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 3rem 0;
+    }
+    .resena-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .rating-section {
+        flex: 1;
+        min-width: 200px;
+    }
+    .comentario-section {
+        flex: 2;
+        min-width: 300px;
+    }
+    .stars {
+        display: flex;
+        gap: 0.3rem;
+    }
+    .star {
+        font-size: 2.5rem;
+        color: #ffd700;
+        cursor: pointer;
+    }
+    .star:hover,
+    .star.active {
+        color: #ffd700;
+        filter: brightness(1.2);
+    }
+    textarea#comentario {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+        font-size: 1rem;
+        background-color: #a9d9c3;
+        color: #4b5563;
+    }
 
-/* Estilos para el placeholder */
-textarea#comentario::placeholder {
-    color: #4B5563;
-    opacity: 0.7;
-}
-.submit-button, .mensaje-button {
-    background: #1A513B;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-}
-.submit-button:hover, .mensaje-button:hover {
-    background: #14402E;
-}
-.button-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem;
-    margin-right: 1rem;
-}
-.button-container-center {
-    display: flex;
-    justify-content: center;
-    margin-top: 1.5rem;
-}
-.send-icon {
-    width: 20px;
-    height: 20px;
-    margin-left: 0.5rem;
-    filter: brightness(0) invert(1);
-}
+    /* Estilos para el placeholder */
+    textarea#comentario::placeholder {
+        color: #4b5563;
+        opacity: 0.7;
+    }
+    .submit-button,
+    .mensaje-button {
+        background: #1a513b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    .submit-button:hover,
+    .mensaje-button:hover {
+        background: #14402e;
+    }
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1rem;
+        margin-right: 1rem;
+    }
+    .button-container-center {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+    .send-icon {
+        width: 20px;
+        height: 20px;
+        margin-left: 0.5rem;
+        filter: brightness(0) invert(1);
+    }
 
-/* Sección de opiniones */
-.opiniones-section {
-    background: #F5F7F4;
-    border-radius: 12px;
-    padding: 2rem;
-    margin: 3rem 0;
-}
-.rating-summary {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-.rating-number {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #1A513B;
-}
-.stars-rating {
-    display: flex;
-    gap: 0.2rem;
-}
-.stars-rating .star {
-    font-size: 2rem;
-}
-.star.filled {
-    color: #FFD700;
-}
-.star.half-filled {
-    position: relative;
-    color: #ccc;
-}
-.star.half-filled::before {
-    content: '★';
-    position: absolute;
-    color: #FFD700;
-    width: 50%;
-    overflow: hidden;
-}
-.rating-stats {
-    flex: 1;
-    min-width: 250px;
-}
-.rating-bar {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-.rating-label {
-    width: 40px;
-    text-align: right;
-    margin-right: 1rem;
-}
-.bar-container {
-    flex: 1;
-    height: 10px;
-    background: #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-}
-.bar {
-    height: 100%;
-    background: #FFD700;
-}
-.review-example {
-    background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    color: #666;
-}
-.review-author {
-    font-weight: 500;
-}
-.review-stars {
-    display: flex;
-    gap: 4px;
-}
-.review-stars .star {
-    font-size: 1rem;
-    color: #ccc;
-}
-.review-stars .star.filled {
-    color: #FFD700;
-}
-.review-text {
-    line-height: 1.6;
-    color: #4B5563;
-    margin: 0;
-}
+    /* Sección de opiniones */
+    .opiniones-section {
+        background: #f5f7f4;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 3rem 0;
+    }
 
-/* Sección de contacto */
-.contacto-section {
-    background: #F5F7F4;
-    border-radius: 12px;
-    padding: 2.5rem 2rem;
-    margin: 3rem 0;
-    text-align: center;
-}
-.contacto-text {
-    max-width: 600px;
-    margin: 1rem auto;
-    color: #4B5563;
-}
-.success-message {
-    margin-top: 1rem;
-    padding: 0.8rem;
-    background-color: #c8f7d0;
-    color: #1A513B;
-    border-radius: 4px;
-    text-align: center;
-    animation: fadeOut 3s forwards;
-}
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    70% { opacity: 1; }
-    100% { opacity: 0; }
-}
+    /* Indicador de estado de conexión */
+    .connection-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .status-indicator {
+        font-size: 1.2rem;
+    }
+
+    .status-indicator.online {
+        color: #10b981;
+    }
+
+    .status-indicator.offline {
+        color: #ef4444;
+    }
+
+    .status-text {
+        color: #4b5563;
+        font-weight: 500;
+    }
+
+    .rating-summary {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    .rating-number {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #1a513b;
+    }
+    .stars-rating {
+        display: flex;
+        gap: 0.2rem;
+    }
+    .stars-rating .star {
+        font-size: 2rem;
+    }
+    .star.filled {
+        color: #ffd700;
+    }
+    .star.half-filled {
+        position: relative;
+        color: #ccc;
+    }
+    .star.half-filled::before {
+        content: "★";
+        position: absolute;
+        color: #ffd700;
+        width: 50%;
+        overflow: hidden;
+    }
+    .rating-stats {
+        flex: 1;
+        min-width: 250px;
+    }
+    .rating-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .rating-label {
+        width: 40px;
+        text-align: right;
+        margin-right: 1rem;
+    }
+    .bar-container {
+        flex: 1;
+        height: 10px;
+        background: #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .bar {
+        height: 100%;
+        background: #ffd700;
+    }
+    .review-example {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: #666;
+    }
+    .review-author {
+        font-weight: 500;
+    }
+    .review-stars {
+        display: flex;
+        gap: 4px;
+    }
+    .review-stars .star {
+        font-size: 1rem;
+        color: #ccc;
+    }
+    .review-stars .star.filled {
+        color: #ffd700;
+    }
+    .review-text {
+        line-height: 1.6;
+        color: #4b5563;
+        margin: 0;
+    }
+
+    /* Sección de contacto */
+    .contacto-section {
+        background: #f5f7f4;
+        border-radius: 12px;
+        padding: 2.5rem 2rem;
+        margin: 3rem 0;
+        text-align: center;
+    }
+    .contacto-text {
+        max-width: 600px;
+        margin: 1rem auto;
+        color: #4b5563;
+    }
+
+    /* Estilos para el mensaje de éxito */
+    .success-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .success-message.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .success-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .success-icon {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .success-text {
+        font-weight: 500;
+    }
 </style>
