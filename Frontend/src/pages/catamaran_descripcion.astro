@@ -48,9 +48,11 @@ import Header from "../components/Header.astro";
                 <textarea id="comentario" placeholder="Escribe tu opinion aqui"
                 ></textarea>
             </div>
+            <!-- Campo oculto para el ID del atractivo -->
+            <input type="hidden" id="atractivo-id" value="atr1" />
         </div>
         <div class="button-container">
-            <button class="submit-button"
+            <button class="submit-button" id="submit-review"
                 >Enviar comentario
                 <img
                     src="../../public/actividades/send-line.svg"
@@ -164,9 +166,17 @@ import Header from "../components/Header.astro";
         async function enviarResena(
             comentario: string,
             puntaje: number,
-            atractivoId = "1"
+            atractivoId = "atr1"  // Asegúrate de usar un ID de atractivo válido, con formato 'atrX'
         ) {
             try {
+                // Validar formato del ID del atractivo
+                if (!atractivoId.startsWith('atr')) {
+                    console.error(`ID de atractivo inválido: ${atractivoId}`);
+                    throw new Error("El ID de atractivo no tiene el formato correcto");
+                }
+                
+                console.log(`Enviando reseña para atractivo: ${atractivoId}`);
+                
                 // Intentar obtener el token de Clerk si está disponible
                 let authHeaders: Record<string, string> = {
                     "Content-Type": "application/json",
@@ -257,8 +267,16 @@ import Header from "../components/Header.astro";
         }
 
         // Función para cargar reseñas del backend
-        async function cargarResenas(atractivoId = "1") {
+        async function cargarResenas(atractivoId = "atr1") {
             try {
+                // Validar formato del ID
+                if (!atractivoId.startsWith('atr')) {
+                    console.error(`ID de atractivo inválido: ${atractivoId}`);
+                    throw new Error("El ID de atractivo no tiene el formato correcto");
+                }
+                
+                console.log(`Cargando reseñas para atractivo: ${atractivoId}`);
+                
                 const response = await fetch(
                     `${BACKEND_URL}/api/resenas/${atractivoId}`
                 );
@@ -276,6 +294,7 @@ import Header from "../components/Header.astro";
                 }
 
                 const data = await response.json();
+                console.log(`Se encontraron ${data.length} reseñas`);
 
                 return data.map((item: any) => ({
                     id: item.id,
@@ -405,41 +424,49 @@ import Header from "../components/Header.astro";
             }
         })();
 
-        const submitButton = document.querySelector(".submit-button");
-        if (submitButton) {
-            submitButton.addEventListener("click", async () => {
-                const comentarioElement = document.getElementById("comentario");
-                if (!comentarioElement) return;
-
-                const comentario = (
-                    comentarioElement as HTMLTextAreaElement
-                ).value.trim();
-
+        // Conectar el botón de enviar reseña
+        const submitBtn = document.querySelector("#submit-review") as HTMLButtonElement;
+        if (submitBtn) {
+            submitBtn.addEventListener("click", async () => {
+                const comentarioInput = document.getElementById(
+                    "comentario"
+                ) as HTMLTextAreaElement;
+                
+                // Obtener el ID de atractivo desde el campo oculto
+                const atractivoIdElement = document.getElementById(
+                    "atractivo-id"
+                ) as HTMLInputElement;
+                
+                // Verificar que tenemos una calificación y un comentario
                 if (rating === 0) {
-                    alert("Por favor selecciona una calificación");
-                    return;
-                }
-                if (!comentario) {
-                    alert("Por favor escribe un comentario");
+                    alert("Por favor, selecciona una calificación");
                     return;
                 }
 
+                const comentario = comentarioInput?.value.trim();
+                if (!comentario) {
+                    alert("Por favor, escribe un comentario");
+                    return;
+                }
+                
+                // Obtener el ID de atractivo
+                const atractivoId = atractivoIdElement?.value || "atr1";
+                
                 // Deshabilitar el botón mientras se envía
-                const submitBtn = submitButton as HTMLButtonElement;
                 submitBtn.disabled = true;
-                submitBtn.textContent = "Enviando...";
+                submitBtn.innerHTML = 'Enviando...';
 
                 try {
                     // Enviar reseña al backend
                     const resultado = await enviarResena(
                         comentario,
                         rating,
-                        "1"
+                        atractivoId
                     );
 
                     if (resultado) {
                         // Recargar las reseñas desde el backend
-                        const resenasActualizadas = await cargarResenas();
+                        const resenasActualizadas = await cargarResenas(atractivoId);
                         if (
                             resenasActualizadas &&
                             resenasActualizadas.length > 0
@@ -449,9 +476,6 @@ import Header from "../components/Header.astro";
                         }
 
                         // Limpiar el formulario
-                        const comentarioInput = document.getElementById(
-                            "comentario"
-                        ) as HTMLTextAreaElement;
                         if (comentarioInput) {
                             comentarioInput.value = "";
                         }

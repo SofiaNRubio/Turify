@@ -42,6 +42,7 @@ if (Astro.request.method === "POST") {
         nombre: formData.get('nombre'),
         descripcion: formData.get('descripcion'),
         categoria_id: formData.get('categoria_id'),
+        tipo: formData.get('tipo'), // Tipo de atractivo para clasificarlo en el frontend
         latitud: parseFloat(formData.get('latitud')?.toString() || '0'),
         longitud: parseFloat(formData.get('longitud')?.toString() || '0'),
         direccion: formData.get('direccion')
@@ -312,6 +313,10 @@ if (paso === '2' && empresa_id) {
                     <option value={cat.id}>{cat.nombre}</option>
                   ))}
                 </select>
+              </label>
+              <label>
+                Tipo:
+                <input type="text" name="tipo" placeholder="Ej: Aventura, Cultural, etc." required>
               </label>
               <div class="form-row">
                 <label>

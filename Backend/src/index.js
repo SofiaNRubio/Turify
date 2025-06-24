@@ -40,6 +40,7 @@ app.use("/api/admin/usuarios", usuariosRouter);
 app.use("/api/rutas", rutas);
 app.use("/api/favoritos", favoritos);
 app.use("/api/resenas", resenasRoutes);
+
 // Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -10,6 +10,33 @@ const router = express.Router();
  *   description: Endpoints para gestionar atractivos turísticos
  */
 
+// Asegurarse de que la tabla tenga la columna 'tipo'
+router.use(async (req, res, next) => {
+    try {
+        // Verificar si la tabla atractivos existe y tiene la columna 'tipo'
+        const result = await db.execute({
+            sql: "PRAGMA table_info(atractivos)"
+        });
+        
+        // Verificar si la columna 'tipo' existe
+        const tipoColumnExists = result.rows.some(row => row.name === 'tipo');
+        
+        if (!tipoColumnExists) {
+            console.log("La columna 'tipo' no existe en la tabla 'atractivos'. Añadiéndola...");
+            await db.execute({
+                sql: "ALTER TABLE atractivos ADD COLUMN tipo TEXT"
+            });
+            console.log("Columna 'tipo' añadida correctamente.");
+        }
+        
+        next();
+    } catch (err) {
+        console.error("Error al verificar/crear la columna 'tipo':", err);
+        // Continuamos con la ejecución aunque haya fallado la verificación
+        next();
+    }
+});
+
 /**
  * @swagger
  * /api/atractivos:
@@ -45,6 +72,9 @@ const router = express.Router();
  *                 type: number
  *               direccion:
  *                 type: string
+ *               tipo:
+ *                 type: string
+ *                 description: Tipo de atractivo (actividades, bodegas, naturaleza, social, etc.)
  *     responses:
  *       201:
  *         description: Atractivo creado exitosamente
@@ -60,6 +90,7 @@ router.post("/", async (req, res) => {
         latitud,
         longitud,
         direccion,
+        tipo, // Añadido el campo tipo
     } = req.body;    try {
         // Primero, intentamos crear una tabla de seguimiento de IDs si no existe
         try {
@@ -132,8 +163,8 @@ router.post("/", async (req, res) => {
         }        // Insertar el atractivo
         await db.execute({
             sql: `INSERT INTO atractivos 
-            (id, nombre, descripcion, empresa_id, categoria_id, latitud, longitud, direccion)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            (id, nombre, descripcion, empresa_id, categoria_id, latitud, longitud, direccion, tipo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 id,
                 nombre,
@@ -143,6 +174,7 @@ router.post("/", async (req, res) => {
                 latitud,
                 longitud,
                 direccion,
+                req.body.tipo || 'otros', // Asegurarnos de que se guarde el tipo
             ],
         });
         
@@ -331,6 +363,9 @@ router.get("/:id", async (req, res) => {
  *                 type: number
  *               direccion:
  *                 type: string
+ *               tipo:
+ *                 type: string
+ *                 description: Tipo de atractivo (actividades, bodegas, naturaleza, social, etc.)
  *     responses:
  *       200:
  *         description: Atractivo actualizado exitosamente
@@ -349,6 +384,7 @@ router.put("/:id", async (req, res) => {
         latitud,
         longitud,
         direccion,
+        tipo, // Añadido el campo tipo
     } = req.body;
 
     try {
@@ -360,7 +396,8 @@ router.put("/:id", async (req, res) => {
                 categoria_id = ?, 
                 latitud = ?, 
                 longitud = ?, 
-                direccion = ?
+                direccion = ?,
+                tipo = ?
                 WHERE id = ?`,
             args: [
                 nombre,
@@ -370,6 +407,7 @@ router.put("/:id", async (req, res) => {
                 latitud,
                 longitud,
                 direccion,
+                req.body.tipo || 'otros', // Mantener el tipo al actualizar
                 id,
             ],
         });
