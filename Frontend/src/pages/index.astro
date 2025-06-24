@@ -36,7 +36,7 @@ const { title } = Astro.props;
                 </div>
                 <div class="cards">
                     <div class="card">
-                        <a href="/actividades_aire_libre" style="text-decoration: none; color: inherit; display: block;">
+                        
                             <img src="/actividades/airelibre.jpg" alt="Actividad 1"/>
                             <h4>Actividades al aire libre </h4>
                             <p>Aventura y adrenalina entre las montañas.</p>
@@ -44,19 +44,25 @@ const { title } = Astro.props;
                         
                     </div>
                     <div class="card">
-                        <img src="/actividades/gastronomia.jpg" alt="Actividad 2" />
-                        <h4>Gastronomía</h4>
-                        <p>Deleitate con la mejor comida de la región.</p>
+                        <a href="/actividades_disponibles/gastronomia_card/gastronomia" style="text-decoration: none; color: inherit; display: block;">
+                            <img src="/actividades/gastronomia.jpg" alt="Actividad 2" />
+                            <h4>Gastronomia</h4>
+                            <p>Deleitate con la mejor comida de la región.</p>
+                        </a>
                     </div>
                     <div class="card">
-                        <img src="/actividades/bodegas.jpg" alt="Actividad 3" />
-                        <h4>Bodegas</h4>
-                        <p>Los mejores vinos del país.</p>
+                        <a href="/actividades_disponibles/bodegas_card/bodegas" style="text-decoration: none; color: inherit; display: block;">
+                            <img src="/actividades/bodegas.jpg" alt="Actividad 3" />
+                            <h4>Bodegas</h4>
+                            <p>Los mejores vinos del país.</p>
+                        </a>
                     </div>
                     <div class="card">
-                        <img src="/actividades/espaciosociales.jpg" alt="Actividad 4" />
-                        <h4>Espacios Sociales</h4>
-                        <p>Disfrutá la ciudad sanrafaelina.</p>
+                        <a href="/actividades_disponibles/espacios_sociales_card/espacios_sociales" style="text-decoration: none; color: inherit; display: block;">
+                            <img src="/actividades/espaciosociales.jpg" alt="Actividad 4" />
+                            <h4>Espacios Sociales</h4>
+                            <p>Disfrutá la ciudad sanrafaelina.</p>
+                        </a>
                 </div>
             </section>
             <RecommendedCarousel />
