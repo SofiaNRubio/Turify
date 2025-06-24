@@ -8,12 +8,12 @@ import gestionRoutes from "./routes/gestion.js";
 import categoriasRoutes from "./routes/categorias.js";
 import rutasRoutes from "./routes/rutas.js";
 import usuariosRoutes from "./routes/usuarios.js";
-import resenasRouter from './api/admin/resenas.js';
-import estadisticasRouter from './api/admin/estadisticas.js';
-import usuariosRouter from './api/admin/usuarios.js';
-import rutas from './routes/rutas.js';
-import favoritos from './routes/favoritos.js';
-import reseñasRoutes from './pages/api/reseñas.js';
+import resenasRouter from "./api/admin/resenas.js";
+import estadisticasRouter from "./api/admin/estadisticas.js";
+import usuariosRouter from "./api/admin/usuarios.js";
+import rutas from "./routes/rutas.js";
+import favoritos from "./routes/favoritos.js";
+import resenasRoutes from "./pages/api/resenas.js";
 
 dotenv.config();
 
@@ -34,14 +34,14 @@ app.use("/api/atractivos", gestionRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/rutas", rutasRoutes);
 app.use("/api/usuarios", usuariosRoutes);
-app.use('/api/admin/resenas', resenasRouter);
-app.use('/api/admin/estadisticas', estadisticasRouter);
-app.use('/api/admin/usuarios', usuariosRouter);
-app.use('/api/rutas', rutas);
-app.use('/api/favoritos', favoritos);
-app.use('/api/reseñas', reseñasRoutes);
+app.use("/api/admin/resenas", resenasRouter);
+app.use("/api/admin/estadisticas", estadisticasRouter);
+app.use("/api/admin/usuarios", usuariosRouter);
+app.use("/api/rutas", rutas);
+app.use("/api/favoritos", favoritos);
+app.use("/api/resenas", resenasRoutes);
 // Servidor
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });
