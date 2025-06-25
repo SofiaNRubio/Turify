@@ -14,6 +14,7 @@ import usuariosRouter from "./api/admin/usuarios.js";
 import rutas from "./routes/rutas.js";
 import favoritos from "./routes/favoritos.js";
 import resenasRoutes from "./pages/api/resenas.js";
+import chatRoutes from "./routes/chat.js";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use("/api/admin/usuarios", usuariosRouter);
 app.use("/api/rutas", rutas);
 app.use("/api/favoritos", favoritos);
 app.use("/api/resenas", resenasRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Servidor
 const PORT = process.env.PORT || 3000;
