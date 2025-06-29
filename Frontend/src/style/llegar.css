@@ -3,7 +3,6 @@
 /* Llegar Component */
 .servicios-llegada {
     padding: 2.5rem 1.5rem;
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
 }
 
 .header-llegada {
@@ -460,4 +459,168 @@
 
 .card-llegada:not(:has(img)) .placeholder-imagen {
     display: flex;
+}
+
+/* HERO Y TÍTULO PRINCIPAL */
+.llegar-hero {
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.llegar-title {
+    font-size: 2.3rem;
+    color: #25644a;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+}
+
+.llegar-underline {
+    width: 60px;
+    height: 4px;
+    background: #25644a;
+    margin: 0 auto 0.5rem auto;
+    border-radius: 2px;
+}
+
+/* TARJETAS DE LLEGADA */
+.grid-llegada {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.card-llegada {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(60, 60, 60, 0.10);
+    overflow: hidden;
+    width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1.5px solid #e5e7eb;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card-llegada:hover {
+    box-shadow: 0 8px 24px rgba(60, 60, 60, 0.18);
+    transform: translateY(-4px) scale(1.03);
+}
+
+.card-llegada img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.card-content {
+    padding: 1.2rem 1rem 1.5rem 1rem;
+    text-align: center;
+    width: 100%;
+}
+
+.card-content h3 {
+    color: #25644a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-content .descripcion {
+    color: #444;
+    font-size: 0.98rem;
+    margin-bottom: 1.1rem;
+    display: block;
+}
+
+.ver-mas {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: #fff;
+    color: #25644a;
+    border: 1.5px solid #25644a;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+}
+
+.ver-mas:hover {
+    background: #25644a;
+    color: #fff;
+}
+
+/* SECCIÓN SUGERENCIAS */
+.llegar-sugerencias {
+    background: #b6e2d6;
+    padding: 2.5rem 1rem 2.5rem 1rem;
+    text-align: center;
+    border-radius: 0 0 12px 12px;
+    margin-top: 2.5rem;
+}
+
+.llegar-sugerencias h2 {
+    color: #25644a;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.llegar-sugerencias-desc {
+    color: #25644a;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.llegar-btn-hospedaje {
+    background: #25644a;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+    cursor: pointer;
+}
+
+.llegar-btn-hospedaje:hover {
+    background: #17422e;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .grid-llegada {
+        gap: 1.2rem;
+    }
+    .card-llegada {
+        width: 90vw;
+        max-width: 340px;
+    }
+}
+
+@media (max-width: 600px) {
+    .llegar-title {
+        font-size: 1.5rem;
+    }
+    .llegar-underline {
+        width: 36px;
+        height: 3px;
+    }
+    .llegar-sugerencias {
+        padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+    }
+    .card-content {
+        padding: 1rem 0.5rem 1.2rem 0.5rem;
+    }
 } 

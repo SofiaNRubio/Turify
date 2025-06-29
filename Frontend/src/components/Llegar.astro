@@ -145,10 +145,12 @@ categoriasConImagen.forEach((cat) => {
 
 <link rel="stylesheet" href="/src/style/llegar.css">
 
+<section class="llegar-hero">
+  <h1 class="llegar-title">Llegar a San Rafael</h1>
+  <div class="llegar-underline"></div>
+</section>
+
 <section class="servicios-llegada">
-    <div class="header-llegada">
-        <h2>Servicios de Llegada</h2>
-    </div>
     <div class="grid-llegada">
         {
             categoriasConImagen.map((categoria: CategoriaConImagen) => (
@@ -158,7 +160,7 @@ categoriasConImagen.forEach((cat) => {
                             src={categoria.imagen}
                             alt={categoria.nombre}
                             onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
-                            onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                            onload={`console.log('\u2713 Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
                         />
                     ) : null}
                     <div class="placeholder-imagen">
@@ -175,23 +177,25 @@ categoriasConImagen.forEach((cat) => {
                         </svg>
                     </div>
                     <div class="card-content">
-                        <span class="tipo-llegada">{categoria.nombre}</span>
                         <h3>{categoria.nombre}</h3>
-                        <p class="descripcion">
-                            Encuentra {categoria.empresasCount}{" "}
-                            {categoria.empresasCount === 1
-                                ? "servicio"
-                                : "servicios"}{" "}
-                            de llegada disponibles.
-                        </p>
+                        <span class="descripcion">Pequeña Descripción</span>
                         <a
                             href={`/llegar?categoria=${categoria.id}`}
                             class="ver-mas">
-                            Ver servicios
+                            Ver Más
                         </a>
                     </div>
                 </div>
             ))
         }
     </div>
+</section>
+
+<section class="llegar-sugerencias">
+  <h2>¿No sabes a donde hospedarte? Click en el botón de abajo</h2>
+  <p class="llegar-sugerencias-desc">
+    Aquí tendrás distintas sugerencias sobre<br />
+    Albergues, Apart-Hoteles, Cabañas, Camping, Complejos, Departamentos, Hoteles, Hostels, Motel, Refugio o Viviendas
+  </p>
+  <a href="/hospedaje" class="llegar-btn-hospedaje">Hospedaje</a>
 </section> 
