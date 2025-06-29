@@ -76,11 +76,54 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Listar todas las empresas
-router.get("/", async (_req, res) => {
+// Obtener ubicaciones únicas
+router.get("/ubicaciones", async (req, res) => {
     try {
+        let sql = "SELECT DISTINCT direccion FROM empresas WHERE direccion IS NOT NULL AND direccion != ''";
+        const args = [];
+
+        // Filtrar por categoría si se proporciona
+        if (req.query.categoria_id) {
+            sql += " AND categoria_id = ?";
+            args.push(req.query.categoria_id);
+        }
+
+        sql += " ORDER BY direccion";
+
         const result = await db.execute({
-            sql: "SELECT * FROM empresas",
+            sql: sql,
+            args: args,
+        });
+
+        const ubicaciones = result.rows
+            .map(row => row.direccion)
+            .filter(direccion => direccion && direccion.trim() !== '');
+
+        res.json(ubicaciones);
+    } catch (err) {
+        console.error("Error al obtener ubicaciones:", err);
+        res.status(500).json({ error: "Error al obtener ubicaciones" });
+    }
+});
+
+// Listar todas las empresas
+router.get("/", async (req, res) => {
+    try {
+        let sql = "SELECT * FROM empresas WHERE 1=1";
+        const args = [];
+
+        // Filtrar por ubicación si se proporciona
+        if (req.query.ubicacion) {
+            sql += " AND direccion LIKE ?";
+            args.push(`%${req.query.ubicacion}%`);
+        }
+
+        // Ordenar por nombre
+        sql += " ORDER BY nombre";
+
+        const result = await db.execute({
+            sql: sql,
+            args: args,
         });
         res.json(result.rows);
     } catch (err) {

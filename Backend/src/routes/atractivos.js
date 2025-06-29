@@ -13,6 +13,47 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api/atractivos/ubicaciones:
+ *   get:
+ *     summary: Obtiene todas las ubicaciones únicas disponibles
+ *     tags: [Atractivos]
+ *     responses:
+ *       200:
+ *         description: Lista de ubicaciones únicas
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/ubicaciones", async (req, res) => {
+    try {
+        let sql = "SELECT DISTINCT direccion FROM atractivos WHERE direccion IS NOT NULL AND direccion != ''";
+        const args = [];
+
+        // Filtrar por categoría si se proporciona
+        if (req.query.categoria_id) {
+            sql += " AND categoria_id = ?";
+            args.push(req.query.categoria_id);
+        }
+
+        sql += " ORDER BY direccion";
+
+        const result = await db.execute({
+            sql: sql,
+            args: args,
+        });
+
+        const ubicaciones = result.rows
+            .map(row => row.direccion)
+            .filter(direccion => direccion && direccion.trim() !== '');
+
+        res.json(ubicaciones);
+    } catch (err) {
+        console.error("Error al obtener ubicaciones:", err);
+        res.status(500).json({ error: "Error al obtener ubicaciones" });
+    }
+});
+
+/**
+ * @swagger
  * /api/atractivos:
  *   get:
  *     summary: Obtiene todos los atractivos
@@ -33,6 +74,11 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Filtrar por nombre del atractivo
+ *       - in: query
+ *         name: ubicacion
+ *         schema:
+ *           type: string
+ *         description: Filtrar por ubicación/dirección
  *     responses:
  *       200:
  *         description: Lista de atractivos
@@ -60,6 +106,12 @@ router.get("/", async (req, res) => {
         if (req.query.nombre) {
             sql += " AND nombre LIKE ?";
             args.push(`%${req.query.nombre}%`);
+        }
+
+        // Filtrar por ubicación si se proporciona
+        if (req.query.ubicacion) {
+            sql += " AND direccion LIKE ?";
+            args.push(`%${req.query.ubicacion}%`);
         }
 
         // Ordenar por fecha de creación
