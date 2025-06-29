@@ -194,21 +194,6 @@
     margin-right: auto;
 }
 
-.emergencias-section .btn-ver-todas {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: white;
-    text-decoration: none;
-    border-radius: 10px;
-    transition: all var(--transition-fast);
-    font-weight: 500;
-}
-
-.emergencias-section .btn-ver-todas:hover {
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-    transform: translateY(-2px);
-}
 
 .emergencias-section .no-empresas {
     text-align: center;

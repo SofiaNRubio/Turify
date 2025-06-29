@@ -1,11 +1,7 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
-import FiltroDistrito from "../components/FiltroUbicacion.astro";
-import getToken from "../utils/getToken";
+import Emergencias from "../components/Emergencias.astro";
 import { apiFetch } from "../utils/api";
-
-// Obtener el token de autenticación
-const token = getToken();
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -21,7 +17,6 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
-    distrito?: string;
 }
 
 interface Categoria {
@@ -29,287 +24,223 @@ interface Categoria {
     nombre: string;
 }
 
-// Función para obtener las categorías desde el backend
-async function obtenerCategorias(): Promise<Categoria[]> {
-    try {
-        const response = await apiFetch("/categorias");
-        if (!response.ok) {
-            throw new Error("Error al obtener categorías");
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error al obtener categorías:", error);
-        return [];
-    }
-}
-
-// Función para obtener las empresas desde el backend
-async function obtenerEmpresas(): Promise<Empresa[]> {
-    try {
-        const response = await apiFetch("/empresas");
-        if (!response.ok) {
-            throw new Error("Error al obtener empresas");
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error al obtener empresas:", error);
-        return [];
-    }
-}
-
-// Función para obtener los distritos únicos filtrados por categoría
-async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
-    try {
-        let endpoint = "/empresas/distritos";
-        if (categoriaId) {
-            endpoint += `?categoria_id=${categoriaId}`;
-        }
-        const response = await apiFetch(endpoint);
-        if (!response.ok) {
-            throw new Error("Error al obtener distritos");
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error al obtener distritos:", error);
-        return [];
-    }
-}
-
-// Obtener datos
-const categorias = await obtenerCategorias();
-const empresas = await obtenerEmpresas();
-
-// Definir categorías de emergencia
-const categoriasEmergencia = [
-    "cuartel de bomberos",
-    "hospital",
-    "emergencias",
-    "policía",
-    "policia",
-    "ambulancia",
-];
-
-// Filtrar solo las categorías de emergencia
-const categoriasEmergenciaFiltradas = categorias.filter((categoria) =>
-    categoriasEmergencia.some((emergencia) =>
-        categoria.nombre.toLowerCase().includes(emergencia)
-    )
-);
-
 // Obtener parámetros de la URL
 const url = new URL(Astro.request.url);
-const categoriaId = url.searchParams.get("categoria");
+const categoriaId = url.searchParams.get('categoria');
 
-// Obtener distritos filtrados por categoría de emergencia
-const distritos = await obtenerDistritos(categoriaId || undefined);
+// Si hay un parámetro de categoría, obtener los servicios filtrados
+let serviciosFiltrados: Empresa[] = [];
+let categoriaSeleccionada: Categoria | null = null;
 
-// Filtrar empresas por categoría de emergencia
-let empresasFiltradas = empresas.filter((empresa) => {
-    if (!empresa.categoria_id) return false;
-    
-    const categoria = categoriasEmergenciaFiltradas.find(
-        (cat) => cat.id === empresa.categoria_id
-    );
-    return categoria !== undefined;
-});
-
-// Filtrar por categoría específica si se especifica
 if (categoriaId) {
-    empresasFiltradas = empresasFiltradas.filter(
-        (empresa) => empresa.categoria_id === categoriaId
-    );
-}
+    try {
+        // Obtener la categoría
+        const responseCategoria = await apiFetch(`/categorias/${categoriaId}`);
+        if (responseCategoria.ok) {
+            categoriaSeleccionada = await responseCategoria.json();
+        }
 
-// Filtrar por distrito si se especifica
-const distritoFiltro = url.searchParams.get("distrito");
-const distritosSeleccionados = distritoFiltro
-  ? distritoFiltro.split(",")
-  : [];
-if (distritosSeleccionados.length > 0) {
-    empresasFiltradas = empresasFiltradas.filter((empresa) =>
-        distritosSeleccionados.some((d) => empresa.distrito && empresa.distrito.toLowerCase().includes(d.toLowerCase()))
-    );
+        // Obtener todas las empresas
+        const responseEmpresas = await apiFetch("/empresas");
+        if (responseEmpresas.ok) {
+            const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
+            serviciosFiltrados = todasLasEmpresas.filter(
+                empresa => empresa.categoria_id === categoriaId
+            );
+        }
+    } catch (error) {
+        console.error("Error al obtener servicios filtrados:", error);
+    }
 }
-
-// Obtener información de la categoría si se filtra
-const categoriaSeleccionada = categoriaId
-    ? categoriasEmergenciaFiltradas.find((cat) => cat.id === categoriaId)
-    : null;
 ---
 
-<link rel="stylesheet" href="/src/style/emergencias.css">
-
-<MainLayout title="Servicios de Emergencia - Turify">
-    <section class="emergencias-section">
-        <div class="container">
-            <div class="header">
-                <h1>
-                    {categoriaSeleccionada
-                        ? `Servicios de ${categoriaSeleccionada.nombre}`
-                        : "Servicios de Emergencia"}
-                </h1>
-                <p class="subtitle">
-                    {categoriaSeleccionada
-                        ? `Encuentra servicios de ${categoriaSeleccionada.nombre.toLowerCase()} en San Rafael`
-                        : "Acceso rápido a todos los servicios de emergencia disponibles en San Rafael, Mendoza"}
-                </p>
-                {categoriaSeleccionada && (
-                    <a href="/emergencias" class="btn-ver-todas">Ver todos los servicios de emergencia</a>
-                )}
+<MainLayout>
+    {categoriaId && categoriaSeleccionada ? (
+        <div class="servicios-filtrados">
+            <div class="header-emergencia">
+                <a href="/emergencias" class="volver-btn">
+                    ← Volver a servicios de emergencia
+                </a>
+                <h2>Servicios de {categoriaSeleccionada.nombre}</h2>
             </div>
-
-            {/* Filtro de distrito */}
-            {distritos.length > 0 && (
-                <FiltroDistrito 
-                    distritos={distritos}
-                    distritoSeleccionado={distritosSeleccionados}
-                    placeholder="Filtrar por distrito..."
-                />
-            )}
-
-            {empresasFiltradas.length === 0 ? (
-                <div class="no-empresas">
-                    <h3>No se encontraron servicios de emergencia</h3>
-                    <p>
-                        {categoriaSeleccionada
-                            ? `No hay servicios registrados en la categoría "${categoriaSeleccionada.nombre}"`
-                            : distritoFiltro
-                            ? `No hay servicios de emergencia en el distrito "${distritoFiltro}"`
-                            : "No hay servicios de emergencia registrados en este momento"}
-                    </p>
-                    <a href="/emergencias" class="btn-volver">Volver a todos los servicios</a>
+            
+            {serviciosFiltrados.length > 0 ? (
+                <div class="grid-servicios">
+                    {serviciosFiltrados.map((servicio: Empresa) => (
+                        <div class="card-servicio">
+                            {servicio.img_url && (
+                                <img 
+                                    src={servicio.img_url} 
+                                    alt={servicio.nombre}
+                                    class="imagen-servicio"
+                                />
+                            )}
+                            <div class="card-content">
+                                <h3>{servicio.nombre}</h3>
+                                {servicio.descripcion && (
+                                    <p class="descripcion">{servicio.descripcion}</p>
+                                )}
+                                <div class="info-contacto">
+                                    {servicio.direccion && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#dc2626" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                            </svg>
+                                            {servicio.direccion}
+                                        </div>
+                                    )}
+                                    {servicio.telefono && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#14532d" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+                                            </svg>
+                                            {servicio.telefono}
+                                        </div>
+                                    )}
+                                    {servicio.email && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#14532d" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                                            </svg>
+                                            {servicio.email}
+                                        </div>
+                                    )}
+                                </div>
+                                {servicio.sitio_web && (
+                                    <a href={servicio.sitio_web} target="_blank" rel="noopener noreferrer" class="sitio-web">
+                                        Visitar sitio web
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : (
-                <div class="empresas-grid">
-                    {empresasFiltradas.map((empresa) => {
-                        const categoria = categoriasEmergenciaFiltradas.find(
-                            (cat) => cat.id === empresa.categoria_id
-                        );
-                        return (
-                            <div 
-                                class="empresa-card emergencia-card"
-                                data-direccion={empresa.direccion}
-                                data-categoria-id={empresa.categoria_id}
-                            >
-                                <div class="imagen-container">
-                                    {empresa.img_url ? (
-                                        <img
-                                            src={empresa.img_url}
-                                            alt={empresa.nombre}
-                                            onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"
-                                        />
-                                    ) : null}
-                                    <div class="placeholder">
-                                        <svg
-                                            width="60"
-                                            height="60"
-                                            viewBox="0 0 60 60"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <rect
-                                                width="60"
-                                                height="60"
-                                                rx="12"
-                                                fill="#fef2f2"
-                                            />
-                                            <path
-                                                d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                                fill="#dc2626"
-                                            />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div class="card-content">
-                                    {categoria && (
-                                        <span class="badge-categoria emergencia-badge">
-                                            {categoria.nombre}
-                                        </span>
-                                    )}
-                                    <h3>{empresa.nombre}</h3>
-                                    {empresa.descripcion && (
-                                        <p class="descripcion">
-                                            {empresa.descripcion}
-                                        </p>
-                                    )}
-                                    <div class="info-empresa">
-                                        {empresa.direccion && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
-                                                        fill="currentColor"
-                                                    />
-                                                </svg>
-                                                <span>{empresa.direccion}</span>
-                                            </div>
-                                        )}
-                                        {empresa.telefono && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M6.62 10.79C8.06 12.21 9.77 13.92 11.19 15.35L12.61 13.93C12.83 13.71 13.16 13.65 13.43 13.78C14.08 14.08 14.83 14.25 15.61 14.25C16.16 14.25 16.61 14.7 16.61 15.25V18.75C16.61 19.3 16.16 19.75 15.61 19.75C8.61 19.75 3 14.14 3 7.14C3 6.59 3.45 6.14 4 6.14H7.5C8.05 6.14 8.5 6.59 8.5 7.14C8.5 7.92 8.67 8.67 8.97 9.32C9.1 9.59 9.04 9.92 8.82 10.14L7.4 11.56L6.62 10.79Z"
-                                                        fill="currentColor"
-                                                    />
-                                                </svg>
-                                                <span>{empresa.telefono}</span>
-                                            </div>
-                                        )}
-                                        {empresa.email && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
-                                                        fill="currentColor"
-                                                    />
-                                                </svg>
-                                                <span>{empresa.email}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div class="acciones">
-                                        {empresa.telefono && (
-                                            <a
-                                                href={`tel:${empresa.telefono}`}
-                                                class="btn-llamar">
-                                                Llamar
-                                            </a>
-                                        )}
-                                        <a
-                                            href={`/empresas/${empresa.id}`}
-                                            class="btn-ver-detalle">
-                                            Ver detalles
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                <div class="no-servicios">
+                    <p>No se encontraron servicios de {categoriaSeleccionada.nombre} disponibles.</p>
                 </div>
             )}
         </div>
-    </section>
+    ) : (
+        <Emergencias />
+    )}
 </MainLayout>
 
-<script>
-  // Inicializar filtro al cargar la página
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM cargado, página de emergencias lista');
-  });
-  
-  console.log('Script de emergencias cargado');
-</script> 
+<style>
+    .servicios-filtrados {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .volver-btn {
+        display: inline-flex;
+        align-items: center;
+        color: #dc2626;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .volver-btn:hover {
+        color: #b91c1c;
+    }
+
+    .header-emergencia {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-emergencia h2 {
+        color: #dc2626;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .grid-servicios {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .card-servicio {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-servicio:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .imagen-servicio {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .card-content h3 {
+        color: #14532d;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+    }
+
+    .descripcion {
+        color: #666;
+        margin: 0 0 1rem 0;
+        line-height: 1.5;
+    }
+
+    .info-contacto {
+        margin-bottom: 1rem;
+    }
+
+    .ubicacion {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #333;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .sitio-web {
+        display: inline-block;
+        background: #dc2626;
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .sitio-web:hover {
+        background: #b91c1c;
+    }
+
+    .no-servicios {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    @media (max-width: 768px) {
+        .servicios-filtrados {
+            padding: 1rem;
+        }
+
+        .grid-servicios {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
