@@ -20,12 +20,10 @@
 
 .left {
     flex: 0 1 auto;
-    min-width: 220px;
 }
 
 .right {
     flex: 0 1 auto;
-    min-width: 220px;
     text-align: left;
     margin-bottom: 1rem;
 }
@@ -121,7 +119,6 @@
 
 .historia-content {
     flex: 2;
-    min-width: 220px;
 }
 
 .historia-content h3 {

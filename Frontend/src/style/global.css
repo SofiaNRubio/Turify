@@ -360,7 +360,6 @@ tr:nth-child(odd) {
   gap: var(--spacing-sm);
   align-items: center;
   white-space: nowrap;
-  min-width: 220px;
 }
 
 /* Estilos base para formularios */
