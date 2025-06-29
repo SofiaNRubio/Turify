@@ -1,6 +1,8 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
+import FiltroDistrito from "../components/FiltroUbicacion.astro";
 import getToken from "../utils/getToken";
+import { apiFetch } from "../utils/api";
 
 // Obtener el token de autenticación
 const token = getToken();
@@ -19,6 +21,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -29,7 +32,7 @@ interface Categoria {
 // Función para obtener las categorías desde el backend
 async function obtenerCategorias(): Promise<Categoria[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/categorias");
+        const response = await apiFetch("/categorias");
         if (!response.ok) {
             throw new Error("Error al obtener categorías");
         }
@@ -43,13 +46,31 @@ async function obtenerCategorias(): Promise<Categoria[]> {
 // Función para obtener las empresas desde el backend
 async function obtenerEmpresas(): Promise<Empresa[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/empresas");
+        const response = await apiFetch("/empresas");
         if (!response.ok) {
             throw new Error("Error al obtener empresas");
         }
         return await response.json();
     } catch (error) {
         console.error("Error al obtener empresas:", error);
+        return [];
+    }
+}
+
+// Función para obtener los distritos únicos filtrados por categoría
+async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
+    try {
+        let endpoint = "/empresas/distritos";
+        if (categoriaId) {
+            endpoint += `?categoria_id=${categoriaId}`;
+        }
+        const response = await apiFetch(endpoint);
+        if (!response.ok) {
+            throw new Error("Error al obtener distritos");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
         return [];
     }
 }
@@ -62,10 +83,24 @@ const empresas = await obtenerEmpresas();
 const url = new URL(Astro.request.url);
 const categoriaId = url.searchParams.get("categoria");
 
+// Obtener distritos filtrados por categoría
+const distritos = await obtenerDistritos(categoriaId || undefined);
+
 // Filtrar empresas por categoría si se especifica
-const empresasFiltradas = categoriaId
+let empresasFiltradas = categoriaId
     ? empresas.filter((empresa) => empresa.categoria_id === categoriaId)
     : empresas;
+
+// Filtrar por distrito si se especifica
+const distritoFiltro = url.searchParams.get("distrito");
+const distritosSeleccionados = distritoFiltro
+  ? distritoFiltro.split(",")
+  : [];
+if (distritosSeleccionados.length > 0) {
+    empresasFiltradas = empresasFiltradas.filter((empresa) =>
+        distritosSeleccionados.some((d) => empresa.distrito && empresa.distrito.toLowerCase().includes(d.toLowerCase()))
+    );
+}
 
 // Obtener información de la categoría si se filtra
 const categoriaSeleccionada = categoriaId
@@ -94,12 +129,23 @@ const categoriaSeleccionada = categoriaId
                 )}
             </div>
 
+            {/* Filtro de distrito */}
+            {distritos.length > 0 && (
+                <FiltroDistrito 
+                    distritos={distritos}
+                    distritoSeleccionado={distritosSeleccionados}
+                    placeholder="Filtrar por distrito..."
+                />
+            )}
+
             {empresasFiltradas.length === 0 ? (
                 <div class="no-empresas">
                     <h3>No se encontraron empresas</h3>
                     <p>
                         {categoriaSeleccionada
                             ? `No hay empresas registradas en la categoría "${categoriaSeleccionada.nombre}"`
+                            : distritoFiltro
+                            ? `No hay empresas en el distrito "${distritoFiltro}"`
                             : "No hay empresas registradas en este momento"}
                     </p>
                     <a href="/empresas" class="btn-volver">Volver a todas las empresas</a>
@@ -111,7 +157,11 @@ const categoriaSeleccionada = categoriaId
                             (cat) => cat.id === empresa.categoria_id
                         );
                         return (
-                            <div class="empresa-card">
+                            <div 
+                                class="empresa-card"
+                                data-direccion={empresa.direccion}
+                                data-categoria-id={empresa.categoria_id}
+                            >
                                 <div class="imagen-container">
                                     {empresa.img_url ? (
                                         <img
@@ -239,3 +289,12 @@ const categoriaSeleccionada = categoriaId
         </div>
     </section>
 </MainLayout>
+
+<script>
+  // Inicializar filtro al cargar la página
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM cargado, página lista');
+  });
+  
+  console.log('Script de empresas cargado');
+</script>

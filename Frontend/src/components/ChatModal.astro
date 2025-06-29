@@ -2,6 +2,7 @@
 // ChatModal.astro - Modal de chat flotante
 ---
 
+
 <link rel="stylesheet" href="/src/style/chat-modal.css">
 
 <div id="chat-modal" class="chat-modal hidden">
@@ -31,6 +32,7 @@
 <button id="chat-toggle" class="chat-toggle"> 💬 </button>
 
 <script is:inline>
+    import { apiFetch } from "../utils/api";
     document.addEventListener("DOMContentLoaded", function () {
         // Variables globales
         let messages = [];
@@ -212,19 +214,15 @@
                 showTypingIndicator();
 
                 try {
-                    const response = await fetch(
-                        "http://localhost:3000/api/chat",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                sessionId: sessionId,
-                                message: userMessage,
-                            }),
-                        }
-                    );
+                    const response = await apiFetch("POST", "/chat", {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            message: userMessage,
+                        }),
+                    });
 
                     const data = await response.json();
                     hideTypingIndicator();

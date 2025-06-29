@@ -1,5 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
+import FiltroUbicacion from "../../components/FiltroUbicacion.astro";
+import { apiFetch } from "../../utils/api";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -33,16 +35,17 @@ interface Atractivo {
     empresa_id: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito: string | null;
 }
 
 // Función para obtener las categorías desde el backend
 async function obtenerCategorias(): Promise<Categoria[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/categorias");
-        if (!response.ok) {
+        const categoriasResponse = await apiFetch("/categorias");
+        if (!categoriasResponse.ok) {
             throw new Error("Error al obtener categorías");
         }
-        return await response.json();
+        return await categoriasResponse.json();
     } catch (error) {
         console.error("Error al obtener categorías:", error);
         return [];
@@ -52,13 +55,11 @@ async function obtenerCategorias(): Promise<Categoria[]> {
 // Función para obtener una empresa por ID
 async function obtenerEmpresa(id: string): Promise<Empresa | null> {
     try {
-        const response = await fetch(
-            `http://localhost:3000/api/empresas/${id}`
-        );
-        if (!response.ok) {
+        const empresaResponse = await apiFetch(`/empresas/${id}`);
+        if (!empresaResponse.ok) {
             return null;
         }
-        return await response.json();
+        return await empresaResponse.json();
     } catch (error) {
         console.error("Error al obtener empresa:", error);
         return null;
@@ -68,11 +69,11 @@ async function obtenerEmpresa(id: string): Promise<Empresa | null> {
 // Función para obtener los atractivos de una empresa
 async function obtenerAtractivos(): Promise<Atractivo[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/atractivos");
-        if (!response.ok) {
+        const atractivosResponse = await apiFetch("/atractivos");
+        if (!atractivosResponse.ok) {
             throw new Error("Error al obtener atractivos");
         }
-        return await response.json();
+        return await atractivosResponse.json();
     } catch (error) {
         console.error("Error al obtener atractivos:", error);
         return [];
@@ -100,6 +101,22 @@ if (!empresa) {
 const atractivosEmpresa = todosLosAtractivos.filter(
     (atractivo) => atractivo.empresa_id === empresaId
 );
+
+// Obtener parámetros de la URL para el filtro de distrito
+const url = new URL(Astro.request.url);
+const distritoFiltro = url.searchParams.get("distrito");
+const distritosSeleccionados = distritoFiltro ? distritoFiltro.split(",") : [];
+
+// Obtener distritos únicos de los atractivos de la empresa
+const distritos = Array.from(new Set(atractivosEmpresa.map(a => a.distrito).filter((d): d is string => !!d)));
+
+// Filtrar atractivos por distrito si se especifica
+let atractivosFiltrados = atractivosEmpresa;
+if (distritosSeleccionados.length > 0) {
+    atractivosFiltrados = atractivosEmpresa.filter((atractivo) =>
+        distritosSeleccionados.some((d) => atractivo.distrito && atractivo.distrito.toLowerCase().includes(d.toLowerCase()))
+    );
+}
 
 // Función para obtener el nombre de la categoría
 function obtenerNombreCategoria(categoriaId: string | null): string {
@@ -258,11 +275,17 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
             <div class="atractivos-seccion">
                 <h2>
                     Atractivos de {empresa.nombre}
-                    <span class="count">({atractivosEmpresa.length})</span>
+                    <span class="count">({atractivosFiltrados.length})</span>
                 </h2>
-
+                {distritos.length > 0 && (
+                    <FiltroUbicacion 
+                        distritos={distritos}
+                        distritoSeleccionado={distritosSeleccionados}
+                        placeholder="Filtrar por distrito..."
+                    />
+                )}
                 {
-                    atractivosEmpresa.length === 0 ? (
+                    atractivosFiltrados.length === 0 ? (
                         <div class="no-atractivos">
                             <svg
                                 width="80"
@@ -290,7 +313,7 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                         </div>
                     ) : (
                         <div class="atractivos-grid">
-                            {atractivosEmpresa.map((atractivo: Atractivo) => (
+                            {atractivosFiltrados.map((atractivo: Atractivo) => (
                                 <div class="atractivo-card">
                                     <div class="imagen-atractivo">
                                         {atractivo.img_url ? (
@@ -332,7 +355,6 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                                             </svg>
                                         </div>
                                     </div>
-
                                     <div class="atractivo-content">
                                         <h3>{atractivo.nombre}</h3>
                                         <p class="descripcion">

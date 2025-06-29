@@ -1,6 +1,7 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
 
 // Obtener el ID de la empresa a editar
 const id = Astro.url.searchParams.get("id");
@@ -17,16 +18,12 @@ let mensaje = "";
 
 try {
     // Obtener categorías disponibles
-    const categoriasResponse = await fetch(
-        "http://localhost:3000/api/categorias"
-    );
+    const categoriasResponse = await apiFetch("/categorias");
     if (categoriasResponse.ok) {
         categorias = await categoriasResponse.json();
     }
 
-    const empresaResponse = await fetch(
-        `http://localhost:3000/api/empresas/${id}`
-    );
+    const empresaResponse = await apiFetch(`/empresas/${id}`);
 
     if (!empresaResponse.ok) {
         throw new Error("Empresa no encontrada");
@@ -46,6 +43,7 @@ try {
                 telefono: formData.get("telefono"),
                 sitio_web: formData.get("sitio_web"),
                 direccion: formData.get("direccion"),
+                distrito: formData.get("distrito"),
                 latitud: parseFloat(formData.get("latitud")?.toString() || "0"),
                 longitud: parseFloat(
                     formData.get("longitud")?.toString() || "0"
@@ -54,16 +52,13 @@ try {
                 categoria_id: formData.get("categoria_id"),
             };
 
-            const updateResponse = await fetch(
-                `http://localhost:3000/api/empresas/${id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(empresaActualizada),
-                }
-            );
+            const updateResponse = await apiFetch(`/empresas/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(empresaActualizada),
+            });
 
             if (!updateResponse.ok) {
                 throw new Error("Error al actualizar la empresa");
@@ -72,9 +67,7 @@ try {
             mensaje = "Empresa actualizada correctamente";
 
             // Actualizar los datos de la empresa para mostrar la info actualizada
-            const nuevaEmpresaResponse = await fetch(
-                `http://localhost:3000/api/empresas/${id}`
-            );
+            const nuevaEmpresaResponse = await apiFetch(`/empresas/${id}`);
             empresa = await nuevaEmpresaResponse.json();
             // Redirigir a la página de administración de atractivos después de un breve retraso
             return Astro.redirect("/admin/gestion");
@@ -232,6 +225,19 @@ if (!empresa) {
                             />
                         </label>
                     </div>
+
+                    <div class="form-section">
+                        <h3>Distrito</h3>
+                        <label>
+                            Distrito:
+                            <input
+                                type="text"
+                                name="distrito"
+                                value={empresa.distrito || ""}
+                            />
+                        </label>
+                    </div>
+
                     <div class="form-empresa-buttons">
                         <button type="submit" class="btn-nuevo">
                             Guardar cambios

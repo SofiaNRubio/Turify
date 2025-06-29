@@ -13,6 +13,32 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /api/atractivos/distritos:
+ *   get:
+ *     summary: Obtiene todas las ubicaciones únicas disponibles
+ *     tags: [Atractivos]
+ *     responses:
+ *       200:
+ *         description: Lista de ubicaciones únicas
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/distritos", async (req, res) => {
+    try {
+        let sql = "SELECT DISTINCT distrito FROM atractivos WHERE distrito IS NOT NULL AND distrito != ''";
+        const args = [];
+        sql += " ORDER BY distrito";
+        const result = await db.execute({ sql, args });
+        const distritos = result.rows.map(row => row.distrito).filter(d => d && d.trim() !== '');
+        res.json(distritos);
+    } catch (err) {
+        console.error("Error al obtener distritos:", err);
+        res.status(500).json({ error: "Error al obtener distritos" });
+    }
+});
+
+/**
+ * @swagger
  * /api/atractivos:
  *   get:
  *     summary: Obtiene todos los atractivos
@@ -33,6 +59,11 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Filtrar por nombre del atractivo
+ *       - in: query
+ *         name: distrito
+ *         schema:
+ *           type: string
+ *         description: Filtrar por distrito
  *     responses:
  *       200:
  *         description: Lista de atractivos
@@ -62,8 +93,14 @@ router.get("/", async (req, res) => {
             args.push(`%${req.query.nombre}%`);
         }
 
+        // Filtrar por distrito si se proporciona
+        if (req.query.distrito) {
+            sql += " AND distrito LIKE ?";
+            args.push(`%${req.query.distrito}%`);
+        }
+
         // Ordenar por fecha de creación
-        sql += " ORDER BY creado_en DESC";
+        sql += " ORDER BY created_at DESC";
 
         const result = await db.execute({
             sql: sql,
@@ -137,7 +174,7 @@ router.get("/:id", async (req, res) => {
  *               - categoria_id
  *               - latitud
  *               - longitud
- *               - direccion
+ *               - distrito
  *             properties:
  *               nombre:
  *                 type: string
@@ -151,7 +188,7 @@ router.get("/:id", async (req, res) => {
  *                 type: number
  *               longitud:
  *                 type: number
- *               direccion:
+ *               distrito:
  *                 type: string
  *               img_url:
  *                 type: string
@@ -172,6 +209,7 @@ router.post("/", async (req, res) => {
         latitud,
         longitud,
         direccion,
+        distrito,
         img_url,
     } = req.body;
 
@@ -182,7 +220,7 @@ router.post("/", async (req, res) => {
         !categoria_id ||
         !latitud ||
         !longitud ||
-        !direccion
+        !distrito
     ) {
         return res.status(400).json({ error: "Faltan campos requeridos" });
     }
@@ -191,8 +229,8 @@ router.post("/", async (req, res) => {
         // Generar un UUID único para el atractivo
         const id = uuidv4();
         await db.execute({
-            sql: `INSERT INTO atractivos (id, nombre, descripcion, empresa_id, categoria_id, latitud, longitud, direccion, img_url)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            sql: `INSERT INTO atractivos (id, nombre, descripcion, empresa_id, categoria_id, latitud, longitud, direccion, distrito, img_url)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 id,
                 nombre,
@@ -202,6 +240,7 @@ router.post("/", async (req, res) => {
                 latitud,
                 longitud,
                 direccion,
+                distrito,
                 img_url,
             ],
         });
@@ -250,6 +289,10 @@ router.post("/", async (req, res) => {
  *                 type: number
  *               direccion:
  *                 type: string
+ *               distrito:
+ *                 type: string
+ *               tipo:
+ *                 type: string
  *               img_url:
  *                 type: string
  *     responses:
@@ -270,6 +313,8 @@ router.put("/:id", async (req, res) => {
         latitud,
         longitud,
         direccion,
+        distrito,
+        tipo,
         img_url,
     } = req.body;
 
@@ -288,7 +333,7 @@ router.put("/:id", async (req, res) => {
         const result = await db.execute({
             sql: `UPDATE atractivos SET 
                   nombre = ?, descripcion = ?, empresa_id = ?, categoria_id = ?, 
-                  latitud = ?, longitud = ?, direccion = ?, img_url = ?
+                  latitud = ?, longitud = ?, direccion = ?, distrito = ?, tipo = ?, img_url = ?
                   WHERE id = ?`,
             args: [
                 nombre,
@@ -298,6 +343,8 @@ router.put("/:id", async (req, res) => {
                 latitud,
                 longitud,
                 direccion,
+                distrito,
+                tipo,
                 img_url,
                 id,
             ],

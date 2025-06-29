@@ -1,6 +1,7 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
 
 // Obtener el ID del atractivo a editar
 const id = Astro.url.searchParams.get("id");
@@ -17,9 +18,7 @@ let empresas: any[] = [];
 let categorias: any[] = [];
 
 try {
-    const atractivoResponse = await fetch(
-        `http://localhost:3000/api/atractivos/${id}`
-    );
+    const atractivoResponse = await apiFetch(`/atractivos/${id}`);
 
     if (!atractivoResponse.ok) {
         throw new Error("Atractivo no encontrado");
@@ -27,7 +26,7 @@ try {
 
     atractivo = await atractivoResponse.json();
     // Obtener empresas y categorías para los selectores
-    const empresasResponse = await fetch("http://localhost:3000/api/empresas");
+    const empresasResponse = await apiFetch("/empresas");
 
     if (empresasResponse.ok) {
         empresas = await empresasResponse.json();
@@ -37,9 +36,7 @@ try {
     }
 
     // Obtener las categorías reales de la API
-    const categoriasResponse = await fetch(
-        "http://localhost:3000/api/categorias"
-    );
+    const categoriasResponse = await apiFetch("/categorias");
 
     if (categoriasResponse.ok) {
         categorias = await categoriasResponse.json();
@@ -70,19 +67,17 @@ try {
                     formData.get("longitud")?.toString() || "0"
                 ),
                 direccion: formData.get("direccion"),
+                distrito: formData.get("distrito"),
                 img_url: formData.get("img_url"),
             };
 
-            const updateResponse = await fetch(
-                `http://localhost:3000/api/atractivos/${id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(atractivoActualizado),
-                }
-            );
+            const updateResponse = await apiFetch(`/atractivos/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(atractivoActualizado),
+            });
 
             if (!updateResponse.ok) {
                 throw new Error("Error al actualizar el atractivo");
@@ -90,9 +85,7 @@ try {
 
             mensaje = "Atractivo actualizado correctamente";
             // Actualizar los datos del atractivo para mostrar la info actualizada
-            const nuevoAtractivoResponse = await fetch(
-                `http://localhost:3000/api/atractivos/${id}`
-            );
+            const nuevoAtractivoResponse = await apiFetch(`/atractivos/${id}`);
             atractivo = await nuevoAtractivoResponse.json();
             // Redirigir a la página de administración de gestión después de actualizar exitosamente
             return Astro.redirect("/admin/gestion");
@@ -199,6 +192,14 @@ if (!atractivo) {
                                 Haz clic en "Subir Imagen" para seleccionar y
                                 subir una imagen a ImgBB automáticamente
                             </small>
+                        </label>
+                        <label>
+                            Distrito:
+                            <input
+                                type="text"
+                                name="distrito"
+                                value={atractivo.distrito || ""}
+                            />
                         </label>
                     </div>
 

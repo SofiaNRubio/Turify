@@ -1,6 +1,7 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
 
 // Obtener el ID de la ruta a editar
 const { searchParams } = Astro.url;
@@ -15,12 +16,12 @@ let ruta = null;
 let rutaAtractivos = [];
 
 try {
-  const rutaResponse = await fetch(`http://localhost:3000/api/rutas/${rutaId}`);
+  const rutaResponse = await apiFetch(`rutas/${rutaId}`);
   if (rutaResponse.ok) {
     ruta = await rutaResponse.json();
     
     // Obtener los atractivos de la ruta
-    const atractivosResponse = await fetch(`http://localhost:3000/api/rutas/${rutaId}/atractivos`);
+    const atractivosResponse = await apiFetch(`rutas/${rutaId}/atractivos`);
     if (atractivosResponse.ok) {
       rutaAtractivos = await atractivosResponse.json();
     }
@@ -36,7 +37,7 @@ try {
 // Obtener las empresas para el selector
 let empresas = [];
 try {
-  const response = await fetch('http://localhost:3000/api/empresas');
+  const response = await apiFetch('empresas');
   if (response.ok) {
     empresas = await response.json();
   } else {
@@ -61,7 +62,7 @@ try {
 // Obtener todos los atractivos disponibles
 let todosAtractivos = [];
 try {
-  const response = await fetch('http://localhost:3000/api/atractivos');
+  const response = await apiFetch('atractivos');
   if (response.ok) {
     todosAtractivos = await response.json();
   } else {
@@ -424,7 +425,7 @@ const atractivosDisponibles = todosAtractivos.filter(a => !atractivosSeleccionad
         };
         
         try {
-          const response = await fetch(`http://localhost:3000/api/rutas/${id}`, {
+          const response = await apiFetch(`rutas/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json'

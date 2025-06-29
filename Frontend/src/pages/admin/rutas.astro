@@ -1,13 +1,14 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
 const nombreFiltro = searchParams.get('nombre') || '';
 
 // Construir la URL de la API con los filtros
-let apiUrl = 'http://localhost:3000/api/rutas';
+let apiUrl = '/rutas';
 const filtros = [];
 if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
 if (filtros.length > 0) {
@@ -17,7 +18,7 @@ if (filtros.length > 0) {
 // Obtener rutas desde la API
 let rutas = [];
 try {
-  const response = await fetch(apiUrl);
+  const response = await apiFetch(apiUrl);
   if (response.ok) {
     rutas = await response.json();
     // Si no hay rutas desde la API, usar la ruta existente conocida
@@ -205,7 +206,7 @@ try {
         }
         
         try {
-          const response = await fetch(`http://localhost:3000/api/rutas/${currentId}`, {
+          const response = await apiFetch(`/rutas/${currentId}`, {
             method: 'DELETE'
           });
           

@@ -12,7 +12,7 @@ let error = null;
 
 if (id) {
   try {
-    const response = await fetch(`http://localhost:3000/api/categorias/${id}`);
+    const response = await apiFetch(`/categorias/${id}`);
     if (response.ok) {
       categoria = await response.json();
     } else {

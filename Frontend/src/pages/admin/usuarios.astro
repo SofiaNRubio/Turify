@@ -1,6 +1,7 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
@@ -8,7 +9,7 @@ const nombreFiltro = searchParams.get('nombre') || '';
 
 // Construir la URL de la API con los filtros
 // Usamos el endpoint específico para usuarios_locales
-let apiUrl = 'http://localhost:3000/api/usuarios/locales';
+let apiUrl = '/usuarios/locales';
 const filtros = [];
 if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
 if (filtros.length > 0) {
@@ -18,7 +19,7 @@ if (filtros.length > 0) {
 // Obtener usuarios desde la API
 let usuarios = [];
 try {
-  const response = await fetch(apiUrl);  
+  const response = await apiFetch(apiUrl);  
   if (response.ok) {
     usuarios = await response.json();
     console.log("Usuarios recibidos:", usuarios);
@@ -206,7 +207,7 @@ try {
           modalConfirmarEliminar.classList.add('hidden');
         }
           try {
-          const response = await fetch(`http://localhost:3000/api/usuarios/${currentId}`, {
+          const response = await apiFetch(`/usuarios/${currentId}`, {
             method: 'DELETE'
           });
           

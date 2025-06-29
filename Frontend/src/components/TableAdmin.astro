@@ -1,4 +1,5 @@
 ---
+import { apiFetch } from "../utils/api";
 // TableAdmin.astro - Componente reutilizable para tablas administrativas
 const { 
   titulo, 
@@ -186,7 +187,7 @@ const {
           
           // Cargar datos actuales del elemento
           try {
-            const response = await fetch(`http://localhost:3000/api/${tipoEntidad}/${currentId}`);
+            const response = await apiFetch(`${tipoEntidad}/${currentId}`);
             if (response.ok) {
               const item = await response.json();
               
@@ -235,7 +236,7 @@ const {
         }
         
         try {
-          const response = await fetch(`http://localhost:3000/api/${tipoEntidad}/${currentId}`, {
+          const response = await apiFetch(`${tipoEntidad}/${currentId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
@@ -294,7 +295,7 @@ const {
         modalConfirmarEliminar.classList.add('hidden');
         
         try {
-          const response = await fetch(`http://localhost:3000/api/${tipoEntidad}/${currentId}`, {
+          const response = await apiFetch(`${tipoEntidad}/${currentId}`, {
             method: 'DELETE'
           });
           

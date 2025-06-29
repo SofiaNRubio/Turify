@@ -34,8 +34,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // Rutas principales de la API
 app.use("/api/empresas", empresasRoutes);
-app.use("/api/busqueda", busquedaRoutes);
-app.use("/api/ubicaciones", ubicacionesRoutes);
 app.use("/api/atractivos", atractivosRoutes);
 app.use("/api/gestion", gestionRoutes); // Mantener gestion como endpoint separado si tiene funcionalidades adicionales
 app.use("/api/categorias", categoriasRoutes);
