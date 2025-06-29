@@ -10,33 +10,6 @@ const router = express.Router();
  *   description: Endpoints para gestionar atractivos turísticos
  */
 
-// Asegurarse de que la tabla tenga la columna 'tipo'
-router.use(async (req, res, next) => {
-    try {
-        // Verificar si la tabla atractivos existe y tiene la columna 'tipo'
-        const result = await db.execute({
-            sql: "PRAGMA table_info(atractivos)"
-        });
-        
-        // Verificar si la columna 'tipo' existe
-        const tipoColumnExists = result.rows.some(row => row.name === 'tipo');
-        
-        if (!tipoColumnExists) {
-            console.log("La columna 'tipo' no existe en la tabla 'atractivos'. Añadiéndola...");
-            await db.execute({
-                sql: "ALTER TABLE atractivos ADD COLUMN tipo TEXT"
-            });
-            console.log("Columna 'tipo' añadida correctamente.");
-        }
-        
-        next();
-    } catch (err) {
-        console.error("Error al verificar/crear la columna 'tipo':", err);
-        // Continuamos con la ejecución aunque haya fallado la verificación
-        next();
-    }
-});
-
 /**
  * @swagger
  * /api/atractivos:
@@ -72,9 +45,9 @@ router.use(async (req, res, next) => {
  *                 type: number
  *               direccion:
  *                 type: string
- *               tipo:
+ *               img_url:
  *                 type: string
- *                 description: Tipo de atractivo (actividades, bodegas, naturaleza, social, etc.)
+ *                 description: URL de la imagen del atractivo
  *     responses:
  *       201:
  *         description: Atractivo creado exitosamente
@@ -90,8 +63,9 @@ router.post("/", async (req, res) => {
         latitud,
         longitud,
         direccion,
-        tipo, // Añadido el campo tipo
-    } = req.body;    try {
+        img_url, // Cambiado de tipo a img_url según el esquema
+    } = req.body;
+    try {
         // Primero, intentamos crear una tabla de seguimiento de IDs si no existe
         try {
             await db.execute({
@@ -99,71 +73,75 @@ router.post("/", async (req, res) => {
                     tipo TEXT NOT NULL,
                     ultimo_numero INTEGER NOT NULL,
                     PRIMARY KEY (tipo)
-                )`
+                )`,
             });
         } catch (createErr) {
             console.error("Error al crear tabla de seguimiento:", createErr);
             // Continuamos con la ejecución aunque haya fallado la creación
         }
-        
+
         // Obtener el número más alto utilizado para atractivos
         let nextNum = 1;
-        
+
         // Primero verificamos en la tabla de seguimiento
         const trackingResult = await db.execute({
-            sql: "SELECT ultimo_numero FROM id_tracking WHERE tipo = 'atractivo'"
+            sql: "SELECT ultimo_numero FROM id_tracking WHERE tipo = 'atractivo'",
         });
-        
+
         if (trackingResult.rows.length > 0) {
             // Ya hay un registro de seguimiento, usamos ese número + 1
             nextNum = trackingResult.rows[0].ultimo_numero + 1;
         } else {
             // No hay registro en la tabla de seguimiento, buscamos en la tabla atractivos
             const lastIdResult = await db.execute({
-                sql: "SELECT id FROM atractivos WHERE id LIKE 'atr%' ORDER BY CAST(SUBSTR(id, 4) AS INTEGER) DESC LIMIT 1"
+                sql: "SELECT id FROM atractivos WHERE id LIKE 'atr%' ORDER BY CAST(SUBSTR(id, 4) AS INTEGER) DESC LIMIT 1",
             });
-            
+
             if (lastIdResult.rows.length > 0) {
                 const lastId = lastIdResult.rows[0].id;
-                const lastNum = parseInt(lastId.replace('atr', ''));
+                const lastNum = parseInt(lastId.replace("atr", ""));
                 nextNum = lastNum + 1;
             }
-            
+
             // Insertamos un registro inicial en la tabla de seguimiento
             await db.execute({
                 sql: "INSERT INTO id_tracking (tipo, ultimo_numero) VALUES (?, ?)",
-                args: ['atractivo', nextNum]
+                args: ["atractivo", nextNum],
             });
         }
-        
+
         const id = `atr${nextNum}`;
-        
+
         // Verificar si la empresa existe
         if (empresa_id) {
             const empresaResult = await db.execute({
                 sql: "SELECT id FROM empresas WHERE id = ?",
-                args: [empresa_id]
+                args: [empresa_id],
             });
-            
+
             if (empresaResult.rows.length === 0) {
-                return res.status(400).json({ error: "La empresa especificada no existe" });
+                return res
+                    .status(400)
+                    .json({ error: "La empresa especificada no existe" });
             }
         }
-        
+
         // Verificar si la categoría existe
         if (categoria_id) {
             const categoriaResult = await db.execute({
                 sql: "SELECT id FROM categorias WHERE id = ?",
-                args: [categoria_id]
+                args: [categoria_id],
             });
-            
+
             if (categoriaResult.rows.length === 0) {
-                return res.status(400).json({ error: "La categoría especificada no existe" });
+                return res
+                    .status(400)
+                    .json({ error: "La categoría especificada no existe" });
             }
-        }        // Insertar el atractivo
+        } // Insertar el atractivo
         await db.execute({
             sql: `INSERT INTO atractivos 
-            (id, nombre, descripcion, empresa_id, categoria_id, latitud, longitud, direccion, tipo)
+            (id, nombre, descripcion, empresa_id, categoria_id, latitud, longitud, direccion, img_url)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 id,
@@ -174,36 +152,37 @@ router.post("/", async (req, res) => {
                 latitud,
                 longitud,
                 direccion,
-                req.body.tipo || 'otros', // Asegurarnos de que se guarde el tipo
+                img_url,
             ],
         });
-        
+
         // Actualizamos el contador en la tabla de seguimiento
         await db.execute({
             sql: "UPDATE id_tracking SET ultimo_numero = ? WHERE tipo = ?",
-            args: [nextNum, 'atractivo']
+            args: [nextNum, "atractivo"],
         });
 
         // Retornar los datos del atractivo creado
-        res.status(201).json({ 
-            id, 
+        res.status(201).json({
+            id,
             nombre,
-            mensaje: "Atractivo creado exitosamente" 
-        });    } catch (err) {
+            mensaje: "Atractivo creado exitosamente",
+        });
+    } catch (err) {
         console.error("Error al crear atractivo:", err);
         // Verificar si es un error de base de datos y proporcionar más detalles
         if (err.code) {
             // Errores comunes de SQLite
-            if (err.code === 'SQLITE_CONSTRAINT') {
-                return res.status(400).json({ 
-                    error: "Error de restricción en la base de datos. Verifica que los IDs de referencia (empresa_id, categoria_id) sean válidos."
+            if (err.code === "SQLITE_CONSTRAINT") {
+                return res.status(400).json({
+                    error: "Error de restricción en la base de datos. Verifica que los IDs de referencia (empresa_id, categoria_id) sean válidos.",
                 });
             }
         }
-        
-        res.status(500).json({ 
+
+        res.status(500).json({
             error: "Error al crear atractivo",
-            detalles: err.message 
+            detalles: err.message,
         });
     }
 });
@@ -239,8 +218,9 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
     try {
         const { nombre, empresa_id, categoria_id } = req.query;
-        
-        let sql = "SELECT a.*, e.nombre as empresa_nombre, c.nombre as categoria_nombre FROM atractivos a LEFT JOIN empresas e ON a.empresa_id = e.id LEFT JOIN categorias c ON a.categoria_id = c.id";
+
+        let sql =
+            "SELECT a.*, e.nombre as empresa_nombre, c.nombre as categoria_nombre FROM atractivos a LEFT JOIN empresas e ON a.empresa_id = e.id LEFT JOIN categorias c ON a.categoria_id = c.id";
         const whereConditions = [];
         const args = [];
 
@@ -298,7 +278,7 @@ router.get("/", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
     const { id } = req.params;
-    
+
     try {
         const result = await db.execute({
             sql: `SELECT a.*, e.nombre as empresa_nombre, c.nombre as categoria_nombre 
@@ -407,7 +387,7 @@ router.put("/:id", async (req, res) => {
                 latitud,
                 longitud,
                 direccion,
-                req.body.tipo || 'otros', // Mantener el tipo al actualizar
+                req.body.tipo || "otros", // Mantener el tipo al actualizar
                 id,
             ],
         });
@@ -453,25 +433,25 @@ router.delete("/:id", async (req, res) => {
             sql: "DELETE FROM rutas_atractivos WHERE atractivo_id = ?",
             args: [id],
         });
-        
+
         // Eliminar reseñas relacionadas
         await db.execute({
             sql: "DELETE FROM reseñas WHERE atractivo_id = ?",
             args: [id],
         });
-        
+
         // Eliminar favoritos relacionados
         await db.execute({
             sql: "DELETE FROM favoritos WHERE atractivo_id = ?",
             args: [id],
         });
-        
+
         // Eliminar imágenes relacionadas
         await db.execute({
             sql: "DELETE FROM imagenes WHERE entidad_tipo = 'atractivo' AND entidad_id = ?",
             args: [id],
         });
-        
+
         // Finalmente eliminar el atractivo
         const result = await db.execute({
             sql: "DELETE FROM atractivos WHERE id = ?",
@@ -543,56 +523,70 @@ router.post("/validar", async (req, res) => {
             longitud,
             direccion,
         } = req.body;
-        
+
         // Validaciones básicas
-        if (!nombre || nombre.trim() === '') {
+        if (!nombre || nombre.trim() === "") {
             return res.status(400).json({ error: "El nombre es obligatorio" });
         }
-        
-        if (!descripcion || descripcion.trim() === '') {
-            return res.status(400).json({ error: "La descripción es obligatoria" });
+
+        if (!descripcion || descripcion.trim() === "") {
+            return res
+                .status(400)
+                .json({ error: "La descripción es obligatoria" });
         }
-        
+
         if (!empresa_id) {
             return res.status(400).json({ error: "La empresa es obligatoria" });
         }
-        
+
         if (!categoria_id) {
-            return res.status(400).json({ error: "La categoría es obligatoria" });
+            return res
+                .status(400)
+                .json({ error: "La categoría es obligatoria" });
         }
-        
+
         if (latitud === undefined || latitud === null || isNaN(latitud)) {
-            return res.status(400).json({ error: "La latitud debe ser un número válido" });
+            return res
+                .status(400)
+                .json({ error: "La latitud debe ser un número válido" });
         }
-        
+
         if (longitud === undefined || longitud === null || isNaN(longitud)) {
-            return res.status(400).json({ error: "La longitud debe ser un número válido" });
+            return res
+                .status(400)
+                .json({ error: "La longitud debe ser un número válido" });
         }
-        
-        if (!direccion || direccion.trim() === '') {
-            return res.status(400).json({ error: "La dirección es obligatoria" });
+
+        if (!direccion || direccion.trim() === "") {
+            return res
+                .status(400)
+                .json({ error: "La dirección es obligatoria" });
         }
-        
+
         // Verificar si la empresa existe
         const empresaResult = await db.execute({
             sql: "SELECT id FROM empresas WHERE id = ?",
-            args: [empresa_id]
+            args: [empresa_id],
         });
-        
+
         if (empresaResult.rows.length === 0) {
-            return res.status(400).json({ error: "La empresa especificada no existe" });
+            return res
+                .status(400)
+                .json({ error: "La empresa especificada no existe" });
         }
-        
+
         // Verificar si la categoría existe
         const categoriaResult = await db.execute({
             sql: "SELECT id FROM categorias WHERE id = ?",
-            args: [categoria_id]
+            args: [categoria_id],
         });
-        
+
         if (categoriaResult.rows.length === 0) {
-            return res.status(400).json({ error: "La categoría especificada no existe" });
+            return res
+                .status(400)
+                .json({ error: "La categoría especificada no existe" });
         }
-        
+
         // Si todo está bien, devolver éxito
         res.status(200).json({ mensaje: "Datos válidos" });
     } catch (err) {

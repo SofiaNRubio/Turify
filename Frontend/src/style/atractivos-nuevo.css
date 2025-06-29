@@ -6,7 +6,7 @@
   background: var(--color-bg-panel);
   padding: 32px;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
   color: var(--color-text);
 }
 
@@ -46,7 +46,7 @@ h3 {
   gap: 10px;
 }
 
-.btn-primario, 
+.btn-primario,
 .btn-secundario {
   padding: 8px 16px;
   border-radius: 6px;
@@ -239,7 +239,7 @@ h3 {
 }
 
 .empresa-card:hover {
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
@@ -254,7 +254,7 @@ h3 {
   color: var(--color-primary);
 }
 
-.empresa-tipo {
+.empresa-categoria {
   font-size: 0.9em;
   margin: 4px 0;
   color: #666;
@@ -368,16 +368,16 @@ textarea {
     padding: 20px;
     margin: 20px auto;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .empresas-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-  
+
   .paso-texto {
     font-size: 0.8em;
   }
@@ -387,16 +387,16 @@ textarea {
   .modo-botones {
     flex-direction: column;
   }
-  
+
   .btn-modo {
     width: 100%;
   }
-  
+
   .pasos-container {
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .paso-linea {
     display: none;
   }

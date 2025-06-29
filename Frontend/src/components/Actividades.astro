@@ -1,0 +1,311 @@
+---
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+// Función para obtener las categorías desde el backend
+async function obtenerCategorias(): Promise<Categoria[]> {
+    try {
+        const response = await fetch("http://localhost:3000/api/categorias");
+        if (!response.ok) {
+            throw new Error("Error al obtener categorías");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener categorías:", error);
+        return [];
+    }
+}
+
+// Función para obtener las empresas desde el backend
+async function obtenerEmpresas(): Promise<Empresa[]> {
+    try {
+        const response = await fetch("http://localhost:3000/api/empresas");
+        if (!response.ok) {
+            throw new Error("Error al obtener empresas");
+        }
+        const empresas: Empresa[] = await response.json();
+
+        // Obtener categorías para poder filtrar
+        const categorias = await obtenerCategorias();
+
+        // Filtrar empresas que no sean de emergencia (bomberos, hospitales, etc.)
+        const categoriasExcluidas = [
+            "Cuartel de Bomberos",
+            "Hospital",
+            "Emergencias",
+            "Policía",
+            "Ambulancia",
+        ];
+
+        return empresas.filter((empresa: Empresa) => {
+            if (!empresa.categoria_id) return true;
+
+            const categoria = categorias.find(
+                (cat) => cat.id === empresa.categoria_id
+            );
+            if (!categoria) return true;
+
+            return !categoriasExcluidas.some((categoriaExcluida: string) =>
+                categoria.nombre
+                    .toLowerCase()
+                    .includes(categoriaExcluida.toLowerCase())
+            );
+        });
+    } catch (error) {
+        console.error("Error al obtener empresas:", error);
+        return [];
+    }
+}
+
+const categorias = await obtenerCategorias();
+const empresas = await obtenerEmpresas();
+
+// Función para obtener el nombre de la categoría
+function obtenerNombreCategoria(categoriaId: string | null): string {
+    if (!categoriaId) return "Sin categoría";
+    const categoria = categorias.find((cat) => cat.id === categoriaId);
+    return categoria ? categoria.nombre : "Sin categoría";
+}
+
+// Función para obtener imagen por categoría
+function obtenerImagenPorCategoria(categoriaId: string | null): string {
+    const categoria = obtenerNombreCategoria(categoriaId);
+
+    const imagenesPorCategoria: { [key: string]: string } = {
+        Bodega: "/actividades/bodegas.jpg",
+        Gastronomía: "/actividades/gastronomia.jpg",
+        "Parque Natural": "/actividades/airelibre.jpg",
+        Museo: "/actividades/espaciosociales.jpg",
+        "Centro de Artesanía": "/actividades/espaciosociales.jpg",
+        Hospedaje: "/actividades/espaciosociales.jpg",
+        default: "/actividades/airelibre.jpg",
+    };
+
+    return imagenesPorCategoria[categoria] || imagenesPorCategoria["default"];
+}
+---
+
+<section class="actividades-empresas">
+    <h2>Descubre las mejores actividades</h2>
+    <div class="grid-actividades">
+        {
+            empresas.map((empresa: Empresa) => (
+                <div class="card-actividad">
+                    <img
+                        src={
+                            empresa.img_url ||
+                            obtenerImagenPorCategoria(empresa.categoria_id)
+                        }
+                        alt={empresa.nombre}
+                    />
+                    <div class="card-content">
+                        <span class="tipo-badge">
+                            {obtenerNombreCategoria(empresa.categoria_id)}
+                        </span>
+                        <h3>{empresa.nombre}</h3>
+                        <p class="descripcion">
+                            {empresa.descripcion ||
+                                "Descubre esta increíble experiencia en San Rafael."}
+                        </p>
+                        <div class="ubicacion">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                            <span>{empresa.direccion}</span>
+                        </div>
+                        {empresa.sitio_web && (
+                            <a
+                                href={empresa.sitio_web}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="ver-mas">
+                                Visitar sitio web
+                            </a>
+                        )}
+                        {!empresa.sitio_web && (
+                            <a href={`/empresas/${empresa.id}`} class="ver-mas">
+                                Ver detalles
+                            </a>
+                        )}
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+</section>
+
+<style>
+    .actividades-empresas {
+        padding: 3rem 1.5rem;
+        background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
+    }
+
+    .actividades-empresas h2 {
+        color: #2e6c4d;
+        margin-bottom: 2.5rem;
+        font-size: 2.2rem;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .grid-actividades {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .card-actividad {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(46, 108, 77, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .card-actividad:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(46, 108, 77, 0.15);
+    }
+
+    .card-actividad img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .card-actividad:hover img {
+        transform: scale(1.05);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+        position: relative;
+    }
+
+    .tipo-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-actividad h3 {
+        margin: 0.5rem 0 1rem 0;
+        color: #2e6c4d;
+        font-size: 1.4rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .descripcion {
+        color: #666;
+        margin-bottom: 1.2rem;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    .ubicacion {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .ubicacion svg {
+        color: #2e6c4d;
+        flex-shrink: 0;
+    }
+
+    .ver-mas {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .ver-mas:hover {
+        background: linear-gradient(135deg, #245239, #2e6c4d);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 108, 77, 0.3);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .actividades-empresas {
+            padding: 2rem 1rem;
+        }
+
+        .actividades-empresas h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-actividades {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .card-content {
+            padding: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .actividades-empresas h2 {
+            font-size: 1.6rem;
+        }
+
+        .card-actividad h3 {
+            font-size: 1.2rem;
+        }
+
+        .descripcion {
+            font-size: 0.9rem;
+        }
+    }
+</style>

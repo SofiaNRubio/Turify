@@ -1,189 +1,383 @@
 <section class="recomendados">
-  <h3>Lugares Recomendados</h3>
-  <div class="carousel-wrapper">
-    <button class="carousel-arrow left" id="prevLugar" aria-label="Anterior">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    
-    <div class="carousel-track" id="carouselTrack">
-      <!-- Cada tarjeta -->
-      <div class="carousel-card">
-        <img src="/carrusel/canon-atuel.jpg" alt="Cañón del Atuel" />
-        <h4>Cañón del Atuel</h4>
-        <p>Paisajes únicos y deportes de aventura.</p>
-      </div>
-      <div class="carousel-card">
-        <img src="/carrusel/valle-grande.jpg" alt="Valle Grande" />
-        <h4>Valle Grande</h4>
-        <p>Ideal para rafting y actividades acuáticas.</p>
-      </div>
-      <div class="carousel-card">
-        <img src="/carrusel/bodega-abeja.jpg" alt="Bodega La Abeja" />
-        <h4>Bodega La Abeja</h4>
-        <p>Historia y vinos de excelencia.</p>
-      </div>
-      <div class="carousel-card">
-        <img src="/carrusel/plaza-san-martin.jpg" alt="Plaza San Martín" />
-        <h4>Plaza San Martín</h4>
-        <p>El corazón de la ciudad.</p>
-      </div>
+    <div class="hero-text">
+        <h1 class="hero-title">Turify</h1>
+        <div class="hero-divider"></div>
+        <p class="hero-subtitle">Viví San Rafael</p>
     </div>
-    
-    <button class="carousel-arrow right" id="nextLugar" aria-label="Siguiente">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-  </div>
-</section>
+    <div class="carousel-wrapper">
+        <button
+            class="carousel-arrow left"
+            id="prevLugar"
+            aria-label="Anterior">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><polyline points="15 18 9 12 15 6"></polyline></svg
+            >
+        </button>
 
-<script type="text/javascript">
-  document.addEventListener('DOMContentLoaded', function () {
-    const cards = document.querySelectorAll('.carousel-card');
-    let current = 0;
+        <div class="carousel-track" id="carouselTrack">
+            <!-- Cada tarjeta -->
+            <div class="carousel-card">
+                <img
+                    src="/carrusel/LaberintoBorges.jpg"
+                    alt="Laberinto Borges"
+                />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/bodega.webp" alt="Viñedos Bianchi" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/naturaleza.jpg" alt="Bodega La Abeja" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/los_reyunos2.jpg" alt="Los Reyunos" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/Turismo-86.jpg" alt="Valle grande" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/el_tigre1.jpg" alt="El Tigre" />
+            </div>
+            <div class="carousel-card">
+                <img
+                    src="/carrusel/vajilla-premium.jpg"
+                    alt="Parque Nacional"
+                />
+            </div>
+            <div class="carousel-card">
+                <img
+                    src="/carrusel/ParquedelosNinos.jpg"
+                    alt="Parque Nacional"
+                />
+            </div>
 
-    const updateClasses = () => {
-      cards.forEach((card, i) => {
-        card.classList.remove('active', 'prev', 'next');
-        if (i === current) {
-          card.classList.add('active');
-        } else if (i === (current - 1 + cards.length) % cards.length) {
-          card.classList.add('prev');
-        } else if (i === (current + 1) % cards.length) {
-          card.classList.add('next');
+            <button
+                class="carousel-arrow right"
+                id="nextLugar"
+                aria-label="Siguiente">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    ><polyline points="9 18 15 12 9 6"></polyline></svg
+                >
+            </button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const cards = document.querySelectorAll(".carousel-card");
+            let current = 0;
+            let autoSlideInterval;
+
+            const updateClasses = () => {
+                cards.forEach((card, i) => {
+                    // Remover todas las clases primero
+                    card.classList.remove("active", "prev", "next");
+
+                    // Forzar un reflow para asegurar que las clases se apliquen correctamente
+                    card.offsetHeight;
+
+                    // Aplicar las nuevas clases
+                    if (i === current) {
+                        card.classList.add("active");
+                    } else if (
+                        i ===
+                        (current - 1 + cards.length) % cards.length
+                    ) {
+                        card.classList.add("prev");
+                    } else if (i === (current + 1) % cards.length) {
+                        card.classList.add("next");
+                    }
+                });
+            };
+
+            const nextSlide = () => {
+                current = (current + 1) % cards.length;
+                updateClasses();
+            };
+
+            const prevSlide = () => {
+                current = (current - 1 + cards.length) % cards.length;
+                updateClasses();
+            };
+
+            const startAutoSlide = () => {
+                autoSlideInterval = setInterval(nextSlide, 30000);
+            };
+
+            const stopAutoSlide = () => {
+                clearInterval(autoSlideInterval);
+            };
+
+            // Event listeners para botones
+            document.getElementById("prevLugar").onclick = () => {
+                stopAutoSlide();
+                prevSlide();
+                startAutoSlide(); // Reiniciar el auto-slide
+            };
+
+            document.getElementById("nextLugar").onclick = () => {
+                stopAutoSlide();
+                nextSlide();
+                startAutoSlide(); // Reiniciar el auto-slide
+            };
+
+            // Pausar auto-slide en hover
+            const carouselWrapper = document.querySelector(".carousel-wrapper");
+            carouselWrapper.addEventListener("mouseenter", stopAutoSlide);
+            carouselWrapper.addEventListener("mouseleave", startAutoSlide);
+
+            // Inicializar
+            updateClasses();
+            startAutoSlide();
+        });
+    </script>
+    <style>
+        .recomendados {
+            margin: 0;
+            width: 100vw;
+            height: 60vh;
+            position: relative;
+            overflow: hidden;
+            display: block;
+            contain: layout style paint;
         }
-      });
-    };
 
-    document.getElementById('prevLugar').onclick = () => {
-      current = (current - 1 + cards.length) % cards.length;
-      updateClasses();
-    };
+        .hero-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
 
-    document.getElementById('nextLugar').onclick = () => {
-      current = (current + 1) % cards.length;
-      updateClasses();
-    };
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
 
-    updateClasses();
-  });
-</script>
-<style>
-.recomendados {
-  margin: 3rem auto;
-  text-align: center;
-}
-.recomendados h3 {
-  color: #2e6c4d;
-  margin-bottom: 1.5rem;
-  font-size: 2.2rem;
-  font-weight: 700;
-}
+        .hero-divider {
+            width: 200px;
+            height: 4px;
+            background-color: #a9d9c3;
+            margin: 0 auto 1rem auto;
+            border-radius: 2px;
+        }
 
-.carousel-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  position: relative;
-  flex-wrap: wrap;
-}
+        .hero-subtitle {
+            font-size: 2rem;
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
 
-.carousel-track {
-  position: relative;
-  width: 350px;
-  height: 340px;
-  overflow: visible;
-  perspective: 1000px;
-}
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.carousel-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 1.5rem;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.08);
-  transition: all 0.5s ease;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  transform: scale(0.9);
-}
-.carousel-card img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 1rem;
-  background: #eaf7f0;
-  box-shadow: 0 2px 8px rgba(46, 108, 77, 0.12);
-}
-.carousel-card h4 {
-  margin: 0.6rem 0 0.3rem;
-  color: #2e6c4d;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-.carousel-card p {
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.4;
-}
+        .carousel-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
 
-.carousel-card.active {
-  opacity: 1;
-  z-index: 3;
-  transform: scale(1) translateX(0);
-  pointer-events: auto;
-}
-.carousel-card.prev {
-  opacity: 0.8;
-  transform: translateX(-100px) scale(0.9) rotateY(5deg);
-  z-index: 2;
-}
-.carousel-card.next {
-  opacity: 0.8;
-  transform: translateX(100px) scale(0.9) rotateY(-5deg);
-  z-index: 2;
-}
+        .carousel-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition:
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transform: translateX(0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+        }
 
-.carousel-arrow {
-  margin: 0 120px;
-  background: #97c0a5;
-  color: #2e6c4d;
-  border: none;
-  border-radius: 50%;
-  width: 52px;
-  height: 52px;
-  box-shadow: 0 4px 12px rgba(46,108,77,0.12);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.25s, transform 0.2s;
-}
-.carousel-arrow:hover {
-  background: #2e6c4d;
-  color: #fff;
-  transform: scale(1.1);
-}
-.carousel-arrow svg {
-  stroke: currentColor;
-}
+        .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            border: none;
+            outline: none;
+        }
 
-@media (max-width: 600px) {
-  .carousel-wrapper {
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  .carousel-arrow {
-    width: 44px;
-    height: 44px;
-  }
-  .carousel-track {
-    width: 90vw;
-  }
-}
+        .carousel-card.active {
+            opacity: 1;
+            z-index: 3;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
 
-</style>
+        .carousel-card.prev {
+            opacity: 0;
+            transform: translateX(-100%);
+            z-index: 2;
+        }
+
+        .carousel-card.next {
+            opacity: 0;
+            transform: translateX(100%);
+            z-index: 2;
+        }
+
+        .carousel-card:not(.active):not(.prev):not(.next) {
+            opacity: 0;
+            transform: translateX(100%);
+            z-index: 1;
+        }
+
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #2e6c4d;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .carousel-arrow.left {
+            left: 30px;
+        }
+
+        .carousel-arrow.right {
+            right: 30px;
+        }
+
+        .carousel-wrapper:hover .carousel-arrow {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .carousel-arrow:hover {
+            background: #2e6c4d;
+            color: #fff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-arrow svg {
+            stroke: currentColor;
+            width: 28px;
+            height: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .recomendados {
+                height: 50vh;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-divider {
+                width: 60px;
+                height: 3px;
+            }
+
+            .hero-subtitle {
+                font-size: 1.3rem;
+            }
+
+            .carousel-arrow {
+                width: 50px;
+                height: 50px;
+            }
+
+            .carousel-arrow.left {
+                left: 15px;
+            }
+
+            .carousel-arrow.right {
+                right: 15px;
+            }
+
+            .carousel-arrow svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .recomendados {
+                height: 40vh;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-divider {
+                width: 50px;
+                height: 2px;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .carousel-arrow {
+                width: 44px;
+                height: 44px;
+            }
+
+            .carousel-arrow.left {
+                left: 10px;
+            }
+
+            .carousel-arrow.right {
+                right: 10px;
+            }
+
+            .carousel-arrow svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</section>

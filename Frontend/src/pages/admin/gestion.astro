@@ -4,18 +4,20 @@ import { AdminMenu } from "../../components/AdminMenu";
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
-const nombreFiltro = searchParams.get('nombre') || '';
-const categoriaFiltro = searchParams.get('categoria_id') || '';
-const empresaFiltro = searchParams.get('empresa_id') || '';
+const nombreFiltro = searchParams.get("nombre") || "";
+const categoriaFiltro = searchParams.get("categoria_id") || "";
+const empresaFiltro = searchParams.get("empresa_id") || "";
 
 // Construir la URL de la API con los filtros
-let apiUrl = 'http://localhost:3000/api/atractivos';
+let apiUrl = "http://localhost:3000/api/atractivos";
 const filtros = [];
 if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
-if (categoriaFiltro) filtros.push(`categoria_id=${encodeURIComponent(categoriaFiltro)}`);
-if (empresaFiltro) filtros.push(`empresa_id=${encodeURIComponent(empresaFiltro)}`);
+if (categoriaFiltro)
+    filtros.push(`categoria_id=${encodeURIComponent(categoriaFiltro)}`);
+if (empresaFiltro)
+    filtros.push(`empresa_id=${encodeURIComponent(empresaFiltro)}`);
 if (filtros.length > 0) {
-  apiUrl += `?${filtros.join('&')}`;
+    apiUrl += `?${filtros.join("&")}`;
 }
 
 // Obtener atractivos desde la API
@@ -23,750 +25,1135 @@ const response = await fetch(apiUrl);
 let atractivos = [];
 
 // Obtener categorías para el filtro
-const categoriasResponse = await fetch('http://localhost:3000/api/categorias');
+const categoriasResponse = await fetch("http://localhost:3000/api/categorias");
 let categorias = [];
 if (categoriasResponse.ok) {
-  categorias = await categoriasResponse.json();
+    categorias = await categoriasResponse.json();
 } else {
-  console.error('Error al cargar categorías:', categoriasResponse.statusText);
+    console.error("Error al cargar categorías:", categoriasResponse.statusText);
 }
 
 // Obtener empresas para el filtro
-const empresasResponse = await fetch('http://localhost:3000/api/empresas');
+const empresasResponse = await fetch("http://localhost:3000/api/empresas");
 let empresas = [];
 if (empresasResponse.ok) {
-  empresas = await empresasResponse.json();
+    empresas = await empresasResponse.json();
 } else {
-  console.error('Error al cargar empresas:', empresasResponse.statusText);
+    console.error("Error al cargar empresas:", empresasResponse.statusText);
 }
 
 if (response.ok) {
-  atractivos = await response.json();
+    atractivos = await response.json();
 } else {
-  console.error('Error al cargar atractivos:', response.statusText);
-  // Usar datos de respaldo en caso de error
-  atractivos = [
-    { id: 1, nombre: "Cataratas del Iguazú", direccion: "Misiones", categoria_nombre: "Naturaleza" },
-    { id: 2, nombre: "Glaciar Perito Moreno", direccion: "Santa Cruz", categoria_nombre: "Naturaleza" },
-    { id: 3, nombre: "Obelisco", direccion: "Buenos Aires", categoria_nombre: "Monumento" },
-  ];
+    console.error("Error al cargar atractivos:", response.statusText);
+    // Usar datos de respaldo en caso de error
+    atractivos = [
+        {
+            id: 1,
+            nombre: "Cataratas del Iguazú",
+            direccion: "Misiones",
+            categoria_nombre: "Naturaleza",
+        },
+        {
+            id: 2,
+            nombre: "Glaciar Perito Moreno",
+            direccion: "Santa Cruz",
+            categoria_nombre: "Naturaleza",
+        },
+        {
+            id: 3,
+            nombre: "Obelisco",
+            direccion: "Buenos Aires",
+            categoria_nombre: "Monumento",
+        },
+    ];
 }
 
 // Crear un conjunto con los IDs de empresas que tienen atractivos
 const empresasConAtractivos = new Set();
 atractivos.forEach((a: any) => {
-  if (a.empresa_id) {
-    empresasConAtractivos.add(a.empresa_id);
-  }
+    if (a.empresa_id) {
+        empresasConAtractivos.add(a.empresa_id);
+    }
 });
 
 // Filtrar empresas sin atractivos
-const empresasSinAtractivos = empresas.filter((empresa: any) => !empresasConAtractivos.has(empresa.id));
+const empresasSinAtractivos = empresas.filter(
+    (empresa: any) => !empresasConAtractivos.has(empresa.id)
+);
 
 // Combinar atractivos con empresas sin atractivos para mostrar en la tabla
 let elementosParaMostrar = [...atractivos];
 
 // Agregar empresas sin atractivos según los filtros seleccionados
 if (!nombreFiltro && !categoriaFiltro) {
-  // Si hay filtro por empresa, solo agregar esa empresa si no tiene atractivos
-  if (empresaFiltro) {
-    const empresaFiltrada = empresasSinAtractivos.find((e: any) => e.id.toString() === empresaFiltro);
-    if (empresaFiltrada) {
-      elementosParaMostrar.push({
-        id: null,
-        nombre: "-",
-        direccion: empresaFiltrada.direccion || "-",
-        categoria_nombre: "-",
-        empresa_id: empresaFiltrada.id,
-        empresa_nombre: empresaFiltrada.nombre
-      });
+    // Si hay filtro por empresa, solo agregar esa empresa si no tiene atractivos
+    if (empresaFiltro) {
+        const empresaFiltrada = empresasSinAtractivos.find(
+            (e: any) => e.id.toString() === empresaFiltro
+        );
+        if (empresaFiltrada) {
+            elementosParaMostrar.push({
+                id: null,
+                nombre: "-",
+                direccion: empresaFiltrada.direccion || "-",
+                categoria_nombre: "-",
+                empresa_id: empresaFiltrada.id,
+                empresa_nombre: empresaFiltrada.nombre,
+            });
+        }
+    } else {
+        // Si no hay filtro por empresa, agregar todas las empresas sin atractivos
+        empresasSinAtractivos.forEach((empresa: any) => {
+            elementosParaMostrar.push({
+                id: null,
+                nombre: "-",
+                direccion: empresa.direccion || "-",
+                categoria_nombre: "-",
+                empresa_id: empresa.id,
+                empresa_nombre: empresa.nombre,
+            });
+        });
     }
-  } else {
-    // Si no hay filtro por empresa, agregar todas las empresas sin atractivos
-    empresasSinAtractivos.forEach((empresa: any) => {
-      elementosParaMostrar.push({
-        id: null,
-        nombre: "-",
-        direccion: empresa.direccion || "-",
-        categoria_nombre: "-",
-        empresa_id: empresa.id,
-        empresa_nombre: empresa.nombre
-      });
-    });
-  }
 }
 ---
 
-<link rel="stylesheet" href="/src/style/atractivos.css">
-<link rel="stylesheet" href="/src/style/modal.css">
+<link rel="stylesheet" href="/src/style/atractivos.css" />
+<link rel="stylesheet" href="/src/style/modal.css" />
 
 <AdminPanel menu={AdminMenu}>
     <div class="admin-content">
-      <div class="header">
-        <h1>Empresas y Atractivos</h1>
-        <a href="/admin/gestion-nuevo" class="btn-nuevo">+ Nuevo Atractivo</a>
-      </div>      <!-- Filtros -->
-      <div class="filtros-container">
-        <form id="filtros-form" method="get" class="filtros">
-          <div class="filtro filtro-nombre">
-            <label for="nombre">Nombre de Atractivo:</label>
-            <input type="text" id="nombre" name="nombre" value={nombreFiltro} placeholder="Buscar...">
-          </div>
-          
-          <div class="filtro">
-            <label for="categoria_id">Categoría:</label>
-            <select id="categoria_id" name="categoria_id">
-              <option value="">Todas las categorías</option>
-              {categorias.map((cat: any) => (
-                <option value={cat.id} selected={cat.id === categoriaFiltro}>{cat.nombre}</option>
-              ))}
-            </select>
-          </div>
-            <div class="filtro">
-            <label for="empresa_id">Empresa:</label>
-            <select id="empresa_id" name="empresa_id">
-              <option value="">Todas las empresas</option>
-              {empresas.map((emp: any) => (
-                <option value={emp.id} selected={emp.id === empresaFiltro}>{emp.nombre}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div class="filtros-botones">
-            <button type="submit" class="btn-filtrar">Filtrar</button>
-            <a href="/admin/gestion" class="btn-limpiar">Limpiar</a>
-          </div>
-        </form>
-      </div>
+        <div class="header">
+            <h1>Empresas y Atractivos</h1>
+            <a href="/admin/gestion-nuevo" class="btn-nuevo"
+                >+ Nuevo Atractivo</a
+            >
+        </div>
+        <!-- Filtros -->
+        <div class="filtros-container">
+            <form id="filtros-form" method="get" class="filtros">
+                <div class="filtro filtro-nombre">
+                    <label for="nombre">Nombre de Atractivo:</label>
+                    <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value={nombreFiltro}
+                        placeholder="Buscar..."
+                    />
+                </div>
+
+                <div class="filtro">
+                    <label for="categoria_id">Categoría:</label>
+                    <select id="categoria_id" name="categoria_id">
+                        <option value="">Todas las categorías</option>
+                        {
+                            categorias.map((cat: any) => (
+                                <option
+                                    value={cat.id}
+                                    selected={cat.id === categoriaFiltro}>
+                                    {cat.nombre}
+                                </option>
+                            ))
+                        }
+                    </select>
+                </div>
+                <div class="filtro">
+                    <label for="empresa_id">Empresa:</label>
+                    <select id="empresa_id" name="empresa_id">
+                        <option value="">Todas las empresas</option>
+                        {
+                            empresas.map((emp: any) => (
+                                <option
+                                    value={emp.id}
+                                    selected={emp.id === empresaFiltro}>
+                                    {emp.nombre}
+                                </option>
+                            ))
+                        }
+                    </select>
+                </div>
+
+                <div class="filtros-botones">
+                    <button type="submit" class="btn-filtrar">Filtrar</button>
+                    <a href="/admin/gestion" class="btn-limpiar">Limpiar</a>
+                </div>
+            </form>
+        </div>
         <table>
-        <thead>
-          <tr>
-            <th>Empresa</th>
-            <th>Atractivo</th>
-            <th>Ubicación</th>
-            <th>Categoría</th>
-            <th>Acciones</th>
-          </tr>        </thead>        
-        <tbody>          
-          {elementosParaMostrar.map((a: any) => (
-            <tr>
-              <td>{a.empresa_nombre || "-"}</td>
-              <td>{a.nombre || "-"}</td>
-              <td>{a.direccion || "-"}</td>              
-              <td>{a.categoria_nombre || "-"}</td>              
-              <td class="acciones">
-                {a.id ? (
-                  <>
-                    <a href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada`} class="btn-agregar">Agregar</a>
-                    <button class="btn-editar" data-id={a.id} data-empresa-id={a.empresa_id} data-atractivo-nombre={a.nombre} data-empresa-nombre={a.empresa_nombre}>Editar</button>
-                    <button class="btn-eliminar" data-id={a.id} data-empresa-id={a.empresa_id} data-atractivo-nombre={a.nombre} data-empresa-nombre={a.empresa_nombre}>Eliminar</button>
-                  </>
-                ) : (
-                  <>
-                    <a href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada`} class="btn-agregar">Agregar</a>
-                    <button class="btn-editar" data-empresa-id={a.empresa_id} data-empresa-nombre={a.empresa_nombre} data-sin-atractivo="true">Editar</button>
-                    <button class="btn-eliminar" data-empresa-id={a.empresa_id} data-empresa-nombre={a.empresa_nombre} data-sin-atractivo="true">Eliminar</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-          {elementosParaMostrar.length === 0 && (
-            <tr>
-              <td colspan="5" class="no-resultados">No se encontraron atractivos ni empresas con los filtros seleccionados</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>    <!-- Modal para editar -->
+            <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>Atractivo</th>
+                    <th>Ubicación</th>
+                    <th>Categoría</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {
+                    elementosParaMostrar.map((a: any) => (
+                        <tr>
+                            <td>{a.empresa_nombre || "-"}</td>
+                            <td>{a.nombre || "-"}</td>
+                            <td>{a.direccion || "-"}</td>
+                            <td>{a.categoria_nombre || "-"}</td>
+                            <td class="acciones">
+                                {a.id ? (
+                                    <>
+                                        <a
+                                            href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada`}
+                                            class="btn-agregar">
+                                            Agregar
+                                        </a>
+                                        <button
+                                            class="btn-editar"
+                                            data-id={a.id}
+                                            data-empresa-id={a.empresa_id}
+                                            data-atractivo-nombre={a.nombre}
+                                            data-empresa-nombre={
+                                                a.empresa_nombre
+                                            }>
+                                            Editar
+                                        </button>
+                                        <button
+                                            class="btn-eliminar"
+                                            data-id={a.id}
+                                            data-empresa-id={a.empresa_id}
+                                            data-atractivo-nombre={a.nombre}
+                                            data-empresa-nombre={
+                                                a.empresa_nombre
+                                            }>
+                                            Eliminar
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <a
+                                            href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada`}
+                                            class="btn-agregar">
+                                            Agregar
+                                        </a>
+                                        <button
+                                            class="btn-editar"
+                                            data-empresa-id={a.empresa_id}
+                                            data-empresa-nombre={
+                                                a.empresa_nombre
+                                            }
+                                            data-sin-atractivo="true">
+                                            Editar
+                                        </button>
+                                        <button
+                                            class="btn-eliminar"
+                                            data-empresa-id={a.empresa_id}
+                                            data-empresa-nombre={
+                                                a.empresa_nombre
+                                            }
+                                            data-sin-atractivo="true">
+                                            Eliminar
+                                        </button>
+                                    </>
+                                )}
+                            </td>
+                        </tr>
+                    ))
+                }
+                {
+                    elementosParaMostrar.length === 0 && (
+                        <tr>
+                            <td colspan="5" class="no-resultados">
+                                No se encontraron atractivos ni empresas con los
+                                filtros seleccionados
+                            </td>
+                        </tr>
+                    )
+                }
+            </tbody>
+        </table>
+    </div>
+    <!-- Modal para editar -->
     <div id="modal-editar" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Editar</h3>
-        </div>
-        <div class="modal-body">
-          <p>¿Qué deseas editar?</p>
-          
-          <div class="modal-options">
-            <div class="modal-option" data-option="atractivo">
-              <div class="modal-icon">🏞️</div>
-              <div>
-                <div class="modal-option-title">Editar Atractivo</div>
-                <div class="modal-option-description">Modificar la información del atractivo turístico</div>
-              </div>
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Editar</h3>
             </div>
-            
-            <div class="modal-option" data-option="empresa">
-              <div class="modal-icon">🏢</div>
-              <div>
-                <div class="modal-option-title">Editar Empresa</div>
-                <div class="modal-option-description">Modificar la información de la empresa asociada</div>
-              </div>
+            <div class="modal-body">
+                <p>¿Qué deseas editar?</p>
+
+                <div class="modal-options">
+                    <div class="modal-option" data-option="atractivo">
+                        <div class="modal-icon">🏞️</div>
+                        <div>
+                            <div class="modal-option-title">
+                                Editar Atractivo
+                            </div>
+                            <div class="modal-option-description">
+                                Modificar la información del atractivo turístico
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-option" data-option="empresa">
+                        <div class="modal-icon">🏢</div>
+                        <div>
+                            <div class="modal-option-title">Editar Empresa</div>
+                            <div class="modal-option-description">
+                                Modificar la información de la empresa asociada
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button
+                        class="modal-btn modal-btn-primary"
+                        id="btn-continuar-editar">Continuar</button
+                    >
+                    <button
+                        class="modal-btn modal-btn-secondary"
+                        id="btn-cancelar-editar">Cancelar</button
+                    >
+                </div>
             </div>
-          </div>
-          
-          <div class="modal-actions">
-            <button class="modal-btn modal-btn-primary" id="btn-continuar-editar">Continuar</button>
-            <button class="modal-btn modal-btn-secondary" id="btn-cancelar-editar">Cancelar</button>
-          </div>
         </div>
-      </div>
     </div>
 
     <!-- Modal para editar atractivo -->
     <div id="modal-editar-atractivo" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Editar Atractivo</h3>
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Editar Atractivo</h3>
+            </div>
+            <div class="modal-body">
+                <form id="form-editar-atractivo" class="modal-form">
+                    <div class="form-group">
+                        <label for="atractivo-nombre">Nombre:</label>
+                        <input
+                            type="text"
+                            id="atractivo-nombre"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atractivo-descripcion">Descripción:</label>
+                        <textarea
+                            id="atractivo-descripcion"
+                            class="form-control"
+                            rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atractivo-categoria">Categoría:</label>
+                        <select
+                            id="atractivo-categoria"
+                            class="form-control"
+                            required>
+                            {
+                                categorias.map((cat: any) => (
+                                    <option value={cat.id}>{cat.nombre}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atractivo-direccion">Dirección:</label>
+                        <input
+                            type="text"
+                            id="atractivo-direccion"
+                            class="form-control"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atractivo-latitud">Latitud:</label>
+                        <input
+                            type="number"
+                            id="atractivo-latitud"
+                            class="form-control"
+                            step="any"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atractivo-longitud">Longitud:</label>
+                        <input
+                            type="number"
+                            id="atractivo-longitud"
+                            class="form-control"
+                            step="any"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atractivo-empresa">Empresa:</label>
+                        <select id="atractivo-empresa" class="form-control">
+                            <option value="">Sin empresa</option>
+                            {
+                                empresas.map((emp: any) => (
+                                    <option value={emp.id}>{emp.nombre}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button
+                            type="button"
+                            class="modal-btn modal-btn-secondary"
+                            id="btn-cancelar-editar-atractivo">Cancelar</button
+                        >
+                        <button
+                            type="submit"
+                            class="modal-btn modal-btn-primary"
+                            >Guardar cambios</button
+                        >
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-body">
-          <form id="form-editar-atractivo" class="modal-form">
-            <div class="form-group">
-              <label for="atractivo-nombre">Nombre:</label>
-              <input type="text" id="atractivo-nombre" class="form-control" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="atractivo-descripcion">Descripción:</label>
-              <textarea id="atractivo-descripcion" class="form-control" rows="3"></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="atractivo-categoria">Categoría:</label>
-              <select id="atractivo-categoria" class="form-control" required>
-                {categorias.map((cat: any) => (
-                  <option value={cat.id}>{cat.nombre}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="atractivo-direccion">Dirección:</label>
-              <input type="text" id="atractivo-direccion" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label for="atractivo-latitud">Latitud:</label>
-              <input type="number" id="atractivo-latitud" class="form-control" step="any">
-            </div>
-            
-            <div class="form-group">
-              <label for="atractivo-longitud">Longitud:</label>
-              <input type="number" id="atractivo-longitud" class="form-control" step="any">
-            </div>
-            
-            <div class="form-group">
-              <label for="atractivo-empresa">Empresa:</label>
-              <select id="atractivo-empresa" class="form-control">
-                <option value="">Sin empresa</option>
-                {empresas.map((emp: any) => (
-                  <option value={emp.id}>{emp.nombre}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div class="modal-actions">
-              <button type="button" class="modal-btn modal-btn-secondary" id="btn-cancelar-editar-atractivo">Cancelar</button>
-              <button type="submit" class="modal-btn modal-btn-primary">Guardar cambios</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
-    
+
     <!-- Modal para editar empresa -->
     <div id="modal-editar-empresa" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Editar Empresa</h3>
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Editar Empresa</h3>
+            </div>
+            <div class="modal-body">
+                <form id="form-editar-empresa" class="modal-form">
+                    <div class="form-group">
+                        <label for="empresa-nombre">Nombre:</label>
+                        <input
+                            type="text"
+                            id="empresa-nombre"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-descripcion">Descripción:</label>
+                        <textarea
+                            id="empresa-descripcion"
+                            class="form-control"
+                            rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-email">Email:</label>
+                        <input
+                            type="email"
+                            id="empresa-email"
+                            class="form-control"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-telefono">Teléfono:</label>
+                        <input
+                            type="text"
+                            id="empresa-telefono"
+                            class="form-control"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-sitio-web">Sitio web:</label>
+                        <input
+                            type="url"
+                            id="empresa-sitio-web"
+                            class="form-control"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-direccion">Dirección:</label>
+                        <input
+                            type="text"
+                            id="empresa-direccion"
+                            class="form-control"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-latitud">Latitud:</label>
+                        <input
+                            type="number"
+                            id="empresa-latitud"
+                            class="form-control"
+                            step="any"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-longitud">Longitud:</label>
+                        <input
+                            type="number"
+                            id="empresa-longitud"
+                            class="form-control"
+                            step="any"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-categoria">Categoría:</label>
+                        <select id="empresa-categoria" class="form-control">
+                            <option value="">Seleccionar categoría</option>
+                            {
+                                categorias.map((cat: any) => (
+                                    <option value={cat.id}>{cat.nombre}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="empresa-img-url">URL de imagen:</label>
+                        <input
+                            type="url"
+                            id="empresa-img-url"
+                            class="form-control"
+                            placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                        <small
+                            >Sube tu imagen a <a
+                                href="https://imgbb.com"
+                                target="_blank"
+                                rel="noopener noreferrer">ImgBB</a
+                            > y pega la URL aquí</small
+                        >
+                    </div>
+
+                    <div class="modal-actions">
+                        <button
+                            type="button"
+                            class="modal-btn modal-btn-secondary"
+                            id="btn-cancelar-editar-empresa">Cancelar</button
+                        >
+                        <button
+                            type="submit"
+                            class="modal-btn modal-btn-primary"
+                            >Guardar cambios</button
+                        >
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-body">
-          <form id="form-editar-empresa" class="modal-form">
-            <div class="form-group">
-              <label for="empresa-nombre">Nombre:</label>
-              <input type="text" id="empresa-nombre" class="form-control" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-descripcion">Descripción:</label>
-              <textarea id="empresa-descripcion" class="form-control" rows="3"></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-email">Email:</label>
-              <input type="email" id="empresa-email" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-telefono">Teléfono:</label>
-              <input type="text" id="empresa-telefono" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-sitio-web">Sitio web:</label>
-              <input type="url" id="empresa-sitio-web" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-direccion">Dirección:</label>
-              <input type="text" id="empresa-direccion" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-latitud">Latitud:</label>
-              <input type="number" id="empresa-latitud" class="form-control" step="any">
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-longitud">Longitud:</label>
-              <input type="number" id="empresa-longitud" class="form-control" step="any">
-            </div>
-            
-            <div class="form-group">
-              <label for="empresa-tipo">Tipo:</label>
-              <input type="text" id="empresa-tipo" class="form-control" placeholder="ej: bodega, museo, etc.">
-            </div>
-            
-            <div class="modal-actions">
-              <button type="button" class="modal-btn modal-btn-secondary" id="btn-cancelar-editar-empresa">Cancelar</button>
-              <button type="submit" class="modal-btn modal-btn-primary">Guardar cambios</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
 
     <!-- Modal para eliminar -->
     <div id="modal-eliminar" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Eliminar</h3>
-        </div>
-        <div class="modal-body">
-          <p>¿Qué deseas eliminar?</p>
-          
-          <div class="modal-options">
-            <div class="modal-option" data-option="atractivo">
-              <div class="modal-icon">🏞️</div>
-              <div>
-                <div class="modal-option-title">Eliminar Atractivo</div>
-                <div class="modal-option-description">Eliminar solamente este atractivo turístico</div>
-              </div>
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Eliminar</h3>
             </div>
-            
-            <div class="modal-option" data-option="empresa">
-              <div class="modal-icon">🏢</div>
-              <div>
-                <div class="modal-option-title">Eliminar Empresa</div>
-                <div class="modal-option-description">Eliminar la empresa y todos sus atractivos asociados</div>
-              </div>
+            <div class="modal-body">
+                <p>¿Qué deseas eliminar?</p>
+
+                <div class="modal-options">
+                    <div class="modal-option" data-option="atractivo">
+                        <div class="modal-icon">🏞️</div>
+                        <div>
+                            <div class="modal-option-title">
+                                Eliminar Atractivo
+                            </div>
+                            <div class="modal-option-description">
+                                Eliminar solamente este atractivo turístico
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-option" data-option="empresa">
+                        <div class="modal-icon">🏢</div>
+                        <div>
+                            <div class="modal-option-title">
+                                Eliminar Empresa
+                            </div>
+                            <div class="modal-option-description">
+                                Eliminar la empresa y todos sus atractivos
+                                asociados
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button
+                        class="modal-btn modal-btn-primary"
+                        id="btn-continuar-eliminar">Continuar</button
+                    >
+                    <button
+                        class="modal-btn modal-btn-secondary"
+                        id="btn-cancelar-eliminar">Cancelar</button
+                    >
+                </div>
             </div>
-          </div>
-            <div class="modal-actions">
-            <button class="modal-btn modal-btn-primary" id="btn-continuar-eliminar">Continuar</button>
-            <button class="modal-btn modal-btn-secondary" id="btn-cancelar-eliminar">Cancelar</button>
-          </div>
         </div>
-      </div>
     </div>
 
     <!-- Modal de confirmación de eliminación -->
     <div id="modal-confirmar-eliminar" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Confirmar eliminación</h3>
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Confirmar eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p id="texto-confirmar-eliminar">
+                    ¿Estás seguro de que deseas eliminar este elemento?
+                </p>
+
+                <div class="modal-actions">
+                    <button
+                        class="modal-btn modal-btn-secondary"
+                        id="btn-cancelar-confirmar">Cancelar</button
+                    >
+                    <button
+                        class="modal-btn modal-btn-danger"
+                        id="btn-confirmar-eliminar">Eliminar</button
+                    >
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          <p id="texto-confirmar-eliminar">¿Estás seguro de que deseas eliminar este elemento?</p>
-          
-          <div class="modal-actions">
-            <button class="modal-btn modal-btn-secondary" id="btn-cancelar-confirmar">Cancelar</button>
-            <button class="modal-btn modal-btn-danger" id="btn-confirmar-eliminar">Eliminar</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Modal de notificación -->
     <div id="modal-notificacion" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 id="titulo-notificacion">Notificación</h3>
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="titulo-notificacion">Notificación</h3>
+            </div>
+            <div class="modal-body">
+                <p id="texto-notificacion"></p>
+
+                <div class="modal-actions">
+                    <button
+                        class="modal-btn modal-btn-primary"
+                        id="btn-aceptar-notificacion">Aceptar</button
+                    >
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          <p id="texto-notificacion"></p>
-          
-          <div class="modal-actions">
-            <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
-          </div>
-        </div>
-      </div>
     </div>
 </AdminPanel>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Referencias a los modales
-    const modalEditar = document.getElementById('modal-editar');
-    const modalEliminar = document.getElementById('modal-eliminar');
-    const modalConfirmarEliminar = document.getElementById('modal-confirmar-eliminar');
-    const modalNotificacion = document.getElementById('modal-notificacion');
-    
-    // Botones editar
-    const btnEditar = document.querySelectorAll('.btn-editar');
-    const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
-    const btnContinuarEditar = document.getElementById('btn-continuar-editar');
-      // Botones eliminar
-    const btnEliminar = document.querySelectorAll('.btn-eliminar');
-    const btnCancelarEliminar = document.getElementById('btn-cancelar-eliminar');
-    const btnContinuarEliminar = document.getElementById('btn-continuar-eliminar');
-    const btnCancelarConfirmar = document.getElementById('btn-cancelar-confirmar');
-    const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar');
-    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');
-      // Variables para almacenar datos del elemento seleccionado
-    let currentAtractivoId: string | null = null;
-    let currentEmpresaId: string | null = null;
-    let currentAtractivoNombre: string | null = null;
-    let currentEmpresaNombre: string | null = null;
-    let selectedOption: string | null = null;
-      // Función para mostrar una notificación
-    function mostrarNotificacion(titulo: string, mensaje: string, esExito: boolean = true, recargar: boolean = true) {
-      const tituloNotificacion = document.getElementById('titulo-notificacion');
-      const textoNotificacion = document.getElementById('texto-notificacion');
-      
-      if (tituloNotificacion) {
-        tituloNotificacion.textContent = titulo;
-        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
-      }
-      
-      if (textoNotificacion) {
-        textoNotificacion.textContent = mensaje;
-      }
-      
-      if (modalNotificacion) {
-        modalNotificacion.classList.remove('hidden');
-        
-        // Configurar el botón Aceptar
-        if (btnAceptarNotificacion) {
-          btnAceptarNotificacion.onclick = () => {
-            modalNotificacion.classList.add('hidden');
-            if (recargar) {
-              window.location.reload();
+    document.addEventListener("DOMContentLoaded", () => {
+        // Referencias a los modales
+        const modalEditar = document.getElementById("modal-editar");
+        const modalEliminar = document.getElementById("modal-eliminar");
+        const modalConfirmarEliminar = document.getElementById(
+            "modal-confirmar-eliminar"
+        );
+        const modalNotificacion = document.getElementById("modal-notificacion");
+
+        // Botones editar
+        const btnEditar = document.querySelectorAll(".btn-editar");
+        const btnCancelarEditar = document.getElementById(
+            "btn-cancelar-editar"
+        );
+        const btnContinuarEditar = document.getElementById(
+            "btn-continuar-editar"
+        );
+        // Botones eliminar
+        const btnEliminar = document.querySelectorAll(".btn-eliminar");
+        const btnCancelarEliminar = document.getElementById(
+            "btn-cancelar-eliminar"
+        );
+        const btnContinuarEliminar = document.getElementById(
+            "btn-continuar-eliminar"
+        );
+        const btnCancelarConfirmar = document.getElementById(
+            "btn-cancelar-confirmar"
+        );
+        const btnConfirmarEliminar = document.getElementById(
+            "btn-confirmar-eliminar"
+        );
+        const btnAceptarNotificacion = document.getElementById(
+            "btn-aceptar-notificacion"
+        );
+        // Variables para almacenar datos del elemento seleccionado
+        let currentAtractivoId: string | null = null;
+        let currentEmpresaId: string | null = null;
+        let currentAtractivoNombre: string | null = null;
+        let currentEmpresaNombre: string | null = null;
+        let selectedOption: string | null = null;
+        // Función para mostrar una notificación
+        function mostrarNotificacion(
+            titulo: string,
+            mensaje: string,
+            esExito: boolean = true,
+            recargar: boolean = true
+        ) {
+            const tituloNotificacion = document.getElementById(
+                "titulo-notificacion"
+            );
+            const textoNotificacion =
+                document.getElementById("texto-notificacion");
+
+            if (tituloNotificacion) {
+                tituloNotificacion.textContent = titulo;
+                tituloNotificacion.style.color = esExito
+                    ? "#1A513B"
+                    : "#d9534f";
             }
-          };
-        }
-      }
-    }    // Modal de Editar
-    if (btnEditar) {
-      btnEditar.forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentAtractivoId = btn.getAttribute('data-id');
-          currentEmpresaId = btn.getAttribute('data-empresa-id');
-          currentAtractivoNombre = btn.getAttribute('data-atractivo-nombre');
-          currentEmpresaNombre = btn.getAttribute('data-empresa-nombre');
-          const sinAtractivo = btn.getAttribute('data-sin-atractivo') === 'true';
-          
-          console.log('Edit button clicked:', {
-            atractivoId: currentAtractivoId,
-            empresaId: currentEmpresaId,
-            atractivoNombre: currentAtractivoNombre,
-            empresaNombre: currentEmpresaNombre,
-            sinAtractivo
-          });
-          
-          // Restablecer selección
-          document.querySelectorAll('#modal-editar .modal-option').forEach(opt => {
-            opt.classList.remove('selected');
-            opt.classList.remove('disabled');
-          });
-          selectedOption = null;
-            // Si es una empresa sin atractivos, deshabilitar la opción de editar atractivo
-          if (sinAtractivo) {
-            const opcionAtractivo = document.querySelector('#modal-editar .modal-option[data-option="atractivo"]');
-            if (opcionAtractivo) {
-              opcionAtractivo.classList.add('disabled');
-              
-              // Agregar descripción indicando que no hay atractivos
-              const descripcion = opcionAtractivo.querySelector('.modal-option-description');
-              if (descripcion) {
-                descripcion.textContent = 'No hay atractivos disponibles para editar';
-              }
+
+            if (textoNotificacion) {
+                textoNotificacion.textContent = mensaje;
             }
-          } else {
-            // Restaurar el texto original para empresas con atractivos
-            const opcionAtractivo = document.querySelector('#modal-editar .modal-option[data-option="atractivo"]');
-            if (opcionAtractivo) {
-              const descripcion = opcionAtractivo.querySelector('.modal-option-description');
-              if (descripcion) {
-                descripcion.textContent = 'Modificar la información del atractivo turístico';
-              }
+
+            if (modalNotificacion) {
+                modalNotificacion.classList.remove("hidden");
+
+                // Configurar el botón Aceptar
+                if (btnAceptarNotificacion) {
+                    btnAceptarNotificacion.onclick = () => {
+                        modalNotificacion.classList.add("hidden");
+                        if (recargar) {
+                            window.location.reload();
+                        }
+                    };
+                }
             }
-          }
-          
-          // Mostrar modal
-          if (modalEditar) {
-            modalEditar.classList.remove('hidden');
-          }
-        });
-      });
-    }
-      // Selección de opción en modal de editar
-    document.querySelectorAll('#modal-editar .modal-option').forEach(option => {
-      option.addEventListener('click', () => {
-        // Si la opción está deshabilitada, no hacer nada
-        if (option.classList.contains('disabled')) {
-          return;
-        }
-        
-        // Quitar selección de todos
-        document.querySelectorAll('#modal-editar .modal-option').forEach(opt => {
-          opt.classList.remove('selected');
-        });
-        
-        // Aplicar selección al actual
-        option.classList.add('selected');
-        selectedOption = option.getAttribute('data-option');
-        console.log('Opción seleccionada:', selectedOption);
-      });
-    });
-    
-    // Botón Cancelar editar
-    if (btnCancelarEditar && modalEditar) {
-      btnCancelarEditar.addEventListener('click', () => {
-        modalEditar.classList.add('hidden');
-      });
-    }
-      // Botón Continuar editar
-    if (btnContinuarEditar && modalEditar) {
-      btnContinuarEditar.addEventListener('click', () => {
-        if (!selectedOption) {
-          mostrarNotificacion('Error', 'Por favor, selecciona una opción', false, false);
-          return;
-        }
-        
-        if (modalEditar) {
-          modalEditar.classList.add('hidden');
-        }
-        
-        if (selectedOption === 'atractivo' && currentAtractivoId) {
-          // Redirigir a página de edición de atractivo
-          console.log('Redirigiendo a editar atractivo:', currentAtractivoId);
-          window.location.href = `/admin/gestion-editar?id=${currentAtractivoId}`;
-        } else if (selectedOption === 'empresa' && currentEmpresaId) {
-          // Redirigir a página de edición de empresa
-          console.log('Redirigiendo a editar empresa:', currentEmpresaId);
-          window.location.href = `/admin/empresas-editar?id=${currentEmpresaId}`;
-        } else if (selectedOption === 'atractivo' && !currentAtractivoId) {
-          // Intentó seleccionar un atractivo pero no hay ID (empresa sin atractivos)
-          mostrarNotificacion('Error', 'Esta empresa no tiene atractivos asociados', false, false);
-        } else {
-          mostrarNotificacion('Error', 'Ocurrió un error al procesar la solicitud', false, false);
-        }
-      });
-    }// Modal de Eliminar
-    if (btnEliminar && modalEliminar) {
-      btnEliminar.forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentAtractivoId = btn.getAttribute('data-id');
-          currentEmpresaId = btn.getAttribute('data-empresa-id');
-          currentAtractivoNombre = btn.getAttribute('data-atractivo-nombre');
-          currentEmpresaNombre = btn.getAttribute('data-empresa-nombre');
-          const sinAtractivo = btn.getAttribute('data-sin-atractivo') === 'true';
-          
-          // Restablecer selección
-          document.querySelectorAll('#modal-eliminar .modal-option').forEach(opt => {
-            opt.classList.remove('selected');
-            opt.classList.remove('disabled');
-          });
-          selectedOption = null;
-            // Si es una empresa sin atractivos, deshabilitar la opción de eliminar atractivo
-          if (sinAtractivo) {
-            const opcionAtractivo = document.querySelector('#modal-eliminar .modal-option[data-option="atractivo"]');
-            if (opcionAtractivo) {
-              opcionAtractivo.classList.add('disabled');
-              
-              // Agregar descripción indicando que no hay atractivos
-              const descripcion = opcionAtractivo.querySelector('.modal-option-description');
-              if (descripcion) {
-                descripcion.textContent = 'No hay atractivos disponibles para eliminar';
-              }
-            }
-          } else {
-            // Restaurar el texto original para empresas con atractivos
-            const opcionAtractivo = document.querySelector('#modal-eliminar .modal-option[data-option="atractivo"]');
-            if (opcionAtractivo) {
-              const descripcion = opcionAtractivo.querySelector('.modal-option-description');
-              if (descripcion) {
-                descripcion.textContent = 'Eliminar solamente este atractivo turístico';
-              }
-            }
-          }
-          
-          // Mostrar modal
-          modalEliminar.classList.remove('hidden');
-        });
-      });
-    }
-      // Selección de opción en modal de eliminar
-    document.querySelectorAll('#modal-eliminar .modal-option').forEach(option => {
-      option.addEventListener('click', () => {
-        // Si la opción está deshabilitada, no hacer nada
-        if (option.classList.contains('disabled')) {
-          return;
-        }
-        
-        // Quitar selección de todos
-        document.querySelectorAll('#modal-eliminar .modal-option').forEach(opt => {
-          opt.classList.remove('selected');
-        });
-        
-        // Aplicar selección al actual
-        option.classList.add('selected');
-        selectedOption = option.getAttribute('data-option');
-      });
-    });
-    
-    // Botón Cancelar eliminar
-    if (btnCancelarEliminar && modalEliminar) {
-      btnCancelarEliminar.addEventListener('click', () => {
-        modalEliminar.classList.add('hidden');
-      });
-    }
-    
-    // Botón Continuar eliminar
-    if (btnContinuarEliminar && modalEliminar && modalConfirmarEliminar) {
-      btnContinuarEliminar.addEventListener('click', () => {
-        if (!selectedOption) {
-          mostrarNotificacion('Error', 'Por favor, selecciona una opción', false, false);
-          return;
-        }
-        
-        modalEliminar.classList.add('hidden');
-        
-        // Configurar texto de confirmación
-        const textoConfirmar = document.getElementById('texto-confirmar-eliminar');
-        if (textoConfirmar) {
-          if (selectedOption === 'atractivo') {
-            textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar el atractivo "${currentAtractivoNombre}"?`;
-          } else if (selectedOption === 'empresa' && currentEmpresaNombre) {
-            textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar la empresa "${currentEmpresaNombre}" y todos sus atractivos asociados?`;
-          }
-        }
-        
-        // Mostrar modal de confirmación
-        modalConfirmarEliminar.classList.remove('hidden');
-      });
-    }
-    
-    // Botón Cancelar confirmación
-    if (btnCancelarConfirmar && modalConfirmarEliminar) {
-      btnCancelarConfirmar.addEventListener('click', () => {
-        modalConfirmarEliminar.classList.add('hidden');
-      });
-    }
-    
-    // Botón Confirmar eliminación
-    if (btnConfirmarEliminar && modalConfirmarEliminar) {
-      btnConfirmarEliminar.addEventListener('click', async () => {
-        modalConfirmarEliminar.classList.add('hidden');
-        
-        try {
-          let response;
-          
-          if (selectedOption === 'atractivo' && currentAtractivoId) {
-            // Eliminar atractivo
-            response = await fetch(`http://localhost:3000/api/atractivos/${currentAtractivoId}`, {
-              method: 'DELETE'
-            });
-            
-            if (response.ok) {
-              mostrarNotificacion('¡Éxito!', `El atractivo "${currentAtractivoNombre}" ha sido eliminado correctamente`, true);
-            } else {
-              mostrarNotificacion('Error', 'No se pudo eliminar el atractivo', false, false);
-            }
-          } else if (selectedOption === 'empresa' && currentEmpresaId) {
-            // Primero eliminamos todos los atractivos asociados a la empresa
-            const atractivosDeEmpresa = await fetch(`http://localhost:3000/api/atractivos?empresa_id=${currentEmpresaId}`);
-            if (atractivosDeEmpresa.ok) {
-              const atractivos = await atractivosDeEmpresa.json();
-              
-              // Eliminar atractivos uno por uno
-              for (const atractivo of atractivos) {
-                await fetch(`http://localhost:3000/api/atractivos/${atractivo.id}`, {
-                  method: 'DELETE'
+        } // Modal de Editar
+        if (btnEditar) {
+            btnEditar.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    currentAtractivoId = btn.getAttribute("data-id");
+                    currentEmpresaId = btn.getAttribute("data-empresa-id");
+                    currentAtractivoNombre = btn.getAttribute(
+                        "data-atractivo-nombre"
+                    );
+                    currentEmpresaNombre = btn.getAttribute(
+                        "data-empresa-nombre"
+                    );
+                    const sinAtractivo =
+                        btn.getAttribute("data-sin-atractivo") === "true";
+
+                    console.log("Edit button clicked:", {
+                        atractivoId: currentAtractivoId,
+                        empresaId: currentEmpresaId,
+                        atractivoNombre: currentAtractivoNombre,
+                        empresaNombre: currentEmpresaNombre,
+                        sinAtractivo,
+                    });
+
+                    // Restablecer selección
+                    document
+                        .querySelectorAll("#modal-editar .modal-option")
+                        .forEach((opt) => {
+                            opt.classList.remove("selected");
+                            opt.classList.remove("disabled");
+                        });
+                    selectedOption = null;
+                    // Si es una empresa sin atractivos, deshabilitar la opción de editar atractivo
+                    if (sinAtractivo) {
+                        const opcionAtractivo = document.querySelector(
+                            '#modal-editar .modal-option[data-option="atractivo"]'
+                        );
+                        if (opcionAtractivo) {
+                            opcionAtractivo.classList.add("disabled");
+
+                            // Agregar descripción indicando que no hay atractivos
+                            const descripcion = opcionAtractivo.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "No hay atractivos disponibles para editar";
+                            }
+                        }
+                    } else {
+                        // Restaurar el texto original para empresas con atractivos
+                        const opcionAtractivo = document.querySelector(
+                            '#modal-editar .modal-option[data-option="atractivo"]'
+                        );
+                        if (opcionAtractivo) {
+                            const descripcion = opcionAtractivo.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "Modificar la información del atractivo turístico";
+                            }
+                        }
+                    }
+
+                    // Mostrar modal
+                    if (modalEditar) {
+                        modalEditar.classList.remove("hidden");
+                    }
                 });
-              }
-              
-              // Luego eliminamos la empresa
-              response = await fetch(`http://localhost:3000/api/empresas/${currentEmpresaId}`, {
-                method: 'DELETE'
-              });
-              
-              if (response.ok) {
-                mostrarNotificacion('¡Éxito!', `La empresa "${currentEmpresaNombre}" y sus ${atractivos.length} atractivos asociados han sido eliminados correctamente`, true);
-              } else {
-                mostrarNotificacion('Error', 'No se pudo eliminar la empresa', false, false);
-              }
-            } else {
-              mostrarNotificacion('Error', 'No se pudieron obtener los atractivos de la empresa', false, false);
-            }
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          mostrarNotificacion('Error', 'Ha ocurrido un error durante la eliminación', false, false);
-        }
-      });
-    }
-    
-    // Prevenir envíos múltiples de formularios
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-      form.addEventListener('submit', function(e: Event) {
-        // Verificar si el formulario ya está enviando
-        if (this.classList.contains('enviando')) {
-          e.preventDefault();
-          return false;
-        }
-        
-        // Marcar el formulario como enviando
-        this.classList.add('enviando');
-          // Deshabilitar todos los botones submit del formulario
-        const submitButtons = this.querySelectorAll('button[type="submit"]');
-        submitButtons.forEach((button) => {
-          const submitButton = button as HTMLButtonElement;
-          // Guardar el texto original
-          const textoOriginal = submitButton.textContent || '';
-          submitButton.dataset.textoOriginal = textoOriginal;
-          
-          // Cambiar texto y deshabilitar
-          submitButton.textContent = 'Procesando...';
-          submitButton.classList.add('procesando');
-          submitButton.disabled = true;
-        });
-        
-        // Timeout de seguridad para restablecer el formulario en caso de error
-        setTimeout(() => {          if (this.classList.contains('enviando')) {
-            this.classList.remove('enviando');
-            submitButtons.forEach((button) => {
-              const submitButton = button as HTMLButtonElement;
-              submitButton.textContent = submitButton.dataset.textoOriginal || '';
-              submitButton.classList.remove('procesando');
-              submitButton.disabled = false;
             });
-          }
-        }, 5000); // 5 segundos de timeout
-      });
-    });
-    
-    // Cerrar modales haciendo clic fuera
-    [modalEditar, modalEliminar, modalConfirmarEliminar, modalNotificacion].forEach(modal => {
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            modal.classList.add('hidden');
-          }
+        }
+        // Selección de opción en modal de editar
+        document
+            .querySelectorAll("#modal-editar .modal-option")
+            .forEach((option) => {
+                option.addEventListener("click", () => {
+                    // Si la opción está deshabilitada, no hacer nada
+                    if (option.classList.contains("disabled")) {
+                        return;
+                    }
+
+                    // Quitar selección de todos
+                    document
+                        .querySelectorAll("#modal-editar .modal-option")
+                        .forEach((opt) => {
+                            opt.classList.remove("selected");
+                        });
+
+                    // Aplicar selección al actual
+                    option.classList.add("selected");
+                    selectedOption = option.getAttribute("data-option");
+                    console.log("Opción seleccionada:", selectedOption);
+                });
+            });
+
+        // Botón Cancelar editar
+        if (btnCancelarEditar && modalEditar) {
+            btnCancelarEditar.addEventListener("click", () => {
+                modalEditar.classList.add("hidden");
+            });
+        }
+        // Botón Continuar editar
+        if (btnContinuarEditar && modalEditar) {
+            btnContinuarEditar.addEventListener("click", () => {
+                if (!selectedOption) {
+                    mostrarNotificacion(
+                        "Error",
+                        "Por favor, selecciona una opción",
+                        false,
+                        false
+                    );
+                    return;
+                }
+
+                if (modalEditar) {
+                    modalEditar.classList.add("hidden");
+                }
+
+                if (selectedOption === "atractivo" && currentAtractivoId) {
+                    // Redirigir a página de edición de atractivo
+                    console.log(
+                        "Redirigiendo a editar atractivo:",
+                        currentAtractivoId
+                    );
+                    window.location.href = `/admin/gestion-editar?id=${currentAtractivoId}`;
+                } else if (selectedOption === "empresa" && currentEmpresaId) {
+                    // Redirigir a página de edición de empresa
+                    console.log(
+                        "Redirigiendo a editar empresa:",
+                        currentEmpresaId
+                    );
+                    window.location.href = `/admin/empresas-editar?id=${currentEmpresaId}`;
+                } else if (
+                    selectedOption === "atractivo" &&
+                    !currentAtractivoId
+                ) {
+                    // Intentó seleccionar un atractivo pero no hay ID (empresa sin atractivos)
+                    mostrarNotificacion(
+                        "Error",
+                        "Esta empresa no tiene atractivos asociados",
+                        false,
+                        false
+                    );
+                } else {
+                    mostrarNotificacion(
+                        "Error",
+                        "Ocurrió un error al procesar la solicitud",
+                        false,
+                        false
+                    );
+                }
+            });
+        } // Modal de Eliminar
+        if (btnEliminar && modalEliminar) {
+            btnEliminar.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    currentAtractivoId = btn.getAttribute("data-id");
+                    currentEmpresaId = btn.getAttribute("data-empresa-id");
+                    currentAtractivoNombre = btn.getAttribute(
+                        "data-atractivo-nombre"
+                    );
+                    currentEmpresaNombre = btn.getAttribute(
+                        "data-empresa-nombre"
+                    );
+                    const sinAtractivo =
+                        btn.getAttribute("data-sin-atractivo") === "true";
+
+                    // Restablecer selección
+                    document
+                        .querySelectorAll("#modal-eliminar .modal-option")
+                        .forEach((opt) => {
+                            opt.classList.remove("selected");
+                            opt.classList.remove("disabled");
+                        });
+                    selectedOption = null;
+                    // Si es una empresa sin atractivos, deshabilitar la opción de eliminar atractivo
+                    if (sinAtractivo) {
+                        const opcionAtractivo = document.querySelector(
+                            '#modal-eliminar .modal-option[data-option="atractivo"]'
+                        );
+                        if (opcionAtractivo) {
+                            opcionAtractivo.classList.add("disabled");
+
+                            // Agregar descripción indicando que no hay atractivos
+                            const descripcion = opcionAtractivo.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "No hay atractivos disponibles para eliminar";
+                            }
+                        }
+                    } else {
+                        // Restaurar el texto original para empresas con atractivos
+                        const opcionAtractivo = document.querySelector(
+                            '#modal-eliminar .modal-option[data-option="atractivo"]'
+                        );
+                        if (opcionAtractivo) {
+                            const descripcion = opcionAtractivo.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "Eliminar solamente este atractivo turístico";
+                            }
+                        }
+                    }
+
+                    // Mostrar modal
+                    modalEliminar.classList.remove("hidden");
+                });
+            });
+        }
+        // Selección de opción en modal de eliminar
+        document
+            .querySelectorAll("#modal-eliminar .modal-option")
+            .forEach((option) => {
+                option.addEventListener("click", () => {
+                    // Si la opción está deshabilitada, no hacer nada
+                    if (option.classList.contains("disabled")) {
+                        return;
+                    }
+
+                    // Quitar selección de todos
+                    document
+                        .querySelectorAll("#modal-eliminar .modal-option")
+                        .forEach((opt) => {
+                            opt.classList.remove("selected");
+                        });
+
+                    // Aplicar selección al actual
+                    option.classList.add("selected");
+                    selectedOption = option.getAttribute("data-option");
+                });
+            });
+
+        // Botón Cancelar eliminar
+        if (btnCancelarEliminar && modalEliminar) {
+            btnCancelarEliminar.addEventListener("click", () => {
+                modalEliminar.classList.add("hidden");
+            });
+        }
+
+        // Botón Continuar eliminar
+        if (btnContinuarEliminar && modalEliminar && modalConfirmarEliminar) {
+            btnContinuarEliminar.addEventListener("click", () => {
+                if (!selectedOption) {
+                    mostrarNotificacion(
+                        "Error",
+                        "Por favor, selecciona una opción",
+                        false,
+                        false
+                    );
+                    return;
+                }
+
+                modalEliminar.classList.add("hidden");
+
+                // Configurar texto de confirmación
+                const textoConfirmar = document.getElementById(
+                    "texto-confirmar-eliminar"
+                );
+                if (textoConfirmar) {
+                    if (selectedOption === "atractivo") {
+                        textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar el atractivo "${currentAtractivoNombre}"?`;
+                    } else if (
+                        selectedOption === "empresa" &&
+                        currentEmpresaNombre
+                    ) {
+                        textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar la empresa "${currentEmpresaNombre}" y todos sus atractivos asociados?`;
+                    }
+                }
+
+                // Mostrar modal de confirmación
+                modalConfirmarEliminar.classList.remove("hidden");
+            });
+        }
+
+        // Botón Cancelar confirmación
+        if (btnCancelarConfirmar && modalConfirmarEliminar) {
+            btnCancelarConfirmar.addEventListener("click", () => {
+                modalConfirmarEliminar.classList.add("hidden");
+            });
+        }
+
+        // Botón Confirmar eliminación
+        if (btnConfirmarEliminar && modalConfirmarEliminar) {
+            btnConfirmarEliminar.addEventListener("click", async () => {
+                modalConfirmarEliminar.classList.add("hidden");
+
+                try {
+                    let response;
+
+                    if (selectedOption === "atractivo" && currentAtractivoId) {
+                        // Eliminar atractivo
+                        response = await fetch(
+                            `http://localhost:3000/api/atractivos/${currentAtractivoId}`,
+                            {
+                                method: "DELETE",
+                            }
+                        );
+
+                        if (response.ok) {
+                            mostrarNotificacion(
+                                "¡Éxito!",
+                                `El atractivo "${currentAtractivoNombre}" ha sido eliminado correctamente`,
+                                true
+                            );
+                        } else {
+                            mostrarNotificacion(
+                                "Error",
+                                "No se pudo eliminar el atractivo",
+                                false,
+                                false
+                            );
+                        }
+                    } else if (
+                        selectedOption === "empresa" &&
+                        currentEmpresaId
+                    ) {
+                        // Primero eliminamos todos los atractivos asociados a la empresa
+                        const atractivosDeEmpresa = await fetch(
+                            `http://localhost:3000/api/atractivos?empresa_id=${currentEmpresaId}`
+                        );
+                        if (atractivosDeEmpresa.ok) {
+                            const atractivos = await atractivosDeEmpresa.json();
+
+                            // Eliminar atractivos uno por uno
+                            for (const atractivo of atractivos) {
+                                await fetch(
+                                    `http://localhost:3000/api/atractivos/${atractivo.id}`,
+                                    {
+                                        method: "DELETE",
+                                    }
+                                );
+                            }
+
+                            // Luego eliminamos la empresa
+                            response = await fetch(
+                                `http://localhost:3000/api/empresas/${currentEmpresaId}`,
+                                {
+                                    method: "DELETE",
+                                }
+                            );
+
+                            if (response.ok) {
+                                mostrarNotificacion(
+                                    "¡Éxito!",
+                                    `La empresa "${currentEmpresaNombre}" y sus ${atractivos.length} atractivos asociados han sido eliminados correctamente`,
+                                    true
+                                );
+                            } else {
+                                mostrarNotificacion(
+                                    "Error",
+                                    "No se pudo eliminar la empresa",
+                                    false,
+                                    false
+                                );
+                            }
+                        } else {
+                            mostrarNotificacion(
+                                "Error",
+                                "No se pudieron obtener los atractivos de la empresa",
+                                false,
+                                false
+                            );
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    mostrarNotificacion(
+                        "Error",
+                        "Ha ocurrido un error durante la eliminación",
+                        false,
+                        false
+                    );
+                }
+            });
+        }
+
+        // Prevenir envíos múltiples de formularios
+        const forms = document.querySelectorAll("form");
+        forms.forEach((form) => {
+            form.addEventListener("submit", function (e: Event) {
+                // Verificar si el formulario ya está enviando
+                if (this.classList.contains("enviando")) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Marcar el formulario como enviando
+                this.classList.add("enviando");
+                // Deshabilitar todos los botones submit del formulario
+                const submitButtons = this.querySelectorAll(
+                    'button[type="submit"]'
+                );
+                submitButtons.forEach((button) => {
+                    const submitButton = button as HTMLButtonElement;
+                    // Guardar el texto original
+                    const textoOriginal = submitButton.textContent || "";
+                    submitButton.dataset.textoOriginal = textoOriginal;
+
+                    // Cambiar texto y deshabilitar
+                    submitButton.textContent = "Procesando...";
+                    submitButton.classList.add("procesando");
+                    submitButton.disabled = true;
+                });
+
+                // Timeout de seguridad para restablecer el formulario en caso de error
+                setTimeout(() => {
+                    if (this.classList.contains("enviando")) {
+                        this.classList.remove("enviando");
+                        submitButtons.forEach((button) => {
+                            const submitButton = button as HTMLButtonElement;
+                            submitButton.textContent =
+                                submitButton.dataset.textoOriginal || "";
+                            submitButton.classList.remove("procesando");
+                            submitButton.disabled = false;
+                        });
+                    }
+                }, 5000); // 5 segundos de timeout
+            });
         });
-      }
+
+        // Cerrar modales haciendo clic fuera
+        [
+            modalEditar,
+            modalEliminar,
+            modalConfirmarEliminar,
+            modalNotificacion,
+        ].forEach((modal) => {
+            if (modal) {
+                modal.addEventListener("click", (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add("hidden");
+                    }
+                });
+            }
+        });
     });
-  });
 </script>

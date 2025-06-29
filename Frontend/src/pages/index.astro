@@ -1,150 +1,107 @@
 ---
 import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
-import RecommendedCarousel from "../components/RecommendedCarousel.astro";
 import CTA from "../components/CTA.astro";
 import RutasDestacadas from "../components/RutasDestacadas.astro";
+import MainLayout from "../layouts/MainLayout.astro";
+import RecommendedCarousel from "../components/RecommendedCarousel.astro";
+import Actividades from "../components/Actividades.astro";
 const { title } = Astro.props;
 ---
 
-<!doctype html>
-<html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
-        <link rel="icon" type="image/png" href="/logo-turify.png" />
-        <meta name="generator" content={Astro.generator} />
-        <link rel="stylesheet"
-              href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        />
-        <div class="hero" style="margin-top: 60px;">
-            <img src="/actividades/laberinto.png" alt="San Rafael" class="hero-img" />
-            <div class="hero-text">
-                <h1>Turify</h1>
-                <h2>Vivi San Rafael</h2>
+<MainLayout title={title}>
+    <RecommendedCarousel />
+    <section class="actividades">
+        <Actividades />
+    </section>
+    <RutasDestacadas />
+    <CTA />
+    <section class="historia">
+        <div class="historia-content">
+            <h3>Historia de Nuestro Ciudad</h3>
+            <p>
+                San Rafael es una ciudad con una rica historia y
+                tradiciones.pues no, en el frontend, debe permitir la carga del
+                archivo de la image, y el mismo meterlo a imgbb y luego pasarle
+                la url al backend. Fundada en el siglo XIX, es reconocida por su
+                hospitalidad, paisajes y actividades turísticas.
+            </p>
+        </div>
+        <div class="historia-mapa">
+            <div
+                id="map"
+                style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;">
             </div>
         </div>
-</header>
-        <title>Turify | Vivi San Rafael</title>
-    </head>
-    <body>
-        <Header />
-        <main>
-            <section class="actividades">
-                <h3>Actividades Disponibles</h3>
-                <div class="activity-button-container">
-                    <a class="activity-button">Ver Todos</a>
-                </div>
-                <div class="cards">
-                    <div class="card">
-                        <a href="/actividades_aire_libre" style="text-decoration: none; color: inherit; display: block;">
-                            <img src="/actividades/airelibre.jpg" alt="Actividad 1"/>
-                            <h4>Actividades al aire libre </h4>
-                            <p>Aventura y adrenalina entre las montañas.</p>
-                        </a>
-                        
-                    </div>
-                    <div class="card">
-                        <img src="/actividades/gastronomia.jpg" alt="Actividad 2" />
-                        <h4>Gastronomía</h4>
-                        <p>Deleitate con la mejor comida de la región.</p>
-                    </div>
-                    <div class="card">
-                        <img src="/actividades/bodegas.jpg" alt="Actividad 3" />
-                        <h4>Bodegas</h4>
-                        <p>Los mejores vinos del país.</p>
-                    </div>
-                    <div class="card">
-                        <img src="/actividades/espaciosociales.jpg" alt="Actividad 4" />
-                        <h4>Espacios Sociales</h4>
-                        <p>Disfrutá la ciudad sanrafaelina.</p>
-                </div>
-            </section>
-            <RecommendedCarousel />
-            <RutasDestacadas />
-            <CTA />
-            <section class="historia">
-                <div class="historia-content">
-                    <h3>Historia de Nuestro Ciudad</h3>
-                    <p>
-                        San Rafael es una ciudad con una rica historia y tradiciones. Fundada en el siglo XIX, es reconocida por su hospitalidad, paisajes y actividades turísticas.
-                    </p>
-                </div>
-                <div class="historia-mapa">
-                    <div id="map" style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;"></div>
-                </div>
-            </section>
+    </section>
 
-            <section class="emergencias">
-                <h3>Servicios de Emergencias <span class="badge">Urgente</span></h3>
-                <div class="emergencias-cards">
-                    <div class="emergencia-card">
-                        <h4>Policía</h4>
-                        <p>101</p>
-                    </div>
-                    <div class="emergencia-card">
-                        <h4>Bomberos</h4>
-                        <p>100</p>
-                    </div>
-                    <div class="emergencia-card">
-                        <h4>Ambulancia</h4>
-                        <p>107</p>
-                    </div>
-                </div>
-            </section>
+    <section class="emergencias">
+        <h3>
+            Servicios de Emergencias <span class="badge">Urgente</span>
+        </h3>
+        <div class="emergencias-cards">
+            <div class="emergencia-card">
+                <h4>Policía</h4>
+                <p>101</p>
+            </div>
+            <div class="emergencia-card">
+                <h4>Bomberos</h4>
+                <p>100</p>
+            </div>
+            <div class="emergencia-card">
+                <h4>Ambulancia</h4>
+                <p>107</p>
+            </div>
+        </div>
+    </section>
 
-            <section class="contacto">
-                <div class="contacto-form">
-                    <h3>Contáctanos</h3>
-                    <form>
-                        <input type="text" placeholder="Nombre" required />
-                        <input type="email" placeholder="Email" required />
-                        <textarea placeholder="Mensaje" required></textarea>
-                        <button type="submit">Enviar</button>
-                    </form>
-                </div>
-                <div class="contacto-info">
-                    <h4>Información de Contacto</h4>
-                    <ul>
-                        <li>Tel: (0260) 123-4567</li>
-                        <li>Email: info@turify.com</li>
-                        <li>Dirección: Av. San Martín 123</li>
-                    </ul>
-                </div>
-            </section>
-        </main>
-        <Footer />
+    <section class="contacto">
+        <div class="contacto-form">
+            <h3>Contáctanos</h3>
+            <form>
+                <input type="text" placeholder="Nombre" required />
+                <input type="email" placeholder="Email" required />
+                <textarea placeholder="Mensaje" required></textarea>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+        <div class="contacto-info">
+            <h4>Información de Contacto</h4>
+            <ul>
+                <li>Tel: (0260) 123-4567</li>
+                <li>Email: info@turify.com</li>
+                <li>Dirección: Av. San Martín 123</li>
+            </ul>
+        </div>
+    </section>
+</MainLayout>
 
-        <script 
-            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-            defer
-        ></script>
-        <script defer>
-        document.addEventListener('DOMContentLoaded', function () {
-            var map = L.map('map').setView([-34.617, -68.330], 13);
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script defer>
+    document.addEventListener("DOMContentLoaded", function () {
+        var map = L.map("map").setView([-34.617, -68.33], 13);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap contributors",
+        }).addTo(map);
 
-            L.marker([-34.617, -68.330]).addTo(map)
-            .bindPopup('San Rafael, Mendoza')
+        L.marker([-34.617, -68.33])
+            .addTo(map)
+            .bindPopup("San Rafael, Mendoza")
             .openPopup();
 
-            setTimeout(function () {
+        setTimeout(function () {
             map.invalidateSize();
-            }, 100);
-        });
-        </script>
-    </body>
-</html>
+        }, 100);
+    });
+</script>
 
 <style>
-    html, body {
+    html,
+    body {
         margin: 0;
         width: 100%;
         height: 100%;
-        font-family: 'Segoe UI', Arial, sans-serif;
+        font-family: "Segoe UI", Arial, sans-serif;
         background: #f8faf7;
         color: #222;
     }
@@ -161,13 +118,15 @@ const { title } = Astro.props;
         padding: 0.6rem 1.2rem;
         font-size: 1rem;
         cursor: pointer;
-        transition: background 0.2s, box-shadow 0.2s;
+        transition:
+            background 0.2s,
+            box-shadow 0.2s;
         text-decoration: none;
     }
     .activity-button:hover {
         background: white;
         color: #2e6c4d;
-        box-shadow: 0 2px 8px rgba(46,108,77,0.1);
+        box-shadow: 0 2px 8px rgba(46, 108, 77, 0.1);
         border: 1px solid #2e6c4d;
         border-color: #2e6c4d;
     }
@@ -232,7 +191,7 @@ const { title } = Astro.props;
     .card {
         background: #fff;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         width: 220px;
         padding: 1rem;
         text-align: center;
@@ -303,7 +262,7 @@ const { title } = Astro.props;
     .emergencia-card {
         background: #fff;
         border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
         width: 180px;
         padding: 1rem;
         text-align: center;
@@ -378,9 +337,11 @@ const { title } = Astro.props;
     .contacto-info li {
         margin-bottom: 0.5rem;
     }
-    
+
     @media (max-width: 900px) {
-        .cards, .emergencias-cards, .contacto {
+        .cards,
+        .emergencias-cards,
+        .contacto {
             flex-direction: column;
             align-items: center;
         }
@@ -391,20 +352,22 @@ const { title } = Astro.props;
     }
 
     .nav-auth button,
-.clerk-sign-in-button {
-    background: #2e6c4d;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(46,108,77,0.08);
-}
-.nav-auth button:hover,
-.clerk-sign-in-button:hover {
-    background: #24543a;
-}
+    .clerk-sign-in-button {
+        background: #2e6c4d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+            background 0.2s,
+            box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(46, 108, 77, 0.08);
+    }
+    .nav-auth button:hover,
+    .clerk-sign-in-button:hover {
+        background: #24543a;
+    }
 </style>

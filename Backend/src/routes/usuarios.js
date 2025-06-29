@@ -7,119 +7,148 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Usuarios
- *   description: Endpoints para gestionar usuarios
+ *   description: Endpoints para gestionar usuarios (usando Clerk para autenticación)
  */
 
 /**
  * @swagger
- * /api/usuarios/locales:
+ * /api/usuarios/perfil/{user_id}:
  *   get:
- *     summary: Obtiene todos los usuarios locales
- *     tags: [Usuarios]
- *     parameters:
- *       - in: query
- *         name: nombre
- *         schema:
- *           type: string
- *         description: Filtrar por nombre de usuario
- *       - in: query
- *         name: email
- *         schema:
- *           type: string
- *         description: Filtrar por email de usuario
- *     responses:
- *       200:
- *         description: Lista de usuarios locales
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   nombre:
- *                     type: string
- *                   email:
- *                     type: string
- *                   rol:
- *                     type: string
- */
-router.get("/locales", async (req, res) => {  try {
-    const { nombre, email } = req.query;
-    
-    // Consulta ajustada a los campos reales de la tabla usuarios_locales
-    let query = "SELECT user_id as id, nombre, rol, metadata FROM usuarios_locales WHERE 1=1";
-    const params = [];
-    
-    if (nombre) {
-      query += " AND nombre LIKE ?";
-      params.push(`%${nombre}%`);
-    }
-    
-    query += " ORDER BY user_id";
-    
-    console.log("Ejecutando consulta:", query);
-    console.log("Parámetros:", params);
-    
-    const usuarios = await db.execute(query, params);
-    console.log("Usuarios encontrados:", usuarios.rows.length);
-    
-    // Enviamos la respuesta una sola vez
-    res.json(usuarios.rows);
-  } catch (error) {
-    console.error("Error al obtener usuarios locales:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-/**
- * @swagger
- * /api/usuarios/{id}:
- *   delete:
- *     summary: Elimina un usuario por ID
+ *     summary: Obtiene el perfil de un usuario por su ID
  *     tags: [Usuarios]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: user_id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID del usuario a eliminar
+ *         description: ID del usuario
  *     responses:
  *       200:
- *         description: Usuario eliminado exitosamente
+ *         description: Datos del usuario
  *       404:
  *         description: Usuario no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.delete("/:id", async (req, res) => {  try {
-    const { id } = req.params;
-    
-    console.log("Intentando eliminar usuario con ID:", id);
-    
-    // Verificar si el usuario existe
-    const usuario = await db.execute(
-      "SELECT user_id FROM usuarios_locales WHERE user_id = ?",
-      [id]
-    );
-    
-    console.log("Resultado de búsqueda para eliminación:", usuario.rows);
-    
-    if (usuario.rows.length === 0) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+router.get("/perfil/:user_id", async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        // Obtener estadísticas del usuario desde las tablas existentes
+        const estadisticas = {
+            total_resenas: 0,
+            total_favoritos: 0,
+            atractivos_visitados: 0,
+        };
+
+        // Contar reseñas del usuario
+        const resenasResult = await db.execute({
+            sql: "SELECT COUNT(*) as count FROM reseñas WHERE user_id = ?",
+            args: [user_id],
+        });
+        estadisticas.total_resenas = resenasResult.rows[0]?.count || 0;
+
+        // Contar favoritos del usuario
+        const favoritosResult = await db.execute({
+            sql: "SELECT COUNT(*) as count FROM favoritos WHERE user_id = ?",
+            args: [user_id],
+        });
+        estadisticas.total_favoritos = favoritosResult.rows[0]?.count || 0;
+
+        // Los atractivos visitados podrían ser los que tienen reseñas
+        estadisticas.atractivos_visitados = estadisticas.total_resenas;
+
+        res.json({
+            user_id,
+            estadisticas,
+        });
+    } catch (error) {
+        console.error("Error al obtener perfil de usuario:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-    
-    // Eliminar el usuario
-    await db.execute("DELETE FROM usuarios_locales WHERE user_id = ?", [id]);
-    
-    res.json({ message: "Usuario eliminado exitosamente" });
-  } catch (error) {
-    console.error("Error al eliminar usuario:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
+});
+
+/**
+ * @swagger
+ * /api/usuarios/{user_id}/favoritos:
+ *   get:
+ *     summary: Obtiene los favoritos de un usuario
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del usuario
+ *     responses:
+ *       200:
+ *         description: Lista de favoritos del usuario
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/:user_id/favoritos", async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const result = await db.execute({
+            sql: `
+                SELECT f.*, a.nombre as atractivo_nombre, a.descripcion, a.img_url
+                FROM favoritos f
+                LEFT JOIN atractivos a ON f.atractivo_id = a.id
+                WHERE f.user_id = ?
+                ORDER BY f.fecha DESC
+            `,
+            args: [user_id],
+        });
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error al obtener favoritos del usuario:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+/**
+ * @swagger
+ * /api/usuarios/{user_id}/resenas:
+ *   get:
+ *     summary: Obtiene las reseñas de un usuario
+ *     tags: [Usuarios]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del usuario
+ *     responses:
+ *       200:
+ *         description: Lista de reseñas del usuario
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/:user_id/resenas", async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const result = await db.execute({
+            sql: `
+                SELECT r.*, a.nombre as atractivo_nombre
+                FROM reseñas r
+                LEFT JOIN atractivos a ON r.atractivo_id = a.id
+                WHERE r.user_id = ?
+                ORDER BY r.fecha DESC
+            `,
+            args: [user_id],
+        });
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error al obtener reseñas del usuario:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 });
 
 export default router;
