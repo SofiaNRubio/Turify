@@ -1,6 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import FiltroUbicacion from "../../components/FiltroUbicacion.astro";
+import { apiFetch } from "../../utils/api";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -40,11 +41,11 @@ interface Atractivo {
 // Función para obtener las categorías desde el backend
 async function obtenerCategorias(): Promise<Categoria[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/categorias");
-        if (!response.ok) {
+        const categoriasResponse = await apiFetch("/categorias");
+        if (!categoriasResponse.ok) {
             throw new Error("Error al obtener categorías");
         }
-        return await response.json();
+        return await categoriasResponse.json();
     } catch (error) {
         console.error("Error al obtener categorías:", error);
         return [];
@@ -54,13 +55,11 @@ async function obtenerCategorias(): Promise<Categoria[]> {
 // Función para obtener una empresa por ID
 async function obtenerEmpresa(id: string): Promise<Empresa | null> {
     try {
-        const response = await fetch(
-            `http://localhost:3000/api/empresas/${id}`
-        );
-        if (!response.ok) {
+        const empresaResponse = await apiFetch(`/empresas/${id}`);
+        if (!empresaResponse.ok) {
             return null;
         }
-        return await response.json();
+        return await empresaResponse.json();
     } catch (error) {
         console.error("Error al obtener empresa:", error);
         return null;
@@ -70,11 +69,11 @@ async function obtenerEmpresa(id: string): Promise<Empresa | null> {
 // Función para obtener los atractivos de una empresa
 async function obtenerAtractivos(): Promise<Atractivo[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/atractivos");
-        if (!response.ok) {
+        const atractivosResponse = await apiFetch("/atractivos");
+        if (!atractivosResponse.ok) {
             throw new Error("Error al obtener atractivos");
         }
-        return await response.json();
+        return await atractivosResponse.json();
     } catch (error) {
         console.error("Error al obtener atractivos:", error);
         return [];

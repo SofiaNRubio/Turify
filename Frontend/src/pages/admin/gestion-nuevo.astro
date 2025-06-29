@@ -1,9 +1,10 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
 
 // Obtener las empresas existentes
-const empresasResponse = await fetch('http://localhost:3000/api/empresas');
+const empresasResponse = await apiFetch('/empresas');
 let empresas = [];
 
 if (empresasResponse.ok) {
@@ -13,7 +14,7 @@ if (empresasResponse.ok) {
 }
 
 // Obtener las categorías existentes
-const categoriasResponse = await fetch('http://localhost:3000/api/categorias');
+const categoriasResponse = await apiFetch('/categorias');
 let categorias = [];
 
 if (categoriasResponse.ok) {
@@ -60,7 +61,7 @@ if (Astro.request.method === "POST") {
       atractivoData.empresa_id = formData.get('empresa_id');      // Primero validar los datos
       console.log("Enviando datos para validación:", atractivoData);
       
-      const validacionResponse = await fetch('http://localhost:3000/api/atractivos/validar', {
+      const validacionResponse = await apiFetch('/atractivos/validar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -82,7 +83,7 @@ if (Astro.request.method === "POST") {
       // Si la validación es exitosa, crear el atractivo
       console.log("Validación exitosa, creando atractivo:", atractivoData);
       
-      const atractivoResponse = await fetch('http://localhost:3000/api/atractivos', {
+      const atractivoResponse = await apiFetch('/atractivos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -123,7 +124,7 @@ if (Astro.request.method === "POST") {
         categoria_id: formData.get('empresa_categoria_id')
       };
       
-      const empresaResponse = await fetch('http://localhost:3000/api/empresas', {
+      const empresaResponse = await apiFetch('/empresas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -151,7 +152,7 @@ const empresa_id = Astro.url.searchParams.get('empresa_id') || '';
 // Si estamos en el paso 2 y tenemos una empresa_id, obtener los datos de la empresa
 let empresaActual = null;
 if (paso === '2' && empresa_id) {
-  try {    const empresaResponse = await fetch(`http://localhost:3000/api/empresas/${empresa_id}`);
+  try {    const empresaResponse = await apiFetch(`/empresas/${empresa_id}`);
     if (empresaResponse.ok) {
       empresaActual = await empresaResponse.json();
       // Si acabamos de crear la empresa (no hay mensaje de error), mostrar mensaje de éxito

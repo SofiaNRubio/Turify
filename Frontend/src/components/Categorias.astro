@@ -1,4 +1,6 @@
 ---
+import { apiFetch } from "../utils/api";
+
 // Definir tipos TypeScript
 interface Empresa {
     id: string;
@@ -30,7 +32,7 @@ interface CategoriaConImagen {
 // Función para obtener las categorías desde el backend
 async function obtenerCategorias(): Promise<Categoria[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/categorias");
+        const response = await apiFetch("/categorias");
         if (!response.ok) {
             throw new Error("Error al obtener categorías");
         }
@@ -44,7 +46,7 @@ async function obtenerCategorias(): Promise<Categoria[]> {
 // Función para obtener las empresas desde el backend
 async function obtenerEmpresas(): Promise<Empresa[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/empresas");
+        const response = await apiFetch("/empresas");
         if (!response.ok) {
             throw new Error("Error al obtener empresas");
         }

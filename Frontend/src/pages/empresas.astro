@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import FiltroDistrito from "../components/FiltroUbicacion.astro";
 import getToken from "../utils/getToken";
+import { apiFetch } from "../utils/api";
 
 // Obtener el token de autenticación
 const token = getToken();
@@ -31,7 +32,7 @@ interface Categoria {
 // Función para obtener las categorías desde el backend
 async function obtenerCategorias(): Promise<Categoria[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/categorias");
+        const response = await apiFetch("/categorias");
         if (!response.ok) {
             throw new Error("Error al obtener categorías");
         }
@@ -45,7 +46,7 @@ async function obtenerCategorias(): Promise<Categoria[]> {
 // Función para obtener las empresas desde el backend
 async function obtenerEmpresas(): Promise<Empresa[]> {
     try {
-        const response = await fetch("http://localhost:3000/api/empresas");
+        const response = await apiFetch("/empresas");
         if (!response.ok) {
             throw new Error("Error al obtener empresas");
         }
@@ -59,11 +60,11 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
 // Función para obtener los distritos únicos filtrados por categoría
 async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
     try {
-        let url = "http://localhost:3000/api/empresas/distritos";
+        let endpoint = "/empresas/distritos";
         if (categoriaId) {
-            url += `?categoria_id=${categoriaId}`;
+            endpoint += `?categoria_id=${categoriaId}`;
         }
-        const response = await fetch(url);
+        const response = await apiFetch(endpoint);
         if (!response.ok) {
             throw new Error("Error al obtener distritos");
         }
