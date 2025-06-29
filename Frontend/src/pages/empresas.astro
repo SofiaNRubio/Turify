@@ -92,9 +92,12 @@ let empresasFiltradas = categoriaId
 
 // Filtrar por ubicación si se especifica
 const ubicacionFiltro = url.searchParams.get("ubicacion");
-if (ubicacionFiltro) {
+const ubicacionesSeleccionadas = ubicacionFiltro
+  ? ubicacionFiltro.split(",")
+  : [];
+if (ubicacionesSeleccionadas.length > 0) {
     empresasFiltradas = empresasFiltradas.filter((empresa) =>
-        empresa.direccion.toLowerCase().includes(ubicacionFiltro.toLowerCase())
+        ubicacionesSeleccionadas.some((ubi) => empresa.direccion.toLowerCase().includes(ubi.toLowerCase()))
     );
 }
 
@@ -129,7 +132,7 @@ const categoriaSeleccionada = categoriaId
             {ubicaciones.length > 0 && (
                 <FiltroUbicacion 
                     ubicaciones={ubicaciones}
-                    ubicacionSeleccionada={ubicacionFiltro || ""}
+                    ubicacionSeleccionada={ubicacionesSeleccionadas}
                     placeholder="Filtrar por ubicación..."
                 />
             )}

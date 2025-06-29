@@ -1,247 +1,157 @@
 ---
 export interface Props {
   ubicaciones: string[];
-  ubicacionSeleccionada?: string;
+  ubicacionSeleccionada?: string | string[];
   placeholder?: string;
   mostrarLimpiar?: boolean;
   id?: string;
 }
 
-const { 
-  ubicaciones = [], 
-  ubicacionSeleccionada = "", 
+const {
+  ubicaciones = [],
+  ubicacionSeleccionada = [],
   placeholder = "Seleccionar ubicación",
   mostrarLimpiar = true,
   id = "filtro-ubicacion"
 } = Astro.props;
+
+// Normalizar seleccionados a array
+const seleccionadas = Array.isArray(ubicacionSeleccionada)
+  ? ubicacionSeleccionada
+  : typeof ubicacionSeleccionada === 'string' && ubicacionSeleccionada
+    ? ubicacionSeleccionada.split(',')
+    : [];
 ---
 
-<div class="filtro-ubicacion" data-ubicacion-seleccionada={ubicacionSeleccionada}>
-  <div class="filtro-container">
-    <label for={id} class="filtro-label">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z" fill="currentColor"/>
-      </svg>
-      Ubicación
-    </label>
-    
-    {ubicaciones.length > 0 ? (
-      <div class="filtro-controls">
-        <select 
-          id={id} 
-          class="filtro-select"
-          data-ubicaciones={JSON.stringify(ubicaciones)}
-        >
-          <option value="">{placeholder}</option>
-          {ubicaciones.map((ubicacion) => (
-            <option 
-              value={ubicacion} 
-              selected={ubicacion === ubicacionSeleccionada}
-            >
-              {ubicacion}
-            </option>
-          ))}
-        </select>
-        
-        {mostrarLimpiar && ubicacionSeleccionada && (
-          <button 
-            type="button" 
-            class="btn-limpiar-filtro"
-            title="Limpiar filtro"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
-            </svg>
-          </button>
-        )}
-      </div>
-    ) : (
-      <div class="filtro-sin-ubicaciones">
-        <p>No hay ubicaciones disponibles para esta categoría</p>
-      </div>
-    )}
-    
-    {ubicacionSeleccionada && (
-      <div class="filtro-activo">
-        <span class="filtro-activo-texto">
-          Filtrando por: <strong>{ubicacionSeleccionada}</strong>
-        </span>
-      </div>
+<div class="filtro-ubicacion-multiple" data-ubicacion-seleccionada={seleccionadas.join(',')}>
+  <div class="filtro-multiple-container">
+    <div class="filtro-multiple-title">Ubicación</div>
+    <div class="filtro-multiple-list">
+      {ubicaciones.length > 0 ? (
+        ubicaciones.map((ubicacion) => (
+          <label class="filtro-multiple-item">
+            <input
+              type="checkbox"
+              value={ubicacion}
+              checked={seleccionadas.includes(ubicacion)}
+              class="filtro-multiple-checkbox"
+            />
+            <span>{ubicacion}</span>
+          </label>
+        ))
+      ) : (
+        <div class="filtro-sin-ubicaciones">
+          <p>No hay ubicaciones disponibles para esta categoría</p>
+        </div>
+      )}
+    </div>
+    {mostrarLimpiar && seleccionadas.length > 0 && (
+      <button type="button" class="btn-limpiar-filtro-multiple">Limpiar filtro</button>
     )}
   </div>
 </div>
 
 <style>
-  .filtro-ubicacion {
-    margin-bottom: 1.5rem;
-  }
-
-  .filtro-container {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 2px 8px rgba(46, 108, 77, 0.1);
-    border: 1px solid rgba(46, 108, 77, 0.1);
-  }
-
-  .filtro-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #2e6c4d;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .filtro-label svg {
-    color: #2e6c4d;
-    flex-shrink: 0;
-  }
-
-  .filtro-controls {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .filtro-select {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 2px solid rgba(46, 108, 77, 0.2);
-    border-radius: 8px;
-    background: white;
-    color: #333;
-    font-size: 0.95rem;
-    font-family: inherit;
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-
-  .filtro-select:focus {
-    outline: none;
-    border-color: #2e6c4d;
-    box-shadow: 0 0 0 3px rgba(46, 108, 77, 0.1);
-  }
-
-  .filtro-select:hover {
-    border-color: #2e6c4d;
-  }
-
-  .btn-limpiar-filtro {
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border: 2px solid rgba(46, 108, 77, 0.2);
-    border-radius: 8px;
-    color: #666;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .btn-limpiar-filtro:hover {
-    background: #e9ecef;
-    border-color: #2e6c4d;
-    color: #2e6c4d;
-  }
-
-  .filtro-activo {
-    margin-top: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    background: rgba(46, 108, 77, 0.1);
-    border-radius: 6px;
-    border-left: 3px solid #2e6c4d;
-  }
-
-  .filtro-activo-texto {
-    color: #2e6c4d;
-    font-size: 0.85rem;
-  }
-
-  .filtro-activo strong {
-    font-weight: 600;
-  }
-
-  .filtro-sin-ubicaciones {
-    padding: 0.75rem;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    text-align: center;
-  }
-
-  .filtro-sin-ubicaciones p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.9rem;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .filtro-controls {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .btn-limpiar-filtro {
-      align-self: flex-end;
-      width: fit-content;
-    }
-  }
+.filtro-ubicacion-multiple {
+  margin-bottom: 1.5rem;
+}
+.filtro-multiple-container {
+  background: #d7f3df;
+  border-radius: 14px;
+  padding: 1.2rem 1.2rem 1rem 1.2rem;
+  box-shadow: 0 2px 8px rgba(46, 108, 77, 0.08);
+  border: 1px solid #b6e2c6;
+  min-width: 200px;
+  max-width: 260px;
+}
+.filtro-multiple-title {
+  font-weight: bold;
+  color: #205c37;
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+}
+.filtro-multiple-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.filtro-multiple-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #205c37;
+  cursor: pointer;
+  padding: 0.1rem 0.2rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.filtro-multiple-item:hover {
+  background: #c2e9d6;
+}
+.filtro-multiple-checkbox {
+  accent-color: #2e6c4d;
+  width: 1.1em;
+  height: 1.1em;
+}
+.btn-limpiar-filtro-multiple {
+  margin-top: 0.8rem;
+  background: #fff;
+  border: 1px solid #2e6c4d;
+  color: #2e6c4d;
+  border-radius: 8px;
+  padding: 0.4rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-limpiar-filtro-multiple:hover {
+  background: #2e6c4d;
+  color: #fff;
+}
+.filtro-sin-ubicaciones {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  text-align: center;
+}
+.filtro-sin-ubicaciones p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
 </style>
 
 <script>
-  // Función para manejar el cambio de filtro
-  function inicializarFiltroUbicacion() {
-    console.log('Inicializando filtro de ubicación');
-    
-    const filtroContainer = document.querySelector('.filtro-ubicacion');
-    if (!filtroContainer) {
-      console.log('No se encontró el contenedor del filtro');
-      return;
-    }
+function getSelectedUbicaciones() {
+  return Array.from(document.querySelectorAll('.filtro-multiple-checkbox:checked')).map((el) => (el as HTMLInputElement).value);
+}
 
-    const select = filtroContainer.querySelector('.filtro-select') as HTMLSelectElement;
-    const btnLimpiar = filtroContainer.querySelector('.btn-limpiar-filtro') as HTMLButtonElement;
-    
-    if (!select) {
-      console.log('No se encontró el select del filtro');
-      return;
-    }
-
-    // Manejar cambio en el select
-    select.addEventListener('change', (e) => {
-      const ubicacion = (e.target as HTMLSelectElement).value;
-      console.log('Cambio detectado en select, ubicación:', ubicacion);
-      
-      // Actualizar URL y recargar la página
-      const url = new URL(window.location.href);
-      if (ubicacion) {
-        url.searchParams.set('ubicacion', ubicacion);
-      } else {
-        url.searchParams.delete('ubicacion');
-      }
-      window.location.href = url.toString();
-    });
-
-    // Manejar click en botón limpiar
-    if (btnLimpiar) {
-      btnLimpiar.addEventListener('click', () => {
-        console.log('Botón limpiar clickeado');
-        
-        // Limpiar parámetro de URL y recargar la página
-        const url = new URL(window.location.href);
-        url.searchParams.delete('ubicacion');
-        window.location.href = url.toString();
-      });
-    }
-    
-    console.log('Filtro de ubicación inicializado correctamente');
+function actualizarFiltroUbicacionMultiple() {
+  const seleccionadas = getSelectedUbicaciones();
+  const url = new URL(window.location.href);
+  if (seleccionadas.length > 0) {
+    url.searchParams.set('ubicacion', seleccionadas.join(','));
+  } else {
+    url.searchParams.delete('ubicacion');
   }
+  window.location.href = url.toString();
+}
 
-  // Inicializar inmediatamente y también cuando el DOM esté listo
-  inicializarFiltroUbicacion();
-  document.addEventListener('DOMContentLoaded', inicializarFiltroUbicacion);
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.filtro-multiple-checkbox').forEach((checkbox) => {
+    checkbox.addEventListener('change', actualizarFiltroUbicacionMultiple);
+  });
+  const btnLimpiar = document.querySelector('.btn-limpiar-filtro-multiple');
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', function () {
+      document.querySelectorAll('.filtro-multiple-checkbox').forEach((cb) => {
+        (cb as HTMLInputElement).checked = false;
+      });
+      actualizarFiltroUbicacionMultiple();
+    });
+  }
+});
 </script> 
