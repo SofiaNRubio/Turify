@@ -1,0 +1,212 @@
+@import url('./global.css');
+
+/* Emergencias Component */
+.servicios-emergencia {
+    padding: 2.5rem 1.5rem;
+    background: linear-gradient(135deg, #fef2f2 0%, #ffeaea 100%);
+}
+
+.header-emergencia {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.servicios-emergencia h2 {
+    color: #dc2626;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ver-todos {
+    color: #dc2626;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border: 2px solid #dc2626;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.ver-todos:hover {
+    background: #dc2626;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.grid-emergencias {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card-emergencia {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.08);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.card-emergencia:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(220, 38, 38, 0.15);
+    border-color: #dc2626;
+}
+
+.card-emergencia img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    transition: transform var(--transition-fast);
+}
+
+.card-emergencia:hover img {
+    transform: scale(1.03);
+}
+
+.card-content {
+    padding: 1.2rem;
+    position: relative;
+}
+
+.card-emergencia h3 {
+    margin: 0 0 0.8rem 0;
+    color: #dc2626;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.tipo-emergencia {
+    display: inline-block;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.descripcion {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    font-size: 0.9rem;
+}
+
+.ubicacion {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.ubicacion svg {
+    color: #dc2626;
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+}
+
+.ver-mas {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+
+.ver-mas:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+}
+
+.placeholder-imagen {
+    width: 100%;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    position: relative;
+}
+
+.placeholder-imagen svg {
+    display: block;
+    width: 40px;
+    height: 40px;
+}
+
+/* Media queries para emergencias */
+@media (max-width: 768px) {
+    .servicios-emergencia {
+        padding: 1.5rem 1rem;
+    }
+
+    .header-emergencia {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .servicios-emergencia h2 {
+        font-size: 1.6rem;
+    }
+
+    .grid-emergencias {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    .card-emergencia h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .servicios-emergencia h2 {
+        font-size: 1.4rem;
+    }
+
+    .card-emergencia h3 {
+        font-size: 1rem;
+    }
+
+    .descripcion {
+        font-size: 0.85rem;
+    }
+
+    .ver-mas {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+} 

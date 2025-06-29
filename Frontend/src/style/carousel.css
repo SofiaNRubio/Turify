@@ -1,0 +1,238 @@
+@import url('./global.css');
+
+/* RecommendedCarousel Component */
+.recomendados {
+    margin: 0;
+    width: 100vw;
+    height: 60vh;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    contain: layout style paint;
+}
+
+.hero-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.hero-divider {
+    width: 200px;
+    height: 4px;
+    background-color: #a9d9c3;
+    margin: 0 auto 1rem auto;
+    border-radius: 2px;
+}
+
+.hero-subtitle {
+    font-size: 2rem;
+    font-weight: 300;
+    margin: 0;
+    letter-spacing: 0.05em;
+}
+
+.carousel-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.carousel-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition:
+        transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transform: translateX(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}
+
+.carousel-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    border: none;
+    outline: none;
+}
+
+.carousel-card.active {
+    opacity: 1;
+    z-index: 3;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.carousel-card.prev {
+    opacity: 0;
+    transform: translateX(-100%);
+    z-index: 2;
+}
+
+.carousel-card.next {
+    opacity: 0;
+    transform: translateX(100%);
+    z-index: 2;
+}
+
+.carousel-card:not(.active):not(.prev):not(.next) {
+    opacity: 0;
+    transform: translateX(100%);
+    z-index: 1;
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    color: #2e6c4d;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.carousel-arrow.left {
+    left: 30px;
+}
+
+.carousel-arrow.right {
+    right: 30px;
+}
+
+.carousel-wrapper:hover .carousel-arrow {
+    opacity: 1;
+    visibility: visible;
+}
+
+.carousel-arrow:hover {
+    background: #2e6c4d;
+    color: #fff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow svg {
+    stroke: currentColor;
+    width: 28px;
+    height: 28px;
+}
+
+/* Media queries para carrusel */
+@media (max-width: 768px) {
+    .recomendados {
+        height: 50vh;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-divider {
+        width: 60px;
+        height: 3px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .carousel-arrow {
+        width: 50px;
+        height: 50px;
+    }
+
+    .carousel-arrow.left {
+        left: 15px;
+    }
+
+    .carousel-arrow.right {
+        right: 15px;
+    }
+
+    .carousel-arrow svg {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .recomendados {
+        height: 40vh;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-divider {
+        width: 50px;
+        height: 2px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .carousel-arrow {
+        width: 44px;
+        height: 44px;
+    }
+
+    .carousel-arrow.left {
+        left: 10px;
+    }
+
+    .carousel-arrow.right {
+        right: 10px;
+    }
+
+    .carousel-arrow svg {
+        width: 20px;
+        height: 20px;
+    }
+} 

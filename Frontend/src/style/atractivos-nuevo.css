@@ -1,59 +1,27 @@
 @import url('./global.css');
 
-.admin-content {
-  max-width: 800px;
-  margin: 40px auto;
-  background: var(--color-bg-panel);
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
-  color: var(--color-text);
-}
-
+/* Estilos específicos para creación de atractivos */
 h1 {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-xxl);
   color: var(--color-primary);
 }
 
 h3 {
   color: var(--color-primary);
-  margin-top: 20px;
-  margin-bottom: 16px;
-  font-size: 1.2em;
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xlarge);
 }
 
-.mensaje {
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 18px;
-  text-align: center;
-}
-
-.mensaje-exito {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.mensaje-error {
-  background: #d9534f;
-  color: #fff;
-}
-
-.mensaje-acciones {
-  margin-top: 12px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
+/* Estilos específicos para botones de mensajes */
 .btn-primario,
 .btn-secundario {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9em;
-  transition: all 0.2s;
+  font-size: var(--font-size-small);
+  transition: all var(--transition-fast);
 }
 
 .btn-primario {
@@ -112,7 +80,7 @@ h3 {
 }
 
 .paso-texto {
-  font-size: 0.9em;
+  font-size: var(--font-size-small);
   text-align: center;
   color: var(--color-text);
 }
@@ -136,14 +104,15 @@ h3 {
 .paso-botones {
   display: flex;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: var(--spacing-xl);
 }
 
+/* Estilos para información de empresa seleccionada */
 .empresa-seleccionada-info {
   background: var(--color-primary-hover);
   padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
 .empresa-seleccionada-info h3 {
@@ -153,8 +122,8 @@ h3 {
 
 .empresa-info {
   background: white;
-  padding: 12px;
-  border-radius: 6px;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
 }
 
 .empresa-info h4 {
@@ -167,11 +136,7 @@ h3 {
   margin: 5px 0;
 }
 
-.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
+/* Estilos específicos para formularios de atractivos */
 .form-atractivo {
   display: flex;
   flex-direction: column;
@@ -180,41 +145,32 @@ h3 {
 
 .form-section {
   background: var(--color-bg-input);
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
-.form-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.form-row label {
-  flex: 1;
-}
-
+/* Selector de modo */
 .modo-selector {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-xxl);
 }
 
 .modo-botones {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-xl);
 }
 
 .btn-modo {
-  padding: 10px 16px;
-  border-radius: 6px;
+  padding: 10px var(--spacing-lg);
+  border-radius: var(--border-radius-md);
   background: var(--color-bg-input);
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.2s;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  transition: all var(--transition-fast);
+  font-family: var(--font-primary);
 }
 
 .btn-modo.active {
@@ -222,24 +178,25 @@ h3 {
   color: #fff;
 }
 
+/* Grid de empresas */
 .empresas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
 }
 
 .empresa-card {
   background: var(--color-table-row-odd);
   border: 1px solid var(--color-primary-hover);
-  padding: 12px;
-  border-radius: 6px;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .empresa-card:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px var(--color-shadow);
   transform: translateY(-2px);
 }
 
@@ -248,136 +205,45 @@ h3 {
   border-color: var(--color-primary);
 }
 
-.empresa-card h4 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  color: var(--color-primary);
-}
-
 .empresa-categoria {
-  font-size: 0.9em;
-  margin: 4px 0;
+  font-size: var(--font-size-small);
   color: #666;
 }
 
 .empresa-direccion {
-  font-size: 0.85em;
-  margin: 4px 0;
-  color: #777;
+  font-size: var(--font-size-small);
+  color: #888;
 }
 
 #empresa-seleccionada {
   background: var(--color-primary-hover);
-  padding: 10px 16px;
-  border-radius: 6px;
-  margin-top: 10px;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-xl);
 }
 
 #empresa-seleccionada h4 {
-  margin: 0;
-  font-size: 0.9em;
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-primary);
 }
 
 #empresa-nombre-display {
   font-weight: bold;
-  margin: 4px 0 0 0;
-}
-
-.hidden {
-  display: none;
-}
-
-.form-atractivo-buttons {
-  display: flex;
-  flex-direction: row;
-  gap: 0;
-  margin-top: 10px;
-}
-
-label {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-  gap: 6px;
-  color: var(--color-primary);
-  margin-bottom: 12px;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="url"],
-input[type="number"],
-textarea,
-select {
-  padding: 8px 10px;
-  border-radius: 5px;
-  border: 1px solid var(--color-primary);
-  background: var(--color-bg-input);
-  color: var(--color-primary);
-  font-size: 1em;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
-.btn-nuevo,
-.btn-cancelar {
-  padding: 10px 0;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1em;
-  min-width: 120px;
-  display: inline-block;
-  text-align: center;
-  margin: 0;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
-}
-
-.btn-nuevo {
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-right: 10px;
-}
-
-.btn-nuevo:hover {
-  background: var(--color-primary-hover);
   color: var(--color-primary);
 }
 
-.btn-cancelar {
-  background: var(--color-bg-panel);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  transition: background 0.2s, color 0.2s;
-}
-
-.btn-cancelar:hover {
-  background: var(--color-primary);
-  color: #fff;
-}
-
+/* Media queries específicas para creación de atractivos */
 @media (max-width: 768px) {
-  .admin-content {
-    padding: 20px;
-    margin: 20px auto;
-  }
-
   .form-row {
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
   }
-
+  
   .empresas-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: 1fr;
   }
-
+  
   .paso-texto {
     font-size: 0.8em;
   }
@@ -387,16 +253,16 @@ textarea {
   .modo-botones {
     flex-direction: column;
   }
-
+  
   .btn-modo {
     width: 100%;
   }
-
+  
   .pasos-container {
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
   }
-
+  
   .paso-linea {
     display: none;
   }

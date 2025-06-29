@@ -2,6 +2,8 @@
 // Historia component
 ---
 
+<link rel="stylesheet" href="/src/style/components.css">
+
 <section class="historia">
     <div class="historia-content">
         <h3>Historia de Nuestra Ciudad</h3>
@@ -83,49 +85,3 @@
         }
     });
 </script>
-
-<style>
-    .historia {
-        display: flex;
-        background: #eaf7f0;
-        border-radius: 12px;
-        padding: 2rem 1rem;
-        margin-bottom: 2rem;
-        gap: 2rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    .historia-content {
-        flex: 2;
-        min-width: 220px;
-    }
-    .historia-content h3 {
-        margin-top: 0;
-        color: #2e6c4d;
-    }
-    .historia-mapa {
-        flex: 1;
-        min-width: 180px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    #historia-map {
-        height: 250px !important;
-        width: 100% !important;
-        border-radius: 8px;
-        z-index: 0;
-    }
-
-    @media (max-width: 900px) {
-        .historia {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        #historia-map {
-            height: 200px !important;
-        }
-    }
-</style>
