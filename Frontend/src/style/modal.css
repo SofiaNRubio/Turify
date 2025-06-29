@@ -1,0 +1,189 @@
+@import url('./global.css');
+
+/* Estilos específicos para modales */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-overlay);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--spacing-xl);
+}
+
+.modal {
+  background-color: var(--color-bg-panel);
+  border-radius: var(--border-radius-xl);
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-header {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 15px var(--spacing-xl);
+  font-weight: 600;
+  font-size: var(--font-size-large);
+}
+
+.modal-body {
+  padding: var(--spacing-xl);
+  color: var(--color-text);
+}
+
+.modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin: 15px 0;
+}
+
+.modal-option {
+  background-color: var(--color-bg-input);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md) 15px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-option:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.modal-option.selected {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.modal-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  pointer-events: none;
+}
+
+.modal-option.disabled .modal-option-description {
+  color: #888;
+  font-style: italic;
+}
+
+.modal-icon {
+  font-size: 1.3em;
+  color: var(--color-primary);
+}
+
+.modal-option.selected .modal-icon {
+  color: white;
+}
+
+.modal-option-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.modal-option-description {
+  font-size: var(--font-size-small);
+  opacity: 0.8;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: var(--spacing-xl);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 15px;
+}
+
+.modal-btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+}
+
+.modal-btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.modal-btn-primary:hover {
+  background-color: #14412f;
+}
+
+.modal-btn-secondary {
+  background-color: var(--color-light);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.modal-btn-secondary:hover {
+  background-color: #e9ecef;
+}
+
+.modal-btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.modal-btn-danger:hover {
+  background-color: var(--color-danger-hover);
+}
+
+.modal-form {
+  margin-top: 15px;
+}
+
+/* Estilos específicos para modal de notificación */
+#modal-notificacion .modal-header {
+  padding: 15px var(--spacing-xl);
+}
+
+#modal-notificacion #titulo-notificacion {
+  margin: 0;
+  font-size: var(--font-size-xlarge);
+}
+
+#modal-notificacion .modal-body {
+  text-align: center;
+  padding: 25px var(--spacing-xl);
+}
+
+#modal-notificacion #texto-notificacion {
+  font-size: var(--font-size-large);
+  margin-bottom: var(--spacing-xl);
+  line-height: 1.4;
+}
+
+#modal-notificacion .modal-btn-primary {
+  min-width: 120px;
+}
+
+/* Media queries específicas para modales */
+@media (max-width: 768px) {
+  .modal {
+    max-width: 90%;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .modal-btn {
+    width: 100%;
+  }
+}

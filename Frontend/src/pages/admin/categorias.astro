@@ -1,0 +1,354 @@
+---
+import AdminPanel from "../../components/AdminPanel.astro";
+import TableAdmin from "../../components/TableAdmin.astro";
+import { AdminMenu } from "../../components/AdminMenu";
+
+// Obtener parámetros de filtro de la URL
+const { searchParams } = Astro.url;
+const nombreFiltro = searchParams.get('nombre') || '';
+
+// Construir la URL de la API con los filtros
+let apiUrl = 'http://localhost:3000/api/categorias';
+const filtros = [];
+if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
+if (filtros.length > 0) {
+  apiUrl += `?${filtros.join('&')}`;
+}
+
+// Obtener categorías desde la API
+const response = await fetch(apiUrl);
+let categorias = [];
+
+if (response.ok) {
+  categorias = await response.json();
+} else {
+  console.error('Error al cargar categorías:', response.statusText);
+  // Usar datos de respaldo en caso de error
+  categorias = [
+    { id: 'cat1', nombre: "Naturaleza" },
+    { id: 'cat2', nombre: "Gastronomía" },
+    { id: 'cat3', nombre: "Cultural" },
+  ];
+}
+
+// Definir columnas para la tabla
+const columnas = [
+  { key: 'id', label: 'ID', editable: false },
+  { key: 'nombre', label: 'Nombre', editable: true, required: true }
+];
+---
+
+<link rel="stylesheet" href="/src/style/categorias.css">
+<link rel="stylesheet" href="/src/style/modal.css">
+
+<AdminPanel menu={AdminMenu}>
+  <div class="admin-content">
+    <div class="header">
+      <h1>Categorías</h1>
+      <a href="/admin/categorias-nueva" class="btn-nuevo">+ Nueva Categoría</a>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="filtros-container">
+      <form id="filtros-form" method="get" class="filtros">
+        <div class="filtro filtro-nombre">
+          <label for="nombre">Nombre de Categoría:</label>
+          <input type="text" id="nombre" name="nombre" value={nombreFiltro} placeholder="Buscar...">
+        </div>
+        
+        <div class="filtros-botones">
+          <button type="submit" class="btn-filtrar">Filtrar</button>
+          <a href="/admin/categorias" class="btn-limpiar">Limpiar</a>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Tabla de categorías -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>        {categorias.length > 0 ? (
+          categorias.map((cat: any) => (
+            <tr>
+              <td>{cat.id}</td>
+              <td>{cat.nombre}</td>              <td class="acciones">
+                <button class="btn-editar" data-id={cat.id} data-nombre={cat.nombre}>Editar</button>
+                <button class="btn-eliminar" data-id={cat.id} data-nombre={cat.nombre}>Eliminar</button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colspan="3" class="sin-resultados">
+              No se encontraron categorías
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+  <!-- Modal para crear nueva categoría -->
+  <div id="modal-nueva-categoria" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Nueva Categoría</h3>
+      </div>
+      <div class="modal-body">
+        <form id="form-nueva-categoria" class="modal-form">
+          <div class="modal-form-group">
+            <label for="nueva-nombre">Nombre:</label>
+            <input type="text" id="nueva-nombre" name="nombre" required class="form-control">
+          </div>
+          
+          <div class="modal-actions">
+            <button type="submit" class="modal-btn modal-btn-primary">Guardar</button>
+            <button type="button" class="modal-btn modal-btn-secondary" id="btn-cancelar-nueva">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div id="modal-confirmar-eliminar" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Confirmar eliminación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-confirmar-eliminar">¿Estás seguro de que deseas eliminar esta categoría?</p>
+          <div class="modal-actions">
+          <button class="modal-btn modal-btn-danger" id="btn-confirmar-eliminar">Eliminar</button>
+          <button class="modal-btn modal-btn-secondary" id="btn-cancelar-confirmar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de notificación -->
+  <div id="modal-notificacion" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="titulo-notificacion">Notificación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-notificacion"></p>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>  <!-- Modal de edición directa -->
+  <div id="modal-editar-categoria" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar categoría</h3>
+      </div>
+      <div class="modal-body">
+        <form id="form-editar-categoria" class="modal-form">
+          <input type="hidden" id="categoria-id-editar" value="">
+          
+          <div class="modal-form-group">
+            <label for="nombre-editar">Nuevo nombre:</label>
+            <input type="text" id="nombre-editar" name="nombre" class="form-control" required>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="submit" class="modal-btn modal-btn-primary">Guardar cambios</button>
+            <button type="button" class="modal-btn modal-btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</AdminPanel>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Modal para nueva categoría
+    const btnNuevo = document.querySelector('.btn-nuevo');    const modalNueva = document.getElementById('modal-nueva-categoria');
+    const formNueva = document.getElementById('form-nueva-categoria');
+    const btnCancelarNueva = document.getElementById('btn-cancelar-nueva');
+      // Elementos del modal de eliminación
+    const btnEliminar = document.querySelectorAll('.btn-eliminar');
+    const modalConfirmarEliminar = document.getElementById('modal-confirmar-eliminar');
+    const btnCancelarConfirmar = document.getElementById('btn-cancelar-confirmar');
+    const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar');
+    const modalNotificacion = document.getElementById('modal-notificacion');
+    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');    // Elementos del modal de edición
+    const btnEditar = document.querySelectorAll('.btn-editar');
+    const modalEditarCategoria = document.getElementById('modal-editar-categoria');
+    const formEditarCategoria = document.getElementById('form-editar-categoria');
+    const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
+    const inputNombreEditar = document.getElementById('nombre-editar') as HTMLInputElement;
+      // Variables para almacenar datos del elemento seleccionado
+    let currentId: string | null = null;
+    let currentNombre: string | null = null;
+    
+    // Función para mostrar notificación
+    function mostrarNotificacion(titulo: string, mensaje: string, esExito: boolean = true, recargar: boolean = true) {
+      const tituloNotificacion = document.getElementById('titulo-notificacion');
+      const textoNotificacion = document.getElementById('texto-notificacion');
+      
+      if (tituloNotificacion) {
+        tituloNotificacion.textContent = titulo;
+      }
+      
+      if (textoNotificacion) {
+        textoNotificacion.textContent = mensaje;
+      }
+      
+      modalNotificacion?.classList.remove('hidden');
+      
+      btnAceptarNotificacion?.addEventListener('click', () => {
+        modalNotificacion?.classList.add('hidden');
+        if (recargar) {
+          window.location.reload();
+        }
+      }, { once: true });
+    }
+    
+    // Función para cerrar modales
+    function cerrarModal(modal: HTMLElement | null) {
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+    
+    // Event listeners para el modal de nueva categoría
+    btnNuevo?.addEventListener('click', (e) => {
+      e.preventDefault();
+      modalNueva?.classList.remove('hidden');
+    });
+    
+    btnCancelarNueva?.addEventListener('click', () => {
+      cerrarModal(modalNueva);
+    });
+    
+    formNueva?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(formNueva as HTMLFormElement);
+      const nombre = formData.get('nombre') as string;
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/categorias', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nombre }),
+        });
+        
+        if (response.ok) {
+          mostrarNotificacion('Éxito', 'Categoría creada correctamente');
+          cerrarModal(modalNueva);
+          (formNueva as HTMLFormElement).reset();
+        } else {
+          mostrarNotificacion('Error', 'Error al crear la categoría', false, false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error', 'Error de conexión', false, false);
+      }
+    });
+    
+    // Event listeners para el modal de eliminación
+    btnEliminar.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const nombre = btn.getAttribute('data-nombre');
+        
+        currentId = id;
+        currentNombre = nombre;
+        
+        const textoConfirmar = document.getElementById('texto-confirmar-eliminar');
+        if (textoConfirmar) {
+          textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar la categoría "${nombre}"?`;
+        }
+        
+        modalConfirmarEliminar?.classList.remove('hidden');
+      });
+    });
+    
+    btnCancelarConfirmar?.addEventListener('click', () => {
+      cerrarModal(modalConfirmarEliminar);
+    });
+    
+    btnConfirmarEliminar?.addEventListener('click', async () => {
+      if (!currentId) return;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/categorias/${currentId}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          mostrarNotificacion('Éxito', 'Categoría eliminada correctamente');
+          cerrarModal(modalConfirmarEliminar);
+        } else {
+          mostrarNotificacion('Error', 'Error al eliminar la categoría', false, false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error', 'Error de conexión', false, false);
+      }
+    });
+    
+    // Event listeners para el modal de edición
+    btnEditar.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const nombre = btn.getAttribute('data-nombre');
+        
+        currentId = id;
+        currentNombre = nombre;
+        
+        if (inputNombreEditar) {
+          inputNombreEditar.value = nombre || '';
+        }
+        
+        modalEditarCategoria?.classList.remove('hidden');
+      });
+    });
+    
+    btnCancelarEditar?.addEventListener('click', () => {
+      cerrarModal(modalEditarCategoria);
+    });
+    
+    formEditarCategoria?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentId) return;
+      
+      const formData = new FormData(formEditarCategoria as HTMLFormElement);
+      const nombre = formData.get('nombre') as string;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/categorias/${currentId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nombre }),
+        });
+        
+        if (response.ok) {
+          mostrarNotificacion('Éxito', 'Categoría actualizada correctamente');
+          cerrarModal(modalEditarCategoria);
+        } else {
+          mostrarNotificacion('Error', 'Error al actualizar la categoría', false, false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error', 'Error de conexión', false, false);
+      }
+    });
+  });
+</script>

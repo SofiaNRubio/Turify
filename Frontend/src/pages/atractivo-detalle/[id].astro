@@ -1,0 +1,1547 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+
+// Obtener el ID del atractivo desde la URL
+const { id } = Astro.params;
+if (!id) {
+    return Astro.redirect("/atractivosporejemplo");
+}
+
+// URL del backend
+const BACKEND_URL = "http://localhost:3000";
+
+// Interfaces para los datos
+interface Atractivo {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    empresa_id?: string;
+    categoria_id?: string;
+    direccion?: string;
+    latitud?: number;
+    longitud?: number;
+    email?: string;
+    telefono?: string;
+    sitio_web?: string;
+    img_url?: string;
+}
+
+// Variables para almacenar los datos
+let isBackendConnected = false;
+let empresa = null;
+let atractivo = null;
+let atractivos = [];
+let resenas = [];
+let correctAtractivoId = null;
+let estadisticas = {
+    totalReviews: 0,
+    averageRating: 0,
+    distribution: {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+    },
+};
+
+// Verificar si es un ID de empresa o atractivo
+const isEmpresaId = id.startsWith("emp");
+const isAtractivoId = id.startsWith("atr");
+
+console.log(
+    `[PAGE] Procesando ID: ${id} (isEmpresaId: ${isEmpresaId}, isAtractivoId: ${isAtractivoId})`
+);
+
+// Función para verificar conexión
+async function checkConnection() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/`, { method: "GET" });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
+
+// Intentar obtener datos del backend
+try {
+    isBackendConnected = await checkConnection();
+
+    if (isBackendConnected) {
+        // Logging de depuración
+        console.log(
+            `[PAGE] Conectado al backend. Procesando ID: ${id}, tipo: ${isEmpresaId ? "empresa" : isAtractivoId ? "atractivo" : "desconocido"}`
+        );
+
+        if (isEmpresaId) {
+            // Si es un ID de empresa, obtener la empresa primero
+            const empresaResponse = await fetch(
+                `${BACKEND_URL}/api/empresas/${id}`
+            );
+            if (empresaResponse.ok) {
+                empresa = await empresaResponse.json();
+                console.log("[PAGE] Empresa obtenida:", empresa);
+
+                // Obtener los atractivos asociados a esta empresa
+                const atractivosResponse = await fetch(
+                    `${BACKEND_URL}/api/atractivos?empresa_id=${id}`
+                );
+                if (atractivosResponse.ok) {
+                    atractivos = await atractivosResponse.json();
+                    console.log(
+                        `[PAGE] Se obtuvieron ${atractivos.length} atractivos asociados a la empresa ${id}`
+                    );
+
+                    // Usar el primer atractivo asociado para mostrar detalles y reseñas
+                    if (atractivos && atractivos.length > 0) {
+                        atractivo = atractivos[0];
+                        correctAtractivoId = atractivo.id;
+                        console.log(
+                            `[PAGE] Usando atractivo asociado: ${correctAtractivoId}`
+                        );
+                    } else {
+                        console.error(
+                            `[PAGE] No se encontraron atractivos asociados a la empresa: ${id}`
+                        );
+                    }
+                } else {
+                    console.error(
+                        `[PAGE] Error al obtener atractivos para la empresa: ${id}`
+                    );
+                }
+            } else {
+                console.error(
+                    `[PAGE] Error al obtener datos de empresa con ID: ${id}`
+                );
+            }
+        } else if (isAtractivoId) {
+            // Si es un ID de atractivo, obtenerlo directamente
+            const atractivoResponse = await fetch(
+                `${BACKEND_URL}/api/atractivos/${id}`
+            );
+            if (atractivoResponse.ok) {
+                atractivo = await atractivoResponse.json();
+                correctAtractivoId = id;
+                console.log(
+                    `[PAGE] Atractivo obtenido directamente: ${correctAtractivoId}`
+                );
+
+                // Obtener la empresa asociada
+                if (atractivo && atractivo.empresa_id) {
+                    const empresaResponse = await fetch(
+                        `${BACKEND_URL}/api/empresas/${atractivo.empresa_id}`
+                    );
+                    if (empresaResponse.ok) {
+                        empresa = await empresaResponse.json();
+                    }
+                }
+            } else {
+                console.error(
+                    `[PAGE] Error al obtener datos de atractivo con ID: ${id}`
+                );
+            }
+        } else {
+            console.error(`[PAGE] Formato de ID no reconocido: ${id}`);
+        }
+
+        // Solo obtener reseñas si tenemos un ID de atractivo válido
+        if (correctAtractivoId) {
+            console.log(
+                `[PAGE] Obteniendo reseñas para atractivo: ${correctAtractivoId}`
+            );
+            try {
+                const resenasResponse = await fetch(
+                    `${BACKEND_URL}/api/resenas/${correctAtractivoId}`
+                );
+                if (resenasResponse.ok) {
+                    resenas = await resenasResponse.json();
+                    console.log(
+                        `[PAGE] Se obtuvieron ${resenas.length} reseñas para el atractivo ${correctAtractivoId}`
+                    );
+
+                    // Calcular estadísticas
+                    if (resenas.length > 0) {
+                        estadisticas.totalReviews = resenas.length;
+
+                        // Calcular promedio
+                        const totalPuntaje = resenas.reduce(
+                            (sum, resena) => sum + resena.puntaje,
+                            0
+                        );
+                        estadisticas.averageRating =
+                            totalPuntaje / resenas.length;
+
+                        // Calcular distribución
+                        resenas.forEach((resena) => {
+                            const puntaje = String(resena.puntaje);
+                            estadisticas.distribution[puntaje] =
+                                (estadisticas.distribution[puntaje] || 0) + 1;
+                        });
+
+                        // Convertir a porcentajes
+                        Object.keys(estadisticas.distribution).forEach(
+                            (key) => {
+                                estadisticas.distribution[key] = Math.round(
+                                    (estadisticas.distribution[key] /
+                                        resenas.length) *
+                                        100
+                                );
+                            }
+                        );
+                    }
+                } else {
+                    console.error(
+                        `[PAGE] Error al obtener reseñas para atractivo ${correctAtractivoId}: ${resenasResponse.status} ${resenasResponse.statusText}`
+                    );
+                    try {
+                        const errorData = await resenasResponse.text();
+                        console.error(`[PAGE] Error detallado: ${errorData}`);
+                    } catch (e) {
+                        console.error(
+                            `[PAGE] No se pudo obtener detalles del error: ${e}`
+                        );
+                    }
+                }
+            } catch (error) {
+                console.error(
+                    `[PAGE] Excepción al obtener reseñas para atractivo ${correctAtractivoId}:`,
+                    error
+                );
+            }
+        } else {
+            console.error(
+                "[PAGE] No se pudo determinar un ID de atractivo válido"
+            );
+        }
+    }
+} catch (error) {
+    console.error("Error al obtener datos:", error);
+}
+
+// Si no hay conexión o no hay datos, usar datos de ejemplo
+if (!atractivo) {
+    console.log("Usando datos de ejemplo");
+    atractivo = {
+        id: isAtractivoId ? id : `atr${id.substring(3)}`,
+        nombre: "Catamarán Los Reyunos",
+        descripcion:
+            "Disfruta de un paseo único en catamarán por el embalse Los Reyunos. Vistas panorámicas y la tranquilidad del agua te esperan. Ideal para familias y parejas.",
+        direccion: "Embalse Los Reyunos, San Rafael, Mendoza",
+        latitud: -34.5895,
+        longitud: -68.5839,
+        tipo: "actividades",
+        email: "info@catamaranreyunos.com",
+        telefono: "+54 9 260 123-4567",
+        sitio_web: "https://www.catamaranreyunos.com",
+    };
+
+    empresa = {
+        id: isEmpresaId ? id : `emp${id.substring(3)}`,
+        nombre: "Empresa Turística Los Reyunos",
+        descripcion:
+            "Empresa dedicada a brindar experiencias turísticas de calidad en la zona de Los Reyunos.",
+        direccion: "Calle Principal 123, San Rafael, Mendoza",
+        email: "contacto@losreyunos.com",
+        telefono: "+54 9 260 765-4321",
+    };
+
+    correctAtractivoId = atractivo.id;
+
+    // Generar algunas reseñas de ejemplo
+    resenas = [
+        {
+            id: 1,
+            atractivo_id: correctAtractivoId,
+            usuario: "María González",
+            user_id: "user123",
+            comentario:
+                "Una experiencia increíble. El paseo en catamarán fue muy relajante y las vistas son espectaculares. Recomendado 100%.",
+            puntaje: 5,
+            fecha: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+            id: 2,
+            atractivo_id: correctAtractivoId,
+            usuario: "Juan Pérez",
+            user_id: "user456",
+            comentario:
+                "Muy buena actividad para hacer en familia. El guía fue muy amable y conocedor de la zona.",
+            puntaje: 4,
+            fecha: new Date(
+                Date.now() - 15 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+        },
+        {
+            id: 3,
+            atractivo_id: correctAtractivoId,
+            usuario: "Carlos Rodríguez",
+            user_id: "user789",
+            comentario:
+                "El paisaje es hermoso, pero el servicio podría mejorar. El catamarán estaba un poco lleno y no había suficiente espacio.",
+            puntaje: 3,
+            fecha: new Date(
+                Date.now() - 45 * 24 * 60 * 60 * 1000
+            ).toISOString(),
+        },
+    ];
+
+    // Calcular estadísticas para los datos de ejemplo
+    estadisticas.totalReviews = resenas.length;
+    const totalPuntaje = resenas.reduce(
+        (sum, resena) => sum + resena.puntaje,
+        0
+    );
+    estadisticas.averageRating = totalPuntaje / resenas.length;
+
+    // Calcular distribución para los datos de ejemplo
+    resenas.forEach((resena) => {
+        const puntaje = String(resena.puntaje);
+        estadisticas.distribution[puntaje] =
+            (estadisticas.distribution[puntaje] || 0) + 1;
+    });
+
+    // Convertir a porcentajes
+    Object.keys(estadisticas.distribution).forEach((key) => {
+        estadisticas.distribution[key] = Math.round(
+            (estadisticas.distribution[key] / resenas.length) * 100
+        );
+    });
+}
+
+// Función para formatear fechas
+function formatearFecha(fechaStr: string) {
+    if (!fechaStr) return "Fecha desconocida";
+
+    try {
+        const fecha = new Date(fechaStr);
+        const ahora = new Date();
+        const diferencia = ahora.getTime() - fecha.getTime();
+
+        // Menos de un día
+        if (diferencia < 86400000) {
+            return "Hoy";
+        }
+        // Menos de una semana
+        else if (diferencia < 604800000) {
+            const dias = Math.floor(diferencia / 86400000);
+            return `Hace ${dias} día${dias > 1 ? "s" : ""}`;
+        }
+        // Menos de un mes
+        else if (diferencia < 2592000000) {
+            const semanas = Math.floor(diferencia / 604800000);
+            return `Hace ${semanas} semana${semanas > 1 ? "s" : ""}`;
+        }
+        // Menos de un año
+        else if (diferencia < 31536000000) {
+            const meses = Math.floor(diferencia / 2592000000);
+            return `Hace ${meses} mes${meses > 1 ? "es" : ""}`;
+        }
+        // Más de un año
+        else {
+            const anos = Math.floor(diferencia / 31536000000);
+            return `Hace ${anos} año${anos > 1 ? "s" : ""}`;
+        }
+    } catch (e) {
+        console.error("Error al formatear fecha:", e);
+        return "Fecha inválida";
+    }
+}
+---
+
+<MainLayout>
+    <div class="container">
+        <h1 class="title">{atractivo.nombre}</h1>
+
+        <!-- Indicador de estado de conexión -->
+        <div class="connection-status">
+            <span
+                class="status-indicator {isBackendConnected ? 'online' : 'offline'}"
+                >●</span
+            >
+            <span class="status-text">
+                {
+                    isBackendConnected
+                        ? "Conectado al servidor"
+                        : "Servidor no disponible - Mostrando datos de ejemplo"
+                }
+            </span>
+        </div>
+
+        <!-- Información principal del atractivo -->
+        <div class="info-section">
+            <div class="description-container">
+                <p class="description">{atractivo.descripcion}</p>
+            </div>
+            <div class="image-container">
+                <img
+                    src={atractivo.img_url || "/default-attraction.jpg"}
+                    class="main-image"
+                    alt={atractivo.nombre}
+                />
+            </div>
+        </div>
+
+        <!-- Ubicación y detalles de contacto -->
+        {
+            (atractivo.latitud && atractivo.longitud) || atractivo.direccion ? (
+                <section class="location-section">
+                    <div class="location-info">
+                        <h2 class="section-subtitle">Ubicación y Contacto</h2>
+                        <p class="address">
+                            {atractivo.direccion || "Dirección no disponible"}
+                        </p>
+                        {atractivo.telefono && (
+                            <p>
+                                <strong>Teléfono:</strong> {atractivo.telefono}
+                            </p>
+                        )}
+                        {atractivo.email && (
+                            <p>
+                                <strong>Email:</strong> {atractivo.email}
+                            </p>
+                        )}
+                        {atractivo.sitio_web && (
+                            <p>
+                                <strong>Sitio web:</strong>
+                                <a
+                                    href={
+                                        atractivo.sitio_web.startsWith("http")
+                                            ? atractivo.sitio_web
+                                            : `https://${atractivo.sitio_web}`
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+                                    {atractivo.sitio_web}
+                                </a>
+                            </p>
+                        )}
+                    </div>
+                    {atractivo.latitud && atractivo.longitud && (
+                        <div
+                            class="map-container"
+                            data-latitud={atractivo.latitud}
+                            data-longitud={atractivo.longitud}>
+                            <div id="map" />
+                        </div>
+                    )}
+                </section>
+            ) : null
+        }
+
+        <!-- Sección para dejar reseñas -->
+        <div class="review-form-section">
+            <h2 class="section-subtitle">Deja tu Opinión</h2>
+            <div class="review-form-container">
+                <div class="rating-input">
+                    <h3 class="input-label">Calificación:</h3>
+                    <div class="stars-container">
+                        <span class="star" data-value="1">☆</span>
+                        <span class="star" data-value="2">☆</span>
+                        <span class="star" data-value="3">☆</span>
+                        <span class="star" data-value="4">☆</span>
+                        <span class="star" data-value="5">☆</span>
+                    </div>
+                </div>
+                <div class="comment-input">
+                    <h3 class="input-label">Comentario:</h3>
+                    <textarea
+                        id="comentario"
+                        placeholder="Comparte tu experiencia sobre este lugar..."
+                    ></textarea>
+                </div>
+                <!-- Campos ocultos para información necesaria -->
+                <input
+                    type="hidden"
+                    id="atractivo-id"
+                    value={correctAtractivoId || ""}
+                />
+                <input type="hidden" id="backend-url" value={BACKEND_URL} />
+            </div>
+            <div class="button-container">
+                <button class="submit-button" id="submit-review">
+                    Enviar reseña
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección de opiniones y calificaciones -->
+        <section class="reviews-section">
+            <h2 class="section-subtitle">Opiniones de Visitantes</h2>
+
+            <!-- Resumen de calificaciones -->
+            <div class="rating-summary">
+                <div class="average-rating">
+                    <div class="rating-number">
+                        {estadisticas.averageRating.toFixed(1)}
+                    </div>
+                    <div class="stars-display">
+                        {
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <span
+                                    class={`star ${
+                                        estadisticas.averageRating >= i + 1
+                                            ? "filled"
+                                            : estadisticas.averageRating >=
+                                                i + 0.5
+                                              ? "half-filled"
+                                              : ""
+                                    }`}>
+                                    ★
+                                </span>
+                            ))
+                        }
+                    </div>
+                    <div class="total-reviews">
+                        {estadisticas.totalReviews}
+                        {
+                            estadisticas.totalReviews === 1
+                                ? "opinión"
+                                : "opiniones"
+                        }
+                    </div>
+                </div>
+
+                <div class="rating-distribution">
+                    {
+                        [5, 4, 3, 2, 1].map((rating) => (
+                            <div class="rating-bar">
+                                <div class="rating-label">{rating} ★</div>
+                                <div class="bar-container">
+                                    <div
+                                        class="bar"
+                                        style={`width: ${estadisticas.distribution[rating.toString()]}%`}
+                                    />
+                                </div>
+                                <div class="percentage">
+                                    {
+                                        estadisticas.distribution[
+                                            rating.toString()
+                                        ]
+                                    }
+                                    %
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <!-- Lista de reseñas -->
+            <div class="reviews-list">
+                {
+                    resenas.map((resena) => (
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="reviewer-info">
+                                    <span class="reviewer-name">
+                                        {resena.usuario || "Usuario anónimo"}
+                                    </span>
+                                    <span class="review-date">
+                                        {formatearFecha(resena.fecha)}
+                                    </span>
+                                </div>
+                                <div class="review-rating">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <span
+                                            class={`star ${i < resena.puntaje ? "filled" : ""}`}>
+                                            ★
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <p class="review-content">{resena.comentario}</p>
+                        </div>
+                    ))
+                }
+            </div>
+        </section>
+
+        <!-- Sección de contacto adicional -->
+        <section class="contact-section">
+            <h2 class="section-subtitle">¿Necesitas más información?</h2>
+            <p class="contact-text">
+                Si tienes dudas específicas sobre este atractivo o quieres
+                planificar tu visita, nuestro equipo está disponible para
+                ayudarte.
+            </p>
+            <div class="contact-button-container">
+                <button class="contact-button">
+                    Contactar
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                        ></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </section>
+    </div>
+</MainLayout>
+
+<script define:vars={{ id, correctAtractivoId, BACKEND_URL }}>
+    // Inicializar el sistema de calificación con estrellas
+    document.addEventListener("DOMContentLoaded", function () {
+        // Inicializar el mapa si está disponible
+        initMap();
+
+        // Debugging info
+        console.log("[SCRIPT] Script inicializado");
+        console.log(
+            "[SCRIPT] ID de atractivo:",
+            document.getElementById("atractivo-id")?.value
+        );
+        console.log(
+            "[SCRIPT] Backend URL:",
+            document.getElementById("backend-url")?.value
+        );
+
+        // Manejar calificación por estrellas
+        let rating = 0;
+        const stars = document.querySelectorAll(".rating-star");
+
+        stars.forEach((star) => {
+            star.addEventListener("click", function () {
+                const value = parseInt(this.getAttribute("data-value"));
+                rating = value;
+                console.log("[SCRIPT] Calificación seleccionada:", rating);
+                updateStars();
+            });
+
+            star.addEventListener("mouseover", function () {
+                const value = parseInt(this.getAttribute("data-value"));
+                highlightStars(value);
+            });
+
+            star.addEventListener("mouseout", function () {
+                updateStars();
+            });
+        });
+
+        function highlightStars(value) {
+            stars.forEach((star) => {
+                const starValue = parseInt(star.getAttribute("data-value"));
+                if (starValue <= value) {
+                    star.textContent = "★";
+                    star.classList.add("hover");
+                } else {
+                    star.textContent = "☆";
+                    star.classList.remove("hover");
+                }
+            });
+        }
+
+        function updateStars() {
+            stars.forEach((star) => {
+                const starValue = parseInt(star.getAttribute("data-value"));
+                if (starValue <= rating) {
+                    star.textContent = "★";
+                    star.classList.add("active");
+                } else {
+                    star.textContent = "☆";
+                    star.classList.remove("active", "hover");
+                }
+            });
+        }
+
+        // Manejar envío de reseñas
+        const submitButton = document.getElementById("submit-review");
+        if (submitButton) {
+            submitButton.addEventListener("click", async function () {
+                console.log("[SCRIPT] Botón de envío presionado");
+
+                const comentarioElement = document.getElementById("comentario");
+                if (!comentarioElement) {
+                    console.error(
+                        "[SCRIPT] No se encontró el elemento de comentario"
+                    );
+                    return;
+                }
+
+                const comentario = comentarioElement.value.trim();
+
+                if (rating === 0) {
+                    alert("Por favor selecciona una calificación");
+                    return;
+                }
+
+                if (!comentario) {
+                    alert("Por favor escribe un comentario");
+                    return;
+                }
+
+                // Asegurarse de que tenemos un ID de atractivo válido
+                const correctAtractivoId =
+                    document.getElementById("atractivo-id")?.value;
+                const backendUrl =
+                    document.getElementById("backend-url")?.value ||
+                    "http://localhost:3000";
+
+                console.log("[SCRIPT] Preparando envío de reseña:");
+                console.log("[SCRIPT] - ID de atractivo:", correctAtractivoId);
+                console.log("[SCRIPT] - Calificación:", rating);
+                console.log(
+                    "[SCRIPT] - Comentario:",
+                    comentario.substring(0, 30) +
+                        (comentario.length > 30 ? "..." : "")
+                );
+                console.log("[SCRIPT] - Backend URL:", backendUrl);
+
+                if (!correctAtractivoId) {
+                    showErrorMessage(
+                        "Error: No se ha podido identificar el atractivo para reseñar"
+                    );
+                    console.error(
+                        "[SCRIPT] No se pudo obtener el ID del atractivo"
+                    );
+                    return;
+                }
+
+                // Verificar que el ID de atractivo tiene el formato correcto
+                if (!correctAtractivoId.startsWith("atr")) {
+                    showErrorMessage(
+                        'Error: El ID del atractivo no tiene el formato correcto (debe empezar con "atr")'
+                    );
+                    console.error(
+                        `[SCRIPT] ID de atractivo inválido: ${correctAtractivoId}`
+                    );
+                    return;
+                }
+
+                // Deshabilitar el botón mientras se envía
+                submitButton.disabled = true;
+                submitButton.innerHTML = "Enviando...";
+
+                try {
+                    // Intentar obtener el token de autenticación si está disponible
+                    let authHeaders = {
+                        "Content-Type": "application/json",
+                    };
+
+                    if (typeof window !== "undefined" && window.Clerk) {
+                        const clerk = window.Clerk;
+                        if (clerk.session) {
+                            const token = await clerk.session.getToken();
+                            if (token) {
+                                authHeaders["Authorization"] =
+                                    `Bearer ${token}`;
+                                console.log(
+                                    "[SCRIPT] Token de autenticación obtenido"
+                                );
+                            } else {
+                                console.log(
+                                    "[SCRIPT] No se pudo obtener token de autenticación"
+                                );
+                            }
+                        } else {
+                            console.log(
+                                "[SCRIPT] No hay sesión de usuario activa"
+                            );
+                        }
+                    } else {
+                        console.log("[SCRIPT] Clerk no está disponible");
+                    }
+
+                    console.log(
+                        `[SCRIPT] Enviando reseña con atractivo_id: ${correctAtractivoId}`
+                    );
+
+                    // Enviar la reseña al backend
+                    const response = await fetch(`${backendUrl}/api/resenas`, {
+                        method: "POST",
+                        headers: authHeaders,
+                        body: JSON.stringify({
+                            atractivo_id: correctAtractivoId,
+                            comentario: comentario,
+                            puntaje: rating,
+                        }),
+                    });
+
+                    // Log de la respuesta
+                    let responseData;
+                    try {
+                        const contentType =
+                            response.headers.get("content-type");
+                        if (
+                            contentType &&
+                            contentType.includes("application/json")
+                        ) {
+                            responseData = await response.json();
+                            console.log(
+                                "[SCRIPT] Respuesta del servidor (JSON):",
+                                responseData
+                            );
+                        } else {
+                            const text = await response.text();
+                            console.log(
+                                "[SCRIPT] Respuesta del servidor (texto):",
+                                text
+                            );
+                            responseData = { mensaje: text };
+                        }
+                    } catch (e) {
+                        console.error(
+                            "[SCRIPT] Error al procesar respuesta:",
+                            e
+                        );
+                    }
+
+                    if (response.ok) {
+                        console.log("[SCRIPT] Reseña enviada exitosamente");
+                        showSuccessMessage("¡Reseña enviada exitosamente!");
+
+                        // Limpiar el formulario
+                        comentarioElement.value = "";
+                        rating = 0;
+                        updateStars();
+
+                        // Recargar la página para mostrar la nueva reseña
+                        setTimeout(() => {
+                            console.log(
+                                "[SCRIPT] Recargando página para mostrar la nueva reseña"
+                            );
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        // Respuesta no exitosa
+                        let errorMessage = "Error al enviar la reseña";
+                        console.error(
+                            `[SCRIPT] Error al enviar reseña: ${response.status} ${response.statusText}`
+                        );
+
+                        if (responseData && responseData.error) {
+                            errorMessage = responseData.error;
+                            console.error(
+                                `[SCRIPT] Mensaje de error del servidor: ${errorMessage}`
+                            );
+
+                            // Si el usuario ya ha dejado una reseña, mostrar un mensaje específico
+                            if (errorMessage.includes("Ya has reseñado")) {
+                                errorMessage =
+                                    "Ya has dejado una reseña para este atractivo";
+                            }
+                            // Si es un error de clave foránea, dar más información
+                            else if (
+                                errorMessage.includes(
+                                    "FOREIGN KEY constraint failed"
+                                )
+                            ) {
+                                errorMessage =
+                                    "Error de referencia: El atractivo indicado no existe en la base de datos";
+                                console.error(
+                                    `[SCRIPT] Error de clave foránea con ID: ${correctAtractivoId}`
+                                );
+                            }
+                        }
+
+                        showErrorMessage(errorMessage);
+                    }
+                } catch (error) {
+                    console.error("[SCRIPT] Error al enviar reseña:", error);
+
+                    // Si es un error de conexión, simular reseña localmente
+                    if (
+                        error.message.includes("fetch") ||
+                        !window.navigator.onLine
+                    ) {
+                        console.log(
+                            "[SCRIPT] Error de conexión, guardando reseña localmente"
+                        );
+
+                        // Crear elemento de reseña simulada
+                        const reviewsList =
+                            document.querySelector(".reviews-list");
+                        if (reviewsList) {
+                            const newReview = document.createElement("div");
+                            newReview.className = "review-card local-review";
+                            newReview.innerHTML = `
+                <div class="review-header">
+                  <div class="reviewer-info">
+                    <span class="reviewer-name">Tu reseña local</span>
+                    <span class="review-date">Ahora mismo</span>
+                  </div>
+                  <div class="review-rating">
+                    ${Array.from(
+                        { length: 5 },
+                        (_, i) =>
+                            `<span class="star ${i < rating ? "filled" : ""}">★</span>`
+                    ).join("")}
+                  </div>
+                </div>
+                <p class="review-content">${comentario}</p>
+                <div class="local-review-badge">Guardada localmente</div>
+              `;
+
+                            // Insertar al principio de la lista
+                            reviewsList.insertBefore(
+                                newReview,
+                                reviewsList.firstChild
+                            );
+
+                            showSuccessMessage(
+                                "Reseña guardada localmente (sin conexión)"
+                            );
+
+                            // Limpiar el formulario
+                            comentarioElement.value = "";
+                            rating = 0;
+                            updateStars();
+                        }
+                    } else {
+                        showErrorMessage(
+                            "Error al enviar la reseña: " + error.message
+                        );
+                    }
+                } finally {
+                    // Rehabilitar el botón
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = `
+            Enviar reseña
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          `;
+                }
+            });
+        }
+
+        // Funciones para mostrar mensajes
+        function showSuccessMessage(message) {
+            showMessage(message, "success");
+        }
+
+        function showErrorMessage(message) {
+            showMessage(message, "error");
+        }
+
+        function showMessage(message, type) {
+            const messageElement = document.createElement("div");
+            messageElement.className = `message-toast ${type}`;
+            messageElement.innerHTML = `
+        <div class="message-content">
+          <span class="message-icon">${type === "success" ? "✓" : "⚠"}</span>
+          <span class="message-text">${message}</span>
+        </div>
+      `;
+
+            document.body.appendChild(messageElement);
+
+            setTimeout(() => {
+                messageElement.classList.add("show");
+            }, 100);
+
+            setTimeout(() => {
+                messageElement.classList.remove("show");
+                setTimeout(() => {
+                    document.body.removeChild(messageElement);
+                }, 300);
+            }, 5000);
+        }
+    });
+
+    // Función para inicializar el mapa
+    function initMap() {
+        const mapElement = document.getElementById("map");
+        if (!mapElement) return;
+
+        const mapContainer = document.querySelector(".map-container");
+        if (mapContainer) {
+            const latitud = parseFloat(
+                mapContainer.getAttribute("data-latitud")
+            );
+            const longitud = parseFloat(
+                mapContainer.getAttribute("data-longitud")
+            );
+
+            if (!isNaN(latitud) && !isNaN(longitud)) {
+                // Si existe la API de Google Maps, usarla
+                if (typeof google !== "undefined" && google.maps) {
+                    const location = { lat: latitud, lng: longitud };
+                    const map = new google.maps.Map(mapElement, {
+                        center: location,
+                        zoom: 15,
+                    });
+                    new google.maps.Marker({
+                        position: location,
+                        map: map,
+                    });
+                } else {
+                    // Fallback: mostrar un enlace a Google Maps
+                    mapElement.innerHTML = `
+            <div class="map-fallback">
+              <p>Mapa no disponible</p>
+              <a href="https://www.google.com/maps/search/?api=1&query=${latitud},${longitud}" 
+                target="_blank" rel="noopener noreferrer" class="map-link">
+                Ver en Google Maps
+              </a>
+            </div>
+          `;
+                }
+            }
+        }
+    }
+
+    // Cargar API de Google Maps (descomentá esta parte y agregá tu API key cuando sea necesario)
+    /*
+  function loadGoogleMapsScript() {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap`;
+    script.defer = true;
+    script.async = true;
+    document.head.appendChild(script);
+    
+    // Exponer la función initMap globalmente
+    window.initMap = initMap;
+  }
+  
+  // loadGoogleMapsScript();
+  */
+</script>
+
+<style>
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .title {
+        font-size: 2.5rem;
+        color: #1a513b;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .connection-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(245, 247, 244, 0.8);
+        border-radius: 6px;
+        width: fit-content;
+        margin: 0 auto 2rem;
+    }
+
+    .status-indicator {
+        font-size: 1.2rem;
+    }
+
+    .status-indicator.online {
+        color: #10b981;
+    }
+
+    .status-indicator.offline {
+        color: #ef4444;
+    }
+
+    .status-text {
+        color: #4b5563;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    /* Sección de información principal */
+    .info-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        align-items: center;
+    }
+
+    .description-container {
+        flex: 3;
+        min-width: 300px;
+    }
+
+    .description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+    }
+
+    .image-container {
+        flex: 2;
+        min-width: 280px;
+    }
+
+    .main-image {
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sección de ubicación */
+    .location-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin: 3rem 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .location-info {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .map-container {
+        flex: 1;
+        min-width: 280px;
+        height: 250px;
+    }
+
+    #map {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        background-color: #e9ecef;
+    }
+
+    .map-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background-color: #f1f3f5;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .map-link {
+        display: inline-block;
+        background: #1a513b;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        margin-top: 0.5rem;
+    }
+
+    .section-subtitle {
+        font-size: 1.5rem;
+        color: #1a513b;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .address {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Sección para dejar reseñas */
+    .review-form-section {
+        margin: 3rem 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .review-form-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .rating-input {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .comment-input {
+        flex: 2;
+        min-width: 300px;
+    }
+
+    .input-label {
+        font-size: 1.1rem;
+        color: #1a513b;
+        margin-bottom: 0.5rem;
+    }
+
+    .stars-container {
+        display: flex;
+        gap: 0.3rem;
+    }
+
+    .star {
+        font-size: 2rem;
+        color: #ccc;
+        cursor: pointer;
+    }
+
+    .star.hover,
+    .star.active {
+        color: #ffd700;
+    }
+
+    textarea#comentario {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+        font-size: 1rem;
+        background-color: white;
+        color: #333;
+    }
+
+    textarea#comentario::placeholder {
+        color: #888;
+        opacity: 0.7;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .submit-button {
+        background: #1a513b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+            background-color 0.2s,
+            transform 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-button:hover {
+        background: #14402e;
+        transform: translateY(-2px);
+    }
+
+    .submit-button:active {
+        transform: translateY(0);
+    }
+
+    /* Sección de opiniones */
+    .reviews-section {
+        margin: 3rem 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .rating-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .average-rating {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .rating-number {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #1a513b;
+    }
+
+    .stars-display {
+        display: flex;
+        gap: 0.2rem;
+    }
+
+    .stars-display .star {
+        font-size: 1.8rem;
+        cursor: default;
+    }
+
+    .star.filled {
+        color: #ffd700;
+    }
+
+    .star.half-filled {
+        position: relative;
+        color: #ccc;
+    }
+
+    .star.half-filled::before {
+        content: "★";
+        position: absolute;
+        color: #ffd700;
+        width: 50%;
+        overflow: hidden;
+    }
+
+    .total-reviews {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .rating-distribution {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .rating-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .rating-label {
+        width: 40px;
+        text-align: right;
+        margin-right: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .bar-container {
+        flex: 1;
+        height: 8px;
+        background: #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .bar {
+        height: 100%;
+        background: #ffd700;
+    }
+
+    .percentage {
+        width: 40px;
+        text-align: left;
+        margin-left: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Lista de reseñas */
+    .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .reviewer-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .reviewer-name {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .review-date {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .review-rating {
+        display: flex;
+        gap: 0.2rem;
+    }
+
+    .review-rating .star {
+        font-size: 1rem;
+        color: #ccc;
+        cursor: default;
+    }
+
+    .review-rating .star.filled {
+        color: #ffd700;
+    }
+
+    .review-content {
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+    }
+
+    .local-review {
+        border: 1px dashed #10b981;
+        background-color: rgba(16, 185, 129, 0.05);
+    }
+
+    .local-review-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #10b981;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    /* Sección de contacto */
+    .contact-section {
+        margin: 3rem 0;
+        padding: 2.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .contact-text {
+        max-width: 600px;
+        margin: 1rem auto 1.5rem;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .contact-button-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .contact-button {
+        background: #1a513b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+            background-color 0.2s,
+            transform 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .contact-button:hover {
+        background: #14402e;
+        transform: translateY(-2px);
+    }
+
+    .contact-button:active {
+        transform: translateY(0);
+    }
+
+    /* Mensajes flotantes */
+    .message-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .message-toast.success {
+        background: #10b981;
+        color: white;
+    }
+
+    .message-toast.error {
+        background: #ef4444;
+        color: white;
+    }
+
+    .message-toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .message-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .message-icon {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .title {
+            font-size: 2rem;
+        }
+
+        .info-section {
+            flex-direction: column-reverse;
+        }
+
+        .review-header {
+            flex-direction: column;
+        }
+
+        .rating-summary {
+            gap: 2rem;
+        }
+
+        .review-form-section,
+        .reviews-section,
+        .location-section,
+        .contact-section {
+            padding: 1.5rem;
+        }
+    }
+</style>

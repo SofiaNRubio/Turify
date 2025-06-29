@@ -1,0 +1,370 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+
+// Definir interfaces para los datos
+interface Atractivo {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    empresa_id?: string;
+    categoria_id?: string;
+    direccion?: string;
+    latitud?: number;
+    longitud?: number;
+    email?: string;
+    telefono?: string;
+    sitio_web?: string;
+    img_url?: string;
+    empresa_nombre?: string;
+    categoria_nombre?: string;
+}
+
+interface Resena {
+    id: number;
+    atractivo_id: string;
+    usuario?: string;
+    user_id?: string;
+    comentario: string;
+    puntaje: number;
+    fecha: string;
+}
+
+// URL del backend
+const BACKEND_URL = "http://localhost:3000";
+
+// Estado de conexión con el backend
+let isBackendConnected = false;
+let atractivos: Atractivo[] = [];
+
+try {
+    // Intentar conectar con el backend
+    const response = await fetch(`${BACKEND_URL}/api/atractivos`);
+
+    if (response.ok) {
+        isBackendConnected = true;
+        atractivos = await response.json();
+        console.log("Datos obtenidos del backend:", atractivos.slice(0, 2)); // Mostrar los primeros 2 como ejemplo
+    } else {
+        console.error("Error al obtener atractivos:", response.statusText);
+    }
+} catch (error) {
+    console.error("Error de conexión con el backend:", error);
+}
+
+// Si no hay conexión o no hay datos, usar datos de ejemplo
+if (atractivos.length === 0) {
+    console.log("Usando datos de ejemplo");
+    atractivos = [
+        {
+            id: "emp1",
+            nombre: "Catamaran Los Reyunos",
+            descripcion:
+                "Paseo en catamaran por el embalse Los Reyunos. Disfruta de vistas panorámicas y la tranquilidad del agua.",
+            categoria_id: "cat1",
+            direccion: "Embalse Los Reyunos, San Rafael, Mendoza",
+            latitud: -34.5895,
+            longitud: -68.5839,
+            empresa_id: "emp1",
+            empresa_nombre: "Catamaran Los Reyunos",
+        },
+        {
+            id: "emp2",
+            nombre: "Bodega La Abeja",
+            descripcion:
+                "Bodega tradicional con degustación de vinos. Recorrido por viñedos y proceso de elaboración.",
+            categoria_id: "cat2",
+            direccion: "Ruta 144, San Rafael, Mendoza",
+            latitud: -34.6123,
+            longitud: -68.3372,
+            empresa_id: "emp2",
+            empresa_nombre: "Bodega La Abeja",
+        },
+        {
+            id: "emp3",
+            nombre: "Cañón del Atuel",
+            descripcion:
+                "Formaciones rocosas y paisajes impresionantes. Un lugar ideal para la aventura y fotografía.",
+            categoria_id: "cat3",
+            direccion: "Valle Grande, San Rafael, Mendoza",
+            latitud: -34.8234,
+            longitud: -68.5021,
+            empresa_id: "emp3",
+            empresa_nombre: "Cañón del Atuel",
+        },
+        {
+            id: "emp4",
+            nombre: "Plaza San Martín",
+            descripcion:
+                "Plaza histórica en el centro de la ciudad. Punto de encuentro y espacio cultural.",
+            categoria_id: "cat4",
+            direccion: "Centro, San Rafael, Mendoza",
+            latitud: -34.6176,
+            longitud: -68.3369,
+            empresa_id: "emp4",
+            empresa_nombre: "Plaza San Martín",
+        },
+    ];
+}
+
+// Agrupar atractivos por categoría
+const atractivosPorCategoria: Record<string, Atractivo[]> = {};
+
+atractivos.forEach((atractivo) => {
+    const categoria = atractivo.categoria_id || "otros";
+    if (!atractivosPorCategoria[categoria]) {
+        atractivosPorCategoria[categoria] = [];
+    }
+    atractivosPorCategoria[categoria].push(atractivo);
+});
+
+// Función para obtener una imagen según la categoría ID
+function getImagenPorTipo(categoriaId: string): string {
+    switch (categoriaId) {
+        case "cat1": // Actividades
+            return "/actividades/airelibre.jpg";
+        case "cat2": // Bodegas
+            return "/actividades/bodegas.jpg";
+        case "cat3": // Naturaleza
+            return "/carrusel/naturaleza.jpg";
+        case "cat4": // Social/Cultural
+            return "/actividades/espaciosociales.jpg";
+        case "cat5": // Gastronomía
+            return "/actividades/gastronomia.jpg";
+        default:
+            return "/actividades/laberinto.png";
+    }
+}
+---
+
+<MainLayout>
+    <div class="container">
+        <h1 class="main-title">Descubre los Atractivos Turísticos</h1>
+
+        <!-- Indicador de estado de conexión con el backend -->
+        <div class="connection-status">
+            <span
+                class="status-indicator {isBackendConnected ? 'online' : 'offline'}"
+                >●</span
+            >
+            <span class="status-text">
+                {
+                    isBackendConnected
+                        ? "Conectado al servidor"
+                        : "Servidor no disponible - Mostrando datos de ejemplo"
+                }
+            </span>
+        </div>
+
+        <!-- Secciones de atractivos por categoría -->
+        {
+            Object.entries(atractivosPorCategoria).map(
+                ([categoria, listaAtractivos]) => (
+                    <section class="tipo-section">
+                        <h2 class="tipo-title">{categoria}</h2>
+                        <div class="cards-grid">
+                            {listaAtractivos.map((atractivo) => (
+                                <div class="card">
+                                    <div class="card-image">
+                                        <img
+                                            src={
+                                                atractivo.img_url ||
+                                                getImagenPorTipo(
+                                                    atractivo.categoria_id ||
+                                                        "otros"
+                                                )
+                                            }
+                                            alt={atractivo.nombre}
+                                        />
+                                    </div>
+                                    <div class="card-content">
+                                        <h3 class="card-title">
+                                            {atractivo.nombre}
+                                        </h3>
+                                        {atractivo.empresa_nombre &&
+                                            atractivo.empresa_nombre !==
+                                                atractivo.nombre && (
+                                                <p class="card-subtitle">
+                                                    {atractivo.empresa_nombre}
+                                                </p>
+                                            )}
+                                        <p class="card-description">
+                                            {atractivo.descripcion &&
+                                            atractivo.descripcion.length > 100
+                                                ? atractivo.descripcion.slice(
+                                                      0,
+                                                      97
+                                                  ) + "..."
+                                                : atractivo.descripcion}
+                                        </p>
+                                        {/* Usar la URL con el ID de empresa original ya que la página de detalle se encargará de buscar el atractivo correspondiente */}
+                                        <a
+                                            href={`/atractivo-detalle/${atractivo.id}`}
+                                            class="card-button">
+                                            Ver detalle
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )
+            )
+        }
+    </div>
+</MainLayout>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .main-title {
+        font-size: 2.5rem;
+        color: #1a513b;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .connection-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        padding: 0.5rem 1rem;
+        background: rgba(245, 247, 244, 0.8);
+        border-radius: 6px;
+        width: fit-content;
+        margin: 0 auto 2rem;
+    }
+
+    .status-indicator {
+        font-size: 1.2rem;
+    }
+
+    .status-indicator.online {
+        color: #10b981;
+    }
+
+    .status-indicator.offline {
+        color: #ef4444;
+    }
+
+    .status-text {
+        color: #4b5563;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .tipo-section {
+        margin-bottom: 3rem;
+    }
+
+    .tipo-title {
+        font-size: 1.8rem;
+        color: #1a513b;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #a9d9c3;
+    }
+
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition:
+            transform 0.3s,
+            box-shadow 0.3s;
+        border: 1px solid #e0e0e0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-image {
+        height: 180px;
+        overflow: hidden;
+    }
+
+    .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .card:hover .card-image img {
+        transform: scale(1.05);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .card-title {
+        color: #1a513b;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+
+    .card-subtitle {
+        color: #666;
+        margin-top: -0.3rem;
+        margin-bottom: 0.8rem;
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+
+    .card-description {
+        color: #4b5563;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+
+    .card-button {
+        display: inline-block;
+        background: #1a513b;
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.3s;
+        text-align: center;
+        align-self: flex-start;
+    }
+
+    .card-button:hover {
+        background: #143d2c;
+    }
+
+    @media (max-width: 768px) {
+        .main-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+</style>

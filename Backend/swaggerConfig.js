@@ -12,8 +12,14 @@ const options = {
         info: {
             title: "API de Turify",
             version: "1.0.0",
-            description: "API de turismo",
+            description: "API de turismo para San Rafael, Mendoza",
         },
+        tags: [
+            {
+                name: "Chat",
+                description: "Endpoints del chat de turismo TurifyBot",
+            },
+        ],
         servers: [
             {
                 url: "http://localhost:3000",
@@ -21,7 +27,10 @@ const options = {
             },
         ],
     },
-    apis: [resolve(__dirname, "src/routes/empresas.js")],
+    apis: [
+        resolve(__dirname, "src/routes/empresas.js"),
+        resolve(__dirname, "src/routes/chat.js"),
+    ],
 };
 
 const specs = swaggerJsdoc(options);

@@ -1,0 +1,73 @@
+@import url('./global.css');
+
+/* Estilos específicos para formularios de edición */
+.form-atractivo, .form-empresa {
+  background-color: var(--color-bg-input);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xxl);
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+.form-section {
+  margin-bottom: var(--spacing-xxl);
+  padding: var(--spacing-xl);
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius-md);
+}
+
+.form-section h3 {
+  color: var(--color-primary);
+  margin-top: 0;
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xlarge);
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: var(--spacing-sm);
+}
+
+/* Botones específicos de formularios de edición */
+.form-atractivo-buttons, .form-empresa-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-xxl);
+}
+
+/* Mejoras para formularios de edición con sidebar */
+.admin-content {
+  padding-bottom: 40px;
+}
+
+.form-atractivo, .form-empresa {
+  margin-top: var(--spacing-xl);
+  margin-bottom: 40px;
+}
+
+/* Media queries específicas para formularios de edición */
+@media (max-width: 768px) {
+  .form-section {
+    padding: 15px;
+  }
+
+  .form-atractivo-buttons, .form-empresa-buttons {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 900px) {
+  .form-atractivo, .form-empresa {
+    padding: var(--spacing-lg);
+  }
+  
+  .form-section {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* Asegurar suficiente espacio para formularios largos */
+.admin-panel-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,153 @@
+---
+// Importar estilos CSS
+---
+
+<link rel="stylesheet" href="/src/style/carousel.css">
+
+<section class="recomendados">
+    <div class="hero-text">
+        <h1 class="hero-title">Turify</h1>
+        <div class="hero-divider"></div>
+        <p class="hero-subtitle">Viví San Rafael</p>
+    </div>
+    <div class="carousel-wrapper">
+        <button
+            class="carousel-arrow left"
+            id="prevLugar"
+            aria-label="Anterior">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><polyline points="15 18 9 12 15 6"></polyline></svg
+            >
+        </button>
+
+        <div class="carousel-track" id="carouselTrack">
+            <!-- Cada tarjeta -->
+            <div class="carousel-card">
+                <img
+                    src="/carrusel/LaberintoBorges.jpg"
+                    alt="Laberinto Borges"
+                />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/bodega.webp" alt="Viñedos Bianchi" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/naturaleza.jpg" alt="Bodega La Abeja" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/los_reyunos2.jpg" alt="Los Reyunos" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/Turismo-86.jpg" alt="Valle grande" />
+            </div>
+            <div class="carousel-card">
+                <img src="/carrusel/el_tigre1.jpg" alt="El Tigre" />
+            </div>
+            <div class="carousel-card">
+                <img
+                    src="/carrusel/vajilla-premium.jpg"
+                    alt="Parque Nacional"
+                />
+            </div>
+            <div class="carousel-card">
+                <img
+                    src="/carrusel/ParquedelosNinos.jpg"
+                    alt="Parque Nacional"
+                />
+            </div>
+
+            <button
+                class="carousel-arrow right"
+                id="nextLugar"
+                aria-label="Siguiente">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    ><polyline points="9 18 15 12 9 6"></polyline></svg
+                >
+            </button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const cards = document.querySelectorAll(".carousel-card");
+            let current = 0;
+            let autoSlideInterval;
+
+            const updateClasses = () => {
+                cards.forEach((card, i) => {
+                    // Remover todas las clases primero
+                    card.classList.remove("active", "prev", "next");
+
+                    // Forzar un reflow para asegurar que las clases se apliquen correctamente
+                    card.offsetHeight;
+
+                    // Aplicar las nuevas clases
+                    if (i === current) {
+                        card.classList.add("active");
+                    } else if (
+                        i ===
+                        (current - 1 + cards.length) % cards.length
+                    ) {
+                        card.classList.add("prev");
+                    } else if (i === (current + 1) % cards.length) {
+                        card.classList.add("next");
+                    }
+                });
+            };
+
+            const nextSlide = () => {
+                current = (current + 1) % cards.length;
+                updateClasses();
+            };
+
+            const prevSlide = () => {
+                current = (current - 1 + cards.length) % cards.length;
+                updateClasses();
+            };
+
+            const startAutoSlide = () => {
+                autoSlideInterval = setInterval(nextSlide, 30000);
+            };
+
+            const stopAutoSlide = () => {
+                clearInterval(autoSlideInterval);
+            };
+
+            // Event listeners para botones
+            document.getElementById("prevLugar").onclick = () => {
+                stopAutoSlide();
+                prevSlide();
+                startAutoSlide(); // Reiniciar el auto-slide
+            };
+
+            document.getElementById("nextLugar").onclick = () => {
+                stopAutoSlide();
+                nextSlide();
+                startAutoSlide(); // Reiniciar el auto-slide
+            };
+
+            // Pausar auto-slide en hover
+            const carouselWrapper = document.querySelector(".carousel-wrapper");
+            carouselWrapper.addEventListener("mouseenter", stopAutoSlide);
+            carouselWrapper.addEventListener("mouseleave", startAutoSlide);
+
+            // Inicializar
+            updateClasses();
+            startAutoSlide();
+        });
+    </script>
+</section>

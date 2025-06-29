@@ -1,0 +1,87 @@
+---
+// Historia component
+---
+
+<link rel="stylesheet" href="/src/style/components.css">
+
+<section class="historia">
+    <div class="historia-content">
+        <h3>Historia de Nuestra Ciudad</h3>
+        <p>
+            San Rafael, en Mendoza, nació en 1805 como un fuerte en la
+            confluencia de los ríos Atuel y Diamante, un refugio en medio de la
+            aridez. Su historia es un canto a la resistencia y al encuentro
+            entre culturas, donde la tierra seca se transformó en un oasis
+            gracias al esfuerzo de sus habitantes y la riqueza de sus aguas.
+        </p>
+        <p>
+            Con el tiempo, San Rafael creció y se convirtió en un centro
+            agrícola y vitivinícola gracias a la llegada de inmigrantes y al
+            ingenio de visionarios como Julio Ballofet. Hoy, su paisaje y su
+            gente reflejan un profundo amor por sus raíces y una esperanza
+            constante en el futuro.
+        </p>
+    </div>
+    <div class="historia-mapa">
+        <div
+            id="historia-map"
+            style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;">
+        </div>
+    </div>
+</section>
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // @ts-ignore - Leaflet se carga globalmente
+    document.addEventListener("DOMContentLoaded", function () {
+        // @ts-ignore - L es la variable global de Leaflet
+        if (typeof L === "undefined") {
+            console.error("Leaflet no está cargado");
+            return;
+        }
+
+        // Verificar si el elemento del mapa existe
+        const mapElement = document.getElementById("historia-map");
+        if (!mapElement) {
+            console.error("Elemento del mapa no encontrado");
+            return;
+        }
+
+        try {
+            // @ts-ignore - L es la variable global de Leaflet
+            var map = L.map("historia-map").setView([-34.617, -68.33], 13);
+
+            // Agregar la capa de tiles
+            // @ts-ignore - L es la variable global de Leaflet
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap contributors",
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Agregar marcador
+            // @ts-ignore - L es la variable global de Leaflet
+            L.marker([-34.617, -68.33])
+                .addTo(map)
+                .bindPopup("San Rafael, Mendoza")
+                .openPopup();
+
+            // Asegurar que el mapa se redimensione correctamente
+            setTimeout(function () {
+                map.invalidateSize();
+            }, 500);
+
+            // Redimensionar cuando la ventana cambie de tamaño
+            window.addEventListener("resize", function () {
+                setTimeout(function () {
+                    map.invalidateSize();
+                }, 100);
+            });
+        } catch (error) {
+            console.error("Error al inicializar el mapa:", error);
+        }
+    });
+</script>

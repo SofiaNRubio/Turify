@@ -1,6 +1,6 @@
 import express from "express";
 import { db } from "../db.js";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 const router = express.Router();
 
@@ -15,16 +15,45 @@ router.post("/", async (req, res) => {
         direccion,
         latitud,
         longitud,
-        tipo,
+        img_url,
+        categoria_id,
     } = req.body;
 
-    const id = uuidv4();
-
     try {
+        // Validar campos requeridos
+        if (!nombre || nombre.trim() === "") {
+            return res.status(400).json({ error: "El nombre es obligatorio" });
+        }
+
+        if (!descripcion || descripcion.trim() === "") {
+            return res
+                .status(400)
+                .json({ error: "La descripción es obligatoria" });
+        }
+
+        // Validar coordenadas
+        const lat = parseFloat(latitud);
+        const lng = parseFloat(longitud);
+
+        if (isNaN(lat) || !isFinite(lat)) {
+            return res
+                .status(400)
+                .json({ error: "La latitud debe ser un número válido" });
+        }
+
+        if (isNaN(lng) || !isFinite(lng)) {
+            return res
+                .status(400)
+                .json({ error: "La longitud debe ser un número válida" });
+        }
+
+        // Generar UUID para la empresa
+        const id = `emp-${randomUUID()}`;
+
         await db.execute({
             sql: `INSERT INTO empresas 
-        (id, nombre, descripcion, email, telefono, sitio_web, direccion, latitud, longitud, tipo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, nombre, descripcion, email, telefono, sitio_web, direccion, latitud, longitud, img_url, categoria_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 id,
                 nombre,
@@ -33,9 +62,10 @@ router.post("/", async (req, res) => {
                 telefono,
                 sitio_web,
                 direccion,
-                latitud,
-                longitud,
-                tipo,
+                lat,
+                lng,
+                img_url,
+                categoria_id,
             ],
         });
 
@@ -91,13 +121,47 @@ router.put("/:id", async (req, res) => {
         direccion,
         latitud,
         longitud,
-        tipo,
+        img_url,
+        categoria_id,
     } = req.body;
 
     try {
+        // Validar campos requeridos
+        if (!nombre || nombre.trim() === "") {
+            return res.status(400).json({ error: "El nombre es obligatorio" });
+        }
+
+        if (!descripcion || descripcion.trim() === "") {
+            return res
+                .status(400)
+                .json({ error: "La descripción es obligatoria" });
+        }
+
+        // Validar coordenadas si están presentes
+        let lat = latitud;
+        let lng = longitud;
+
+        if (latitud !== undefined && latitud !== null) {
+            lat = parseFloat(latitud);
+            if (isNaN(lat) || !isFinite(lat)) {
+                return res
+                    .status(400)
+                    .json({ error: "La latitud debe ser un número válido" });
+            }
+        }
+
+        if (longitud !== undefined && longitud !== null) {
+            lng = parseFloat(longitud);
+            if (isNaN(lng) || !isFinite(lng)) {
+                return res
+                    .status(400)
+                    .json({ error: "La longitud debe ser un número válida" });
+            }
+        }
+
         const result = await db.execute({
             sql: `UPDATE empresas SET 
-        nombre = ?, descripcion = ?, email = ?, telefono = ?, sitio_web = ?, direccion = ?, latitud = ?, longitud = ?, tipo = ?
+        nombre = ?, descripcion = ?, email = ?, telefono = ?, sitio_web = ?, direccion = ?, latitud = ?, longitud = ?, img_url = ?, categoria_id = ?
         WHERE id = ?`,
             args: [
                 nombre,
@@ -106,9 +170,10 @@ router.put("/:id", async (req, res) => {
                 telefono,
                 sitio_web,
                 direccion,
-                latitud,
-                longitud,
-                tipo,
+                lat,
+                lng,
+                img_url,
+                categoria_id,
                 id,
             ],
         });
@@ -129,6 +194,56 @@ router.delete("/:id", async (req, res) => {
     const { id } = req.params;
 
     try {
+        // Identificar primero los atractivos relacionados con esta empresa
+        const atractivos = await db.execute({
+            sql: "SELECT id FROM atractivos WHERE empresa_id = ?",
+            args: [id],
+        });
+
+        // Para cada atractivo, eliminar registros relacionados
+        for (const atractivo of atractivos.rows) {
+            const atractivoId = atractivo.id;
+
+            // Eliminar referencias en rutas_atractivos
+            await db.execute({
+                sql: "DELETE FROM rutas_atractivos WHERE atractivo_id = ?",
+                args: [atractivoId],
+            });
+
+            // Eliminar reseñas relacionadas
+            await db.execute({
+                sql: "DELETE FROM reseñas WHERE atractivo_id = ?",
+                args: [atractivoId],
+            });
+
+            // Eliminar favoritos relacionados
+            await db.execute({
+                sql: "DELETE FROM favoritos WHERE atractivo_id = ?",
+                args: [atractivoId],
+            });
+
+            // Eliminar imágenes relacionadas con el atractivo
+            // Esta línea se puede comentar ya que no existe tabla imagenes en el esquema
+            // await db.execute({
+            //     sql: "DELETE FROM imagenes WHERE entidad_tipo = 'atractivo' AND entidad_id = ?",
+            //     args: [atractivoId],
+            // });
+
+            // Finalmente eliminar el atractivo
+            await db.execute({
+                sql: "DELETE FROM atractivos WHERE id = ?",
+                args: [atractivoId],
+            });
+        }
+
+        // Eliminar imágenes relacionadas con la empresa
+        // Esta línea se puede comentar ya que no existe tabla imagenes en el esquema
+        // await db.execute({
+        //     sql: "DELETE FROM imagenes WHERE entidad_tipo = 'empresa' AND entidad_id = ?",
+        //     args: [id],
+        // });
+
+        // Finalmente, eliminar la empresa
         const result = await db.execute({
             sql: "DELETE FROM empresas WHERE id = ?",
             args: [id],
@@ -138,7 +253,9 @@ router.delete("/:id", async (req, res) => {
             return res.status(404).json({ error: "Empresa no encontrada" });
         }
 
-        res.json({ mensaje: "Empresa eliminada" });
+        res.json({
+            mensaje: "Empresa y sus atractivos eliminados exitosamente",
+        });
     } catch (err) {
         console.error("Error al eliminar empresa:", err);
         res.status(500).json({ error: "Error al eliminar empresa" });
@@ -146,7 +263,7 @@ router.delete("/:id", async (req, res) => {
 });
 /**
  * @swagger
- * /empresas:
+ * /api/empresas:
  *   post:
  *     summary: Crea una nueva empresa
  *     tags: [Empresas]
@@ -165,7 +282,8 @@ router.delete("/:id", async (req, res) => {
  *               - direccion
  *               - latitud
  *               - longitud
- *               - tipo
+ *               - img_url
+ *               - categoria_id
  *             properties:
  *               nombre:
  *                 type: string
@@ -183,7 +301,9 @@ router.delete("/:id", async (req, res) => {
  *                 type: number
  *               longitud:
  *                 type: number
- *               tipo:
+ *               img_url:
+ *                 type: string
+ *               categoria_id:
  *                 type: string
  *     responses:
  *       '201':
@@ -203,7 +323,7 @@ router.delete("/:id", async (req, res) => {
 
 /**
  * @swagger
- * /empresas:
+ * /api/empresas:
  *   get:
  *     summary: Obtiene la lista de todas las empresas
  *     tags: [Empresas]
@@ -220,7 +340,7 @@ router.delete("/:id", async (req, res) => {
 
 /**
  * @swagger
- * /empresas/{id}:
+ * /api/empresas/{id}:
  *   get:
  *     summary: Obtiene una empresa por su ID
  *     tags: [Empresas]
@@ -244,7 +364,7 @@ router.delete("/:id", async (req, res) => {
 
 /**
  * @swagger
- * /empresas/{id}:
+ * /api/empresas/{id}:
  *   put:
  *     summary: Actualiza una empresa por su ID
  *     tags: [Empresas]
@@ -278,7 +398,9 @@ router.delete("/:id", async (req, res) => {
  *                 type: number
  *               longitud:
  *                 type: number
- *               tipo:
+ *               img_url:
+ *                 type: string
+ *               categoria_id:
  *                 type: string
  *     responses:
  *       '200':
@@ -291,7 +413,7 @@ router.delete("/:id", async (req, res) => {
 
 /**
  * @swagger
- * /empresas/{id}:
+ * /api/empresas/{id}:
  *   delete:
  *     summary: Elimina una empresa por su ID
  *     tags: [Empresas]

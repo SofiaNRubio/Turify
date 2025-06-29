@@ -1,0 +1,40 @@
+@import url('./global.css');
+
+/* Estilos específicos para atractivos */
+#nombre {
+  width: 90%;
+}
+
+/* Estilos específicos para botones de edición de atractivos */
+.btn-editar-atractivo, .btn-editar-empresa {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  text-align: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  margin-bottom: 5px;
+  display: inline-block;
+  min-width: 70px;
+  font-family: var(--font-primary);
+}
+
+.btn-editar-atractivo:hover, .btn-editar-empresa:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+}
+
+/* Media queries específicas para atractivos */
+@media (max-width: 768px) {
+  .btn-editar-atractivo, .btn-editar-empresa {
+    width: 50%;
+    padding: var(--spacing-sm) 10px;
+    font-size: 0.85em;
+    margin: 2px 0;
+    min-width: unset;
+  }
+} 

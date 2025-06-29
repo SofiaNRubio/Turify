@@ -1,0 +1,47 @@
+---
+const { menu = [], children } = Astro.props;
+import '../style/paneladmin.css';
+---
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Panel Admin | Turify</title>
+        <meta name="viewport" content="width=device-width" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class="admin-layout">
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-content">
+                    <h2>Menú Administrador</h2>
+                    <nav>
+                        <ul>
+                            {menu.map((item) => (
+                                <li>
+                                    <a href={item.href}>{item.label}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>                <div class="sidebar-footer">
+                    <a href="/" class="sidebar-logo-link" aria-label="Volver a Turify">
+                        <div class="sidebar-logo">
+                            <img src="/logo-turify.png" alt="Logo Turify" class="logo-img" />
+                            <span class="logo-text">VOLVER A TURIFY</span>
+                        </div>
+                    </a>
+                </div>
+            </aside>
+            <main class="main-content">
+                <div class="welcome-message">
+                    <slot />
+                </div>
+            </main>
+        </div>
+        <script src="../scripts/paneladmin.js"></script>
+    </body>
+</html>
