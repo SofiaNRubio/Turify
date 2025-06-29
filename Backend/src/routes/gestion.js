@@ -1,5 +1,6 @@
 import express from "express";
 import { db } from "../db.js";
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -66,51 +67,8 @@ router.post("/", async (req, res) => {
         img_url, // Cambiado de tipo a img_url según el esquema
     } = req.body;
     try {
-        // Primero, intentamos crear una tabla de seguimiento de IDs si no existe
-        try {
-            await db.execute({
-                sql: `CREATE TABLE IF NOT EXISTS id_tracking (
-                    tipo TEXT NOT NULL,
-                    ultimo_numero INTEGER NOT NULL,
-                    PRIMARY KEY (tipo)
-                )`,
-            });
-        } catch (createErr) {
-            console.error("Error al crear tabla de seguimiento:", createErr);
-            // Continuamos con la ejecución aunque haya fallado la creación
-        }
-
-        // Obtener el número más alto utilizado para atractivos
-        let nextNum = 1;
-
-        // Primero verificamos en la tabla de seguimiento
-        const trackingResult = await db.execute({
-            sql: "SELECT ultimo_numero FROM id_tracking WHERE tipo = 'atractivo'",
-        });
-
-        if (trackingResult.rows.length > 0) {
-            // Ya hay un registro de seguimiento, usamos ese número + 1
-            nextNum = trackingResult.rows[0].ultimo_numero + 1;
-        } else {
-            // No hay registro en la tabla de seguimiento, buscamos en la tabla atractivos
-            const lastIdResult = await db.execute({
-                sql: "SELECT id FROM atractivos WHERE id LIKE 'atr%' ORDER BY CAST(SUBSTR(id, 4) AS INTEGER) DESC LIMIT 1",
-            });
-
-            if (lastIdResult.rows.length > 0) {
-                const lastId = lastIdResult.rows[0].id;
-                const lastNum = parseInt(lastId.replace("atr", ""));
-                nextNum = lastNum + 1;
-            }
-
-            // Insertamos un registro inicial en la tabla de seguimiento
-            await db.execute({
-                sql: "INSERT INTO id_tracking (tipo, ultimo_numero) VALUES (?, ?)",
-                args: ["atractivo", nextNum],
-            });
-        }
-
-        const id = `atr${nextNum}`;
+        // Generar un UUID único para el atractivo
+        const id = uuidv4();
 
         // Verificar si la empresa existe
         if (empresa_id) {
@@ -155,13 +113,6 @@ router.post("/", async (req, res) => {
                 img_url,
             ],
         });
-
-        // Actualizamos el contador en la tabla de seguimiento
-        await db.execute({
-            sql: "UPDATE id_tracking SET ultimo_numero = ? WHERE tipo = ?",
-            args: [nextNum, "atractivo"],
-        });
-
         // Retornar los datos del atractivo creado
         res.status(201).json({
             id,
@@ -170,20 +121,7 @@ router.post("/", async (req, res) => {
         });
     } catch (err) {
         console.error("Error al crear atractivo:", err);
-        // Verificar si es un error de base de datos y proporcionar más detalles
-        if (err.code) {
-            // Errores comunes de SQLite
-            if (err.code === "SQLITE_CONSTRAINT") {
-                return res.status(400).json({
-                    error: "Error de restricción en la base de datos. Verifica que los IDs de referencia (empresa_id, categoria_id) sean válidos.",
-                });
-            }
-        }
-
-        res.status(500).json({
-            error: "Error al crear atractivo",
-            detalles: err.message,
-        });
+        res.status(500).json({ error: "Error al crear atractivo" });
     }
 });
 

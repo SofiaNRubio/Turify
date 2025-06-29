@@ -1,99 +1,18 @@
 ---
-import Footer from "../components/Footer.astro";
-import CTA from "../components/CTA.astro";
-import RutasDestacadas from "../components/RutasDestacadas.astro";
 import MainLayout from "../layouts/MainLayout.astro";
 import RecommendedCarousel from "../components/RecommendedCarousel.astro";
-import Actividades from "../components/Actividades.astro";
+import Categorias from "../components/Categorias.astro";
+import Historia from "../components/Historia.astro";
+import Emergencias from "../components/Emergencias.astro";
 const { title } = Astro.props;
 ---
 
 <MainLayout title={title}>
     <RecommendedCarousel />
-    <section class="actividades">
-        <Actividades />
-    </section>
-    <RutasDestacadas />
-    <CTA />
-    <section class="historia">
-        <div class="historia-content">
-            <h3>Historia de Nuestro Ciudad</h3>
-            <p>
-                San Rafael es una ciudad con una rica historia y
-                tradiciones.pues no, en el frontend, debe permitir la carga del
-                archivo de la image, y el mismo meterlo a imgbb y luego pasarle
-                la url al backend. Fundada en el siglo XIX, es reconocida por su
-                hospitalidad, paisajes y actividades turísticas.
-            </p>
-        </div>
-        <div class="historia-mapa">
-            <div
-                id="map"
-                style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;">
-            </div>
-        </div>
-    </section>
-
-    <section class="emergencias">
-        <h3>
-            Servicios de Emergencias <span class="badge">Urgente</span>
-        </h3>
-        <div class="emergencias-cards">
-            <div class="emergencia-card">
-                <h4>Policía</h4>
-                <p>101</p>
-            </div>
-            <div class="emergencia-card">
-                <h4>Bomberos</h4>
-                <p>100</p>
-            </div>
-            <div class="emergencia-card">
-                <h4>Ambulancia</h4>
-                <p>107</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="contacto">
-        <div class="contacto-form">
-            <h3>Contáctanos</h3>
-            <form>
-                <input type="text" placeholder="Nombre" required />
-                <input type="email" placeholder="Email" required />
-                <textarea placeholder="Mensaje" required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-        </div>
-        <div class="contacto-info">
-            <h4>Información de Contacto</h4>
-            <ul>
-                <li>Tel: (0260) 123-4567</li>
-                <li>Email: info@turify.com</li>
-                <li>Dirección: Av. San Martín 123</li>
-            </ul>
-        </div>
-    </section>
+    <Categorias />
+    <Historia />
+    <Emergencias />
 </MainLayout>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-<script defer>
-    document.addEventListener("DOMContentLoaded", function () {
-        var map = L.map("map").setView([-34.617, -68.33], 13);
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "© OpenStreetMap contributors",
-        }).addTo(map);
-
-        L.marker([-34.617, -68.33])
-            .addTo(map)
-            .bindPopup("San Rafael, Mendoza")
-            .openPopup();
-
-        setTimeout(function () {
-            map.invalidateSize();
-        }, 100);
-    });
-</script>
 
 <style>
     html,
@@ -174,11 +93,11 @@ const { title } = Astro.props;
         margin: 0;
         font-weight: 400;
     }
-    .actividades {
+    .categorias {
         margin-bottom: 2rem;
         text-align: center;
     }
-    .actividades h3 {
+    .categorias h3 {
         color: #2e6c4d;
         margin-bottom: 1rem;
     }
@@ -207,31 +126,6 @@ const { title } = Astro.props;
     .card h4 {
         margin: 0.5rem 0 0.3rem 0;
         color: #2e6c4d;
-    }
-    .historia {
-        display: flex;
-        background: #eaf7f0;
-        border-radius: 12px;
-        padding: 2rem 1rem;
-        margin-bottom: 2rem;
-        gap: 2rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    .historia-content {
-        flex: 2;
-        min-width: 220px;
-    }
-    .historia-content h3 {
-        margin-top: 0;
-        color: #2e6c4d;
-    }
-    .historia-mapa {
-        flex: 1;
-        min-width: 180px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
     }
     .emergencias {
         background: #ffeaea;
@@ -344,10 +238,6 @@ const { title } = Astro.props;
         .contacto {
             flex-direction: column;
             align-items: center;
-        }
-        .historia {
-            flex-direction: column;
-            align-items: flex-start;
         }
     }
 

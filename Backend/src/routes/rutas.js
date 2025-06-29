@@ -183,62 +183,16 @@ router.post("/", async (req, res) => {
     const { nombre, descripcion, creador_empresa_id, atractivos } = req.body;
 
     if (!nombre || !descripcion || !creador_empresa_id) {
-        return res
-            .status(400)
-            .json({
-                error: "Datos incompletos para crear la ruta",
-                message:
-                    "Por favor proporciona el nombre, descripción y empresa creadora",
-            });
+        return res.status(400).json({
+            error: "Datos incompletos para crear la ruta",
+            message:
+                "Por favor proporciona el nombre, descripción y empresa creadora",
+        });
     }
 
     try {
-        // Primero, intentamos crear una tabla de seguimiento de IDs si no existe
-        try {
-            await db.execute({
-                sql: `CREATE TABLE IF NOT EXISTS id_tracking (
-          tipo TEXT NOT NULL,
-          ultimo_numero INTEGER NOT NULL,
-          PRIMARY KEY (tipo)
-        )`,
-            });
-        } catch (createErr) {
-            console.error("Error al crear tabla de seguimiento:", createErr);
-            // Continuamos con la ejecución aunque haya fallado la creación
-        }
-
-        // Obtener el número más alto utilizado para rutas
-        let nextNum = 1;
-
-        // Primero verificamos en la tabla de seguimiento
-        const trackingResult = await db.execute({
-            sql: "SELECT ultimo_numero FROM id_tracking WHERE tipo = 'ruta'",
-        });
-
-        if (trackingResult.rows.length > 0) {
-            // Ya hay un registro de seguimiento, usamos ese número + 1
-            nextNum = trackingResult.rows[0].ultimo_numero + 1;
-        } else {
-            // No hay registro en la tabla de seguimiento, buscamos en la tabla rutas
-            const lastIdResult = await db.execute({
-                sql: "SELECT id FROM rutas WHERE id LIKE 'ruta%' ORDER BY CAST(SUBSTR(id, 5) AS INTEGER) DESC LIMIT 1",
-            });
-
-            if (lastIdResult.rows.length > 0) {
-                const lastId = lastIdResult.rows[0].id;
-                const lastNum = parseInt(lastId.replace("ruta", ""));
-                nextNum = lastNum + 1;
-            }
-
-            // Insertamos un registro inicial en la tabla de seguimiento
-            await db.execute({
-                sql: "INSERT INTO id_tracking (tipo, ultimo_numero) VALUES (?, ?)",
-                args: ["ruta", nextNum],
-            });
-        }
-
-        // Crear ID único para la nueva ruta
-        const rutaId = `ruta${nextNum}`;
+        // Generar un UUID único para la ruta
+        const rutaId = uuidv4();
 
         // Insertar la nueva ruta
         await db.execute({
@@ -247,12 +201,6 @@ router.post("/", async (req, res) => {
         VALUES (?, ?, ?, ?)
       `,
             args: [rutaId, nombre, descripcion, creador_empresa_id],
-        });
-
-        // Actualizamos el contador en la tabla de seguimiento
-        await db.execute({
-            sql: "UPDATE id_tracking SET ultimo_numero = ? WHERE tipo = ?",
-            args: [nextNum, "ruta"],
         });
 
         // Insertar las relaciones con atractivos si existen
@@ -274,14 +222,10 @@ router.post("/", async (req, res) => {
             nombre,
             descripcion,
             creador_empresa_id,
-            message: "Ruta creada exitosamente",
         });
-    } catch (error) {
-        console.error("Error al crear ruta:", error);
-        res.status(500).json({
-            error: "Error al crear ruta",
-            message: error.message,
-        });
+    } catch (err) {
+        console.error("Error al crear ruta:", err);
+        res.status(500).json({ error: "Error al crear ruta" });
     }
 });
 
