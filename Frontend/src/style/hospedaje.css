@@ -1,0 +1,153 @@
+/* Estilos para la página de hospedaje */
+.hospedaje-hospedaje {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-hospedaje {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header-hospedaje h2 {
+    color: #0ea5e9;
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+.grid-hospedaje {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.card-hospedaje {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.card-hospedaje:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+    border-color: #0ea5e9;
+}
+
+.card-hospedaje img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.card-hospedaje:hover img {
+    transform: scale(1.05);
+}
+
+.placeholder-imagen {
+    display: none;
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #bae6fd 0%, #0ea5e9 100%);
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.card-content {
+    padding: 1.5rem;
+    position: relative;
+}
+
+.tipo-hospedaje {
+    display: inline-block;
+    background: #0ea5e9;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+}
+
+.card-content h3 {
+    color: #0ea5e9;
+    margin: 0 0 0.75rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.descripcion {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.ver-mas {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #0ea5e9;
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ver-mas:hover {
+    background: #0369a1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.ver-mas::after {
+    content: '→';
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.ver-mas:hover::after {
+    transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+    .hospedaje-hospedaje {
+        padding: 1rem;
+    }
+    .header-hospedaje h2 {
+        font-size: 2rem;
+    }
+    .grid-hospedaje {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .card-content h3 {
+        font-size: 1.25rem;
+    }
+    .ver-mas {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-hospedaje h2 {
+        font-size: 1.75rem;
+    }
+    .card-content {
+        padding: 1rem;
+    }
+} 

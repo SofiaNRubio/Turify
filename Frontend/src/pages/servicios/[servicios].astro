@@ -1,0 +1,393 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import { apiFetch } from "../../utils/api";
+
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+// Obtener el ID del servicio desde los parámetros de la ruta
+const { servicios } = Astro.params;
+
+let servicio: Empresa | null = null;
+let categoria: Categoria | null = null;
+
+if (servicios) {
+    try {
+        // Obtener el servicio específico
+        const responseServicio = await apiFetch(`/empresas/${servicios}`);
+        if (responseServicio.ok) {
+            servicio = await responseServicio.json();
+            
+            // Si el servicio tiene categoría, obtener la información de la categoría
+            if (servicio.categoria_id) {
+                const responseCategoria = await apiFetch(`/categorias/${servicio.categoria_id}`);
+                if (responseCategoria.ok) {
+                    categoria = await responseCategoria.json();
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error al obtener el servicio:", error);
+    }
+}
+
+// Si no se encontró el servicio, redirigir a la página de servicios
+if (!servicio) {
+    return Astro.redirect("/servicios");
+}
+---
+
+<MainLayout>
+    <div class="servicio-detalle">
+        <div class="header-detalle">
+            <a href="/servicios" class="volver-btn">
+                ← Volver a servicios
+            </a>
+            {categoria && (
+                <a href={`/servicios?categoria=${categoria.id}`} class="volver-categoria">
+                    ← Volver a {categoria.nombre}
+                </a>
+            )}
+        </div>
+
+        <div class="servicio-content">
+            <div class="servicio-imagen">
+                {servicio.img_url ? (
+                    <img 
+                        src={servicio.img_url} 
+                        alt={servicio.nombre}
+                        class="imagen-principal"
+                    />
+                ) : (
+                    <div class="placeholder-imagen">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z" fill="#ea580c"/>
+                        </svg>
+                    </div>
+                )}
+            </div>
+
+            <div class="servicio-info">
+                <div class="servicio-header">
+                    {categoria && (
+                        <span class="categoria-tag">{categoria.nombre}</span>
+                    )}
+                    <h1>{servicio.nombre}</h1>
+                    {servicio.descripcion && (
+                        <p class="descripcion">{servicio.descripcion}</p>
+                    )}
+                </div>
+
+                <div class="servicio-datos">
+                    {servicio.direccion && (
+                        <div class="dato-item">
+                            <div class="dato-icono">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#ea580c" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                            </div>
+                            <div class="dato-contenido">
+                                <h3>Dirección</h3>
+                                <p>{servicio.direccion}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {servicio.telefono && (
+                        <div class="dato-item">
+                            <div class="dato-icono">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#ea580c" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+                                </svg>
+                            </div>
+                            <div class="dato-contenido">
+                                <h3>Teléfono</h3>
+                                <a href={`tel:${servicio.telefono}`} class="contacto-link">
+                                    {servicio.telefono}
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
+                    {servicio.email && (
+                        <div class="dato-item">
+                            <div class="dato-icono">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#ea580c" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                </svg>
+                            </div>
+                            <div class="dato-contenido">
+                                <h3>Email</h3>
+                                <a href={`mailto:${servicio.email}`} class="contacto-link">
+                                    {servicio.email}
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
+                    {servicio.sitio_web && (
+                        <div class="dato-item">
+                            <div class="dato-icono">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#ea580c" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                            </div>
+                            <div class="dato-contenido">
+                                <h3>Sitio Web</h3>
+                                <a href={servicio.sitio_web} target="_blank" rel="noopener noreferrer" class="contacto-link">
+                                    Visitar sitio web
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {servicio.latitud && servicio.longitud && (
+                    <div class="mapa-seccion">
+                        <h3>Ubicación</h3>
+                        <div class="mapa-container">
+                            <iframe
+                                width="100%"
+                                height="300"
+                                frameborder="0"
+                                style="border:0"
+                                src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${servicio.latitud},${servicio.longitud}`}
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+</MainLayout>
+
+<style>
+    .servicio-detalle {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .header-detalle {
+        margin-bottom: 2rem;
+    }
+
+    .volver-btn,
+    .volver-categoria {
+        display: inline-flex;
+        align-items: center;
+        color: #ea580c;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        transition: color 0.3s ease;
+    }
+
+    .volver-btn:hover,
+    .volver-categoria:hover {
+        color: #c2410c;
+    }
+
+    .servicio-content {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .servicio-imagen {
+        position: sticky;
+        top: 2rem;
+    }
+
+    .imagen-principal {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .placeholder-imagen {
+        width: 100%;
+        height: 400px;
+        background: linear-gradient(135deg, #fed7aa 0%, #ea580c 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .servicio-info {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .servicio-header {
+        margin-bottom: 2rem;
+    }
+
+    .categoria-tag {
+        display: inline-block;
+        background: #ea580c;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+
+    .servicio-header h1 {
+        color: #ea580c;
+        font-size: 2.5rem;
+        margin: 0 0 1rem 0;
+        font-weight: 700;
+    }
+
+    .descripcion {
+        color: #666;
+        line-height: 1.6;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .servicio-datos {
+        margin-bottom: 2rem;
+    }
+
+    .dato-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #fef7f0;
+        border-radius: 8px;
+        border-left: 4px solid #ea580c;
+    }
+
+    .dato-icono {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        background: #ea580c;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dato-contenido h3 {
+        color: #ea580c;
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .dato-contenido p {
+        margin: 0;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .contacto-link {
+        color: #ea580c;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .contacto-link:hover {
+        color: #c2410c;
+        text-decoration: underline;
+    }
+
+    .mapa-seccion {
+        margin-top: 2rem;
+    }
+
+    .mapa-seccion h3 {
+        color: #ea580c;
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .mapa-container {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .servicio-detalle {
+            padding: 1rem;
+        }
+
+        .servicio-content {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .servicio-imagen {
+            position: static;
+        }
+
+        .imagen-principal,
+        .placeholder-imagen {
+            height: 300px;
+        }
+
+        .servicio-header h1 {
+            font-size: 2rem;
+        }
+
+        .servicio-info {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .servicio-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .servicio-info {
+            padding: 1rem;
+        }
+
+        .dato-item {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .dato-icono {
+            align-self: center;
+        }
+    }
+</style> 
