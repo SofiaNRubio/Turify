@@ -2,8 +2,7 @@
 // ChatModal.astro - Modal de chat flotante
 ---
 
-
-<link rel="stylesheet" href="/src/style/chat-modal.css">
+<link rel="stylesheet" href="/src/style/chat-modal.css" />
 
 <div id="chat-modal" class="chat-modal hidden">
     <div class="chat-modal-content">
@@ -29,11 +28,25 @@
     </div>
 </div>
 
-<button id="chat-toggle" class="chat-toggle"> 💬 </button>
+<button id="chat-toggle" class="chat-toggle">💬</button>
 
-<script is:inline>
-    import { apiFetch } from "../utils/api";
+<script define:vars={{ backendUrl: import.meta.env.PUBLIC_BACKEND_URL }}>
+    async function apiFetch(method, endpoint, options = {}) {
+        const url = endpoint.startsWith("http")
+            ? endpoint
+            : `${backendUrl}${endpoint}`;
+        console.log("ChatModal: Haciendo petición a:", url);
+        return fetch(url, {
+            method,
+            ...options,
+        });
+    }
+
+    // Esperar a que el DOM esté completamente cargado
     document.addEventListener("DOMContentLoaded", function () {
+        console.log("ChatModal: DOM cargado, inicializando...");
+        console.log("ChatModal: Backend URL:", backendUrl);
+
         // Variables globales
         let messages = [];
         let typingMessage = null;
@@ -45,6 +58,23 @@
         const messagesDiv = document.getElementById("chat-messages");
         const chatForm = document.getElementById("chat-form");
         const userInput = document.getElementById("chat-user-input");
+
+        // Verificar que todos los elementos existen
+        if (
+            !chatModal ||
+            !chatToggle ||
+            !closeChat ||
+            !messagesDiv ||
+            !chatForm ||
+            !userInput
+        ) {
+            console.error(
+                "ChatModal: No se encontraron todos los elementos necesarios"
+            );
+            return;
+        }
+
+        console.log("ChatModal: Todos los elementos encontrados");
 
         // ID único por sesión
         const sessionId =
@@ -176,73 +206,76 @@
         }
 
         // Event listeners
-        if (chatToggle) {
-            chatToggle.addEventListener("click", function () {
-                if (chatModal) chatModal.classList.remove("hidden");
-                if (userInput) userInput.focus();
-            });
-        }
+        chatToggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("ChatModal: Botón de chat clickeado");
+            chatModal.classList.remove("hidden");
+            userInput.focus();
+        });
 
-        if (closeChat) {
-            closeChat.addEventListener("click", function () {
-                if (chatModal) chatModal.classList.add("hidden");
-            });
-        }
+        closeChat.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("ChatModal: Cerrando chat");
+            chatModal.classList.add("hidden");
+        });
 
         // Cerrar modal al hacer clic fuera
-        if (chatModal) {
-            chatModal.addEventListener("click", function (e) {
-                if (e.target === chatModal) {
-                    chatModal.classList.add("hidden");
-                }
-            });
-        }
+        chatModal.addEventListener("click", function (e) {
+            if (e.target === chatModal) {
+                console.log("ChatModal: Cerrando chat (clic fuera)");
+                chatModal.classList.add("hidden");
+            }
+        });
 
-        if (chatForm) {
-            chatForm.addEventListener("submit", async function (e) {
-                e.preventDefault();
-                if (!userInput) return;
+        chatForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            if (!userInput) return;
 
-                const userMessage = userInput.value.trim();
-                if (!userMessage) return;
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
 
-                // Mostrar mensaje del usuario
-                appendMessage(userMessage, "user");
-                messages.push({ role: "user", content: userMessage });
-                userInput.value = "";
+            console.log("ChatModal: Enviando mensaje:", userMessage);
 
-                showTypingIndicator();
+            // Mostrar mensaje del usuario
+            appendMessage(userMessage, "user");
+            messages.push({ role: "user", content: userMessage });
+            userInput.value = "";
 
-                try {
-                    const response = await apiFetch("POST", "/chat", {
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            sessionId: sessionId,
-                            message: userMessage,
-                        }),
+            showTypingIndicator();
+
+            try {
+                const response = await apiFetch("POST", "/chat", {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        message: userMessage,
+                    }),
+                });
+
+                const data = await response.json();
+                hideTypingIndicator();
+
+                if (data.response) {
+                    appendMessage(data.response, "assistant");
+                    messages.push({
+                        role: "assistant",
+                        content: data.response,
                     });
-
-                    const data = await response.json();
-                    hideTypingIndicator();
-
-                    if (data.response) {
-                        appendMessage(data.response, "assistant");
-                        messages.push({
-                            role: "assistant",
-                            content: data.response,
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error:", error);
-                    hideTypingIndicator();
-                    appendMessage(
-                        "Lo siento, hubo un error al procesar tu mensaje.",
-                        "error"
-                    );
                 }
-            });
-        }
+            } catch (error) {
+                console.error("ChatModal: Error:", error);
+                hideTypingIndicator();
+                appendMessage(
+                    "Lo siento, hubo un error al procesar tu mensaje.",
+                    "error"
+                );
+            }
+        });
+
+        console.log("ChatModal: Inicialización completada");
     });
 </script>

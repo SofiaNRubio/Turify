@@ -63,12 +63,10 @@ const empresas = await obtenerEmpresas();
 
 // Filtrar categorías de emergencia (incluir solo estas)
 const categoriasEmergencia = [
-    "cuartel de bomberos",
-    "hospital",
-    "emergencias",
+    "hospitales",
     "policía",
-    "policia",
-    "ambulancia",
+    "bomberos",
+    "farmacias",
 ];
 
 const categoriasFiltradas = categorias.filter((categoria) =>
@@ -158,13 +156,7 @@ categoriasConImagen.forEach((cat) => {
                             onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
                         />
                     ) : null}
-                    <div
-                        class="placeholder-imagen"
-                        style={
-                            categoria.imagen
-                                ? "display: none;"
-                                : "display: flex;"
-                        }>
+                    <div class="placeholder-imagen">
                         <svg
                             width="40"
                             height="40"
@@ -202,7 +194,7 @@ categoriasConImagen.forEach((cat) => {
                             <span>San Rafael, Mendoza</span>
                         </div>
                         <a
-                            href={`/empresas?categoria=${categoria.id}`}
+                            href={`/emergencias?categoria=${categoria.id}`}
                             class="ver-mas">
                             Ver servicios
                         </a>

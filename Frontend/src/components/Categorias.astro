@@ -63,12 +63,10 @@ const empresas = await obtenerEmpresas();
 
 // Filtrar categorías de emergencia
 const categoriasExcluidas = [
-    "cuartel de bomberos",
-    "hospital",
-    "emergencias",
+    "hospitales",
     "policía",
-    "policia",
-    "ambulancia",
+    "bomberos",
+    "farmacias",
 ];
 
 const categoriasFiltradas = categorias.filter(
@@ -142,22 +140,22 @@ categoriasConImagen.forEach((cat) => {
 
 <link rel="stylesheet" href="/src/style/categorias-component.css">
 
-<section class="actividades-empresas">
-    <h2>Descubre las mejores categorías</h2>
-    <div class="grid-actividades">
+<section class="cat-actividades-empresas">
+    <h2 id="titulo-categorias">Explora lo mejor de San Rafael</h2>
+    <div class="cat-grid-actividades">
         {
             categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="card-actividad">
+                <div class="cat-card-actividad">
                     {categoria.imagen ? (
                         <img
                             src={categoria.imagen}
                             alt={categoria.nombre}
-                            onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
+                            onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.cat-placeholder-imagen').style.display='flex';`}
                             onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
                         />
                     ) : null}
                     <div
-                        class="placeholder-imagen"
+                        class="cat-placeholder-imagen"
                         style={
                             categoria.imagen
                                 ? "display: none;"
@@ -185,33 +183,18 @@ categoriasConImagen.forEach((cat) => {
                             Sin imagen
                         </div>
                     </div>
-                    <div class="card-content">
-                        <span class="tipo-badge">{categoria.nombre}</span>
+                    <div class="cat-card-content">
                         <h3>{categoria.nombre}</h3>
-                        <p class="descripcion">
+                        <p class="cat-descripcion">
                             Explora {categoria.empresasCount}{" "}
                             {categoria.empresasCount === 1
                                 ? "empresa"
                                 : "empresas"}{" "}
                             en esta categoría.
                         </p>
-                        <div class="ubicacion">
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
-                                    fill="currentColor"
-                                />
-                            </svg>
-                            <span>San Rafael, Mendoza</span>
-                        </div>
                         <a
                             href={`/empresas?categoria=${categoria.id}`}
-                            class="ver-mas">
+                            class="cat-ver-mas">
                             Ver empresas
                         </a>
                     </div>
@@ -220,3 +203,17 @@ categoriasConImagen.forEach((cat) => {
         }
     </div>
 </section>
+
+<script>
+    // Script para cambiar aleatoriamente la primera palabra del título
+    document.addEventListener('DOMContentLoaded', function() {
+        const titulo = document.getElementById('titulo-categorias');
+        if (titulo && titulo.textContent) {
+            const palabras = ['Explora', 'Encuentra'];
+            const palabraAleatoria = palabras[Math.floor(Math.random() * palabras.length)];
+            
+            // Reemplazar solo la primera palabra manteniendo el resto del texto
+            titulo.textContent = titulo.textContent.replace(/^(Explora|Encuentra)/, palabraAleatoria);
+        }
+    });
+</script>
