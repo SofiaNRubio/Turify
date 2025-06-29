@@ -1,6 +1,6 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
-import FiltroUbicacion from "../components/FiltroUbicacion.astro";
+import FiltroDistrito from "../components/FiltroUbicacion.astro";
 import getToken from "../utils/getToken";
 
 // Obtener el token de autenticación
@@ -20,6 +20,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -55,21 +56,20 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
     }
 }
 
-// Función para obtener las ubicaciones únicas filtradas por categoría
-async function obtenerUbicaciones(categoriaId?: string): Promise<string[]> {
+// Función para obtener los distritos únicos filtrados por categoría
+async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
     try {
-        let url = "http://localhost:3000/api/empresas/ubicaciones";
+        let url = "http://localhost:3000/api/empresas/distritos";
         if (categoriaId) {
             url += `?categoria_id=${categoriaId}`;
         }
-        
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error("Error al obtener ubicaciones");
+            throw new Error("Error al obtener distritos");
         }
         return await response.json();
     } catch (error) {
-        console.error("Error al obtener ubicaciones:", error);
+        console.error("Error al obtener distritos:", error);
         return [];
     }
 }
@@ -82,22 +82,22 @@ const empresas = await obtenerEmpresas();
 const url = new URL(Astro.request.url);
 const categoriaId = url.searchParams.get("categoria");
 
-// Obtener ubicaciones filtradas por categoría
-const ubicaciones = await obtenerUbicaciones(categoriaId || undefined);
+// Obtener distritos filtrados por categoría
+const distritos = await obtenerDistritos(categoriaId || undefined);
 
 // Filtrar empresas por categoría si se especifica
 let empresasFiltradas = categoriaId
     ? empresas.filter((empresa) => empresa.categoria_id === categoriaId)
     : empresas;
 
-// Filtrar por ubicación si se especifica
-const ubicacionFiltro = url.searchParams.get("ubicacion");
-const ubicacionesSeleccionadas = ubicacionFiltro
-  ? ubicacionFiltro.split(",")
+// Filtrar por distrito si se especifica
+const distritoFiltro = url.searchParams.get("distrito");
+const distritosSeleccionados = distritoFiltro
+  ? distritoFiltro.split(",")
   : [];
-if (ubicacionesSeleccionadas.length > 0) {
+if (distritosSeleccionados.length > 0) {
     empresasFiltradas = empresasFiltradas.filter((empresa) =>
-        ubicacionesSeleccionadas.some((ubi) => empresa.direccion.toLowerCase().includes(ubi.toLowerCase()))
+        distritosSeleccionados.some((d) => empresa.distrito && empresa.distrito.toLowerCase().includes(d.toLowerCase()))
     );
 }
 
@@ -128,12 +128,12 @@ const categoriaSeleccionada = categoriaId
                 )}
             </div>
 
-            <!-- Filtro de ubicación -->
-            {ubicaciones.length > 0 && (
-                <FiltroUbicacion 
-                    ubicaciones={ubicaciones}
-                    ubicacionSeleccionada={ubicacionesSeleccionadas}
-                    placeholder="Filtrar por ubicación..."
+            {/* Filtro de distrito */}
+            {distritos.length > 0 && (
+                <FiltroDistrito 
+                    distritos={distritos}
+                    distritoSeleccionado={distritosSeleccionados}
+                    placeholder="Filtrar por distrito..."
                 />
             )}
 
@@ -143,8 +143,8 @@ const categoriaSeleccionada = categoriaId
                     <p>
                         {categoriaSeleccionada
                             ? `No hay empresas registradas en la categoría "${categoriaSeleccionada.nombre}"`
-                            : ubicacionFiltro
-                            ? `No hay empresas en la ubicación "${ubicacionFiltro}"`
+                            : distritoFiltro
+                            ? `No hay empresas en el distrito "${distritoFiltro}"`
                             : "No hay empresas registradas en este momento"}
                     </p>
                     <a href="/empresas" class="btn-volver">Volver a todas las empresas</a>

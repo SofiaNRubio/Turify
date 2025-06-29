@@ -52,7 +52,8 @@ if (Astro.request.method === "POST") {
         img_url: formData.get('img_url'),
         latitud: parseFloat(formData.get('latitud')?.toString() || '0'),
         longitud: parseFloat(formData.get('longitud')?.toString() || '0'),
-        direccion: formData.get('direccion')
+        direccion: formData.get('direccion'),
+        distrito: formData.get('distrito')
       };
       
       // Obtener la empresa_id del paso anterior
@@ -115,6 +116,7 @@ if (Astro.request.method === "POST") {
         telefono: formData.get('empresa_telefono'),
         sitio_web: formData.get('empresa_sitio_web'),
         direccion: formData.get('empresa_direccion'),
+        distrito: formData.get('empresa_distrito'),
         latitud: parseFloat(formData.get('empresa_latitud')?.toString() || '0'),
         longitud: parseFloat(formData.get('empresa_longitud')?.toString() || '0'),
         img_url: formData.get('empresa_img_url'),
@@ -280,6 +282,10 @@ if (paso === '2' && empresa_id) {
                   Dirección:
                   <input type="text" name="empresa_direccion" required>
                 </label>
+                <label>
+                  Distrito:
+                  <input type="text" name="empresa_distrito" required placeholder="Distrito">
+                </label>
                 <div class="form-row">
                   <label>
                     Latitud:
@@ -363,6 +369,10 @@ if (paso === '2' && empresa_id) {
                 Dirección:
                 <input type="text" name="direccion" id="atractivo-direccion" required
                        value={empresaActual?.direccion || ''}>
+              </label>
+              <label>
+                Distrito:
+                <input type="text" name="distrito" id="atractivo-distrito" required placeholder="Distrito" value={empresaActual?.distrito || ''}>
               </label>
             </div>
             

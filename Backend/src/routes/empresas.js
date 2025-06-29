@@ -13,6 +13,7 @@ router.post("/", async (req, res) => {
         telefono,
         sitio_web,
         direccion,
+        distrito,
         latitud,
         longitud,
         img_url,
@@ -52,8 +53,8 @@ router.post("/", async (req, res) => {
 
         await db.execute({
             sql: `INSERT INTO empresas 
-        (id, nombre, descripcion, email, telefono, sitio_web, direccion, latitud, longitud, img_url, categoria_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, nombre, descripcion, email, telefono, sitio_web, direccion, distrito, latitud, longitud, img_url, categoria_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 id,
                 nombre,
@@ -62,6 +63,7 @@ router.post("/", async (req, res) => {
                 telefono,
                 sitio_web,
                 direccion,
+                distrito,
                 lat,
                 lng,
                 img_url,
@@ -76,10 +78,10 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Obtener ubicaciones únicas
-router.get("/ubicaciones", async (req, res) => {
+// Obtener distritos únicos
+router.get("/distritos", async (req, res) => {
     try {
-        let sql = "SELECT DISTINCT direccion FROM empresas WHERE direccion IS NOT NULL AND direccion != ''";
+        let sql = "SELECT DISTINCT distrito FROM empresas WHERE distrito IS NOT NULL AND distrito != ''";
         const args = [];
 
         // Filtrar por categoría si se proporciona
@@ -88,21 +90,21 @@ router.get("/ubicaciones", async (req, res) => {
             args.push(req.query.categoria_id);
         }
 
-        sql += " ORDER BY direccion";
+        sql += " ORDER BY distrito";
 
         const result = await db.execute({
             sql: sql,
             args: args,
         });
 
-        const ubicaciones = result.rows
-            .map(row => row.direccion)
-            .filter(direccion => direccion && direccion.trim() !== '');
+        const distritos = result.rows
+            .map(row => row.distrito)
+            .filter(distrito => distrito && distrito.trim() !== '');
 
-        res.json(ubicaciones);
+        res.json(distritos);
     } catch (err) {
-        console.error("Error al obtener ubicaciones:", err);
-        res.status(500).json({ error: "Error al obtener ubicaciones" });
+        console.error("Error al obtener distritos:", err);
+        res.status(500).json({ error: "Error al obtener distritos" });
     }
 });
 
@@ -112,10 +114,10 @@ router.get("/", async (req, res) => {
         let sql = "SELECT * FROM empresas WHERE 1=1";
         const args = [];
 
-        // Filtrar por ubicación si se proporciona
-        if (req.query.ubicacion) {
-            sql += " AND direccion LIKE ?";
-            args.push(`%${req.query.ubicacion}%`);
+        // Filtrar por distrito si se proporciona
+        if (req.query.distrito) {
+            sql += " AND distrito LIKE ?";
+            args.push(`%${req.query.distrito}%`);
         }
 
         // Ordenar por nombre
@@ -162,6 +164,7 @@ router.put("/:id", async (req, res) => {
         telefono,
         sitio_web,
         direccion,
+        distrito,
         latitud,
         longitud,
         img_url,
@@ -204,7 +207,7 @@ router.put("/:id", async (req, res) => {
 
         const result = await db.execute({
             sql: `UPDATE empresas SET 
-        nombre = ?, descripcion = ?, email = ?, telefono = ?, sitio_web = ?, direccion = ?, latitud = ?, longitud = ?, img_url = ?, categoria_id = ?
+        nombre = ?, descripcion = ?, email = ?, telefono = ?, sitio_web = ?, direccion = ?, distrito = ?, latitud = ?, longitud = ?, img_url = ?, categoria_id = ?
         WHERE id = ?`,
             args: [
                 nombre,
@@ -213,6 +216,7 @@ router.put("/:id", async (req, res) => {
                 telefono,
                 sitio_web,
                 direccion,
+                distrito,
                 lat,
                 lng,
                 img_url,

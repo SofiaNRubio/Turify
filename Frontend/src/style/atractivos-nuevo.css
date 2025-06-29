@@ -267,3 +267,166 @@ h3 {
     display: none;
   }
 }
+
+/* --- NUEVOS ESTILOS ADMIN --- */
+.admin-content {
+  max-width: 800px;
+  margin: 40px auto;
+  background: var(--color-bg-panel);
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  color: var(--color-text);
+}
+
+.mensaje {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.mensaje-exito {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.mensaje-error {
+  background: #d9534f;
+  color: #fff;
+}
+
+.mensaje-acciones {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.form-row label {
+  flex: 1;
+}
+
+.hidden {
+  display: none;
+}
+
+.form-atractivo-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  margin-top: 10px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  gap: 6px;
+  color: var(--color-primary);
+  margin-bottom: 12px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+  padding: 8px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-bg-input);
+  color: var(--color-primary);
+  font-size: 1em;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.btn-nuevo,
+.btn-cancelar {
+  padding: 10px 0;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1em;
+  min-width: 120px;
+  display: inline-block;
+  text-align: center;
+  margin: 0;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.btn-nuevo {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-right: 10px;
+}
+
+.btn-nuevo:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+}
+
+.btn-cancelar {
+  background: var(--color-bg-panel);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-cancelar:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 20px;
+    margin: 20px auto;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .empresas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .paso-texto {
+    font-size: 0.8em;
+  }
+}
+
+@media (max-width: 480px) {
+  .modo-botones {
+    flex-direction: column;
+  }
+  .btn-modo {
+    width: 100%;
+  }
+  .pasos-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .paso-linea {
+    display: none;
+  }
+}

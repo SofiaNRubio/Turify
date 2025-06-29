@@ -1,5 +1,6 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
+import FiltroUbicacion from "../../components/FiltroUbicacion.astro";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -33,6 +34,7 @@ interface Atractivo {
     empresa_id: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito: string | null;
 }
 
 // Función para obtener las categorías desde el backend
@@ -100,6 +102,22 @@ if (!empresa) {
 const atractivosEmpresa = todosLosAtractivos.filter(
     (atractivo) => atractivo.empresa_id === empresaId
 );
+
+// Obtener parámetros de la URL para el filtro de distrito
+const url = new URL(Astro.request.url);
+const distritoFiltro = url.searchParams.get("distrito");
+const distritosSeleccionados = distritoFiltro ? distritoFiltro.split(",") : [];
+
+// Obtener distritos únicos de los atractivos de la empresa
+const distritos = Array.from(new Set(atractivosEmpresa.map(a => a.distrito).filter((d): d is string => !!d)));
+
+// Filtrar atractivos por distrito si se especifica
+let atractivosFiltrados = atractivosEmpresa;
+if (distritosSeleccionados.length > 0) {
+    atractivosFiltrados = atractivosEmpresa.filter((atractivo) =>
+        distritosSeleccionados.some((d) => atractivo.distrito && atractivo.distrito.toLowerCase().includes(d.toLowerCase()))
+    );
+}
 
 // Función para obtener el nombre de la categoría
 function obtenerNombreCategoria(categoriaId: string | null): string {
@@ -258,11 +276,17 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
             <div class="atractivos-seccion">
                 <h2>
                     Atractivos de {empresa.nombre}
-                    <span class="count">({atractivosEmpresa.length})</span>
+                    <span class="count">({atractivosFiltrados.length})</span>
                 </h2>
-
+                {distritos.length > 0 && (
+                    <FiltroUbicacion 
+                        distritos={distritos}
+                        distritoSeleccionado={distritosSeleccionados}
+                        placeholder="Filtrar por distrito..."
+                    />
+                )}
                 {
-                    atractivosEmpresa.length === 0 ? (
+                    atractivosFiltrados.length === 0 ? (
                         <div class="no-atractivos">
                             <svg
                                 width="80"
@@ -290,7 +314,7 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                         </div>
                     ) : (
                         <div class="atractivos-grid">
-                            {atractivosEmpresa.map((atractivo: Atractivo) => (
+                            {atractivosFiltrados.map((atractivo: Atractivo) => (
                                 <div class="atractivo-card">
                                     <div class="imagen-atractivo">
                                         {atractivo.img_url ? (
@@ -332,7 +356,6 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                                             </svg>
                                         </div>
                                     </div>
-
                                     <div class="atractivo-content">
                                         <h3>{atractivo.nombre}</h3>
                                         <p class="descripcion">

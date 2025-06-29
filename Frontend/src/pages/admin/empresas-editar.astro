@@ -46,6 +46,7 @@ try {
                 telefono: formData.get("telefono"),
                 sitio_web: formData.get("sitio_web"),
                 direccion: formData.get("direccion"),
+                distrito: formData.get("distrito"),
                 latitud: parseFloat(formData.get("latitud")?.toString() || "0"),
                 longitud: parseFloat(
                     formData.get("longitud")?.toString() || "0"
@@ -232,6 +233,19 @@ if (!empresa) {
                             />
                         </label>
                     </div>
+
+                    <div class="form-section">
+                        <h3>Distrito</h3>
+                        <label>
+                            Distrito:
+                            <input
+                                type="text"
+                                name="distrito"
+                                value={empresa.distrito || ""}
+                            />
+                        </label>
+                    </div>
+
                     <div class="form-empresa-buttons">
                         <button type="submit" class="btn-nuevo">
                             Guardar cambios

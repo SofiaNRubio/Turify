@@ -1,58 +1,58 @@
 ---
 export interface Props {
-  ubicaciones: string[];
-  ubicacionSeleccionada?: string | string[];
+  distritos: string[];
+  distritoSeleccionado?: string | string[];
   placeholder?: string;
   mostrarLimpiar?: boolean;
   id?: string;
 }
 
 const {
-  ubicaciones = [],
-  ubicacionSeleccionada = [],
-  placeholder = "Seleccionar ubicación",
+  distritos = [],
+  distritoSeleccionado = [],
+  placeholder = "Seleccionar distrito",
   mostrarLimpiar = true,
-  id = "filtro-ubicacion"
+  id = "filtro-distrito"
 } = Astro.props;
 
 // Normalizar seleccionados a array
-const seleccionadas = Array.isArray(ubicacionSeleccionada)
-  ? ubicacionSeleccionada
-  : typeof ubicacionSeleccionada === 'string' && ubicacionSeleccionada
-    ? ubicacionSeleccionada.split(',')
+const seleccionados = Array.isArray(distritoSeleccionado)
+  ? distritoSeleccionado
+  : typeof distritoSeleccionado === 'string' && distritoSeleccionado
+    ? distritoSeleccionado.split(',')
     : [];
 ---
 
-<div class="filtro-ubicacion-multiple" data-ubicacion-seleccionada={seleccionadas.join(',')}>
+<div class="filtro-distrito-multiple" data-distrito-seleccionado={seleccionados.join(',')}>
   <div class="filtro-multiple-container">
-    <div class="filtro-multiple-title">Ubicación</div>
+    <div class="filtro-multiple-title">Distrito</div>
     <div class="filtro-multiple-list">
-      {ubicaciones.length > 0 ? (
-        ubicaciones.map((ubicacion) => (
+      {distritos.length > 0 ? (
+        distritos.map((distrito) => (
           <label class="filtro-multiple-item">
             <input
               type="checkbox"
-              value={ubicacion}
-              checked={seleccionadas.includes(ubicacion)}
+              value={distrito}
+              checked={seleccionados.includes(distrito)}
               class="filtro-multiple-checkbox"
             />
-            <span>{ubicacion}</span>
+            <span>{distrito}</span>
           </label>
         ))
       ) : (
-        <div class="filtro-sin-ubicaciones">
-          <p>No hay ubicaciones disponibles para esta categoría</p>
+        <div class="filtro-sin-distritos">
+          <p>No hay distritos disponibles para esta categoría</p>
         </div>
       )}
     </div>
-    {mostrarLimpiar && seleccionadas.length > 0 && (
+    {mostrarLimpiar && seleccionados.length > 0 && (
       <button type="button" class="btn-limpiar-filtro-multiple">Limpiar filtro</button>
     )}
   </div>
 </div>
 
 <style>
-.filtro-ubicacion-multiple {
+.filtro-distrito-multiple {
   margin-bottom: 1.5rem;
 }
 .filtro-multiple-container {
@@ -110,14 +110,14 @@ const seleccionadas = Array.isArray(ubicacionSeleccionada)
   background: #2e6c4d;
   color: #fff;
 }
-.filtro-sin-ubicaciones {
+.filtro-sin-distritos {
   padding: 0.75rem;
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   text-align: center;
 }
-.filtro-sin-ubicaciones p {
+.filtro-sin-distritos p {
   margin: 0;
   color: #6c757d;
   font-size: 0.9rem;
@@ -125,24 +125,24 @@ const seleccionadas = Array.isArray(ubicacionSeleccionada)
 </style>
 
 <script>
-function getSelectedUbicaciones() {
+function getSelectedDistritos() {
   return Array.from(document.querySelectorAll('.filtro-multiple-checkbox:checked')).map((el) => (el as HTMLInputElement).value);
 }
 
-function actualizarFiltroUbicacionMultiple() {
-  const seleccionadas = getSelectedUbicaciones();
+function actualizarFiltroDistritoMultiple() {
+  const seleccionados = getSelectedDistritos();
   const url = new URL(window.location.href);
-  if (seleccionadas.length > 0) {
-    url.searchParams.set('ubicacion', seleccionadas.join(','));
+  if (seleccionados.length > 0) {
+    url.searchParams.set('distrito', seleccionados.join(','));
   } else {
-    url.searchParams.delete('ubicacion');
+    url.searchParams.delete('distrito');
   }
   window.location.href = url.toString();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.filtro-multiple-checkbox').forEach((checkbox) => {
-    checkbox.addEventListener('change', actualizarFiltroUbicacionMultiple);
+    checkbox.addEventListener('change', actualizarFiltroDistritoMultiple);
   });
   const btnLimpiar = document.querySelector('.btn-limpiar-filtro-multiple');
   if (btnLimpiar) {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.filtro-multiple-checkbox').forEach((cb) => {
         (cb as HTMLInputElement).checked = false;
       });
-      actualizarFiltroUbicacionMultiple();
+      actualizarFiltroDistritoMultiple();
     });
   }
 });

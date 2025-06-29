@@ -70,6 +70,7 @@ try {
                     formData.get("longitud")?.toString() || "0"
                 ),
                 direccion: formData.get("direccion"),
+                distrito: formData.get("distrito"),
                 img_url: formData.get("img_url"),
             };
 
@@ -199,6 +200,14 @@ if (!atractivo) {
                                 Haz clic en "Subir Imagen" para seleccionar y
                                 subir una imagen a ImgBB automáticamente
                             </small>
+                        </label>
+                        <label>
+                            Distrito:
+                            <input
+                                type="text"
+                                name="distrito"
+                                value={atractivo.distrito || ""}
+                            />
                         </label>
                     </div>
 
