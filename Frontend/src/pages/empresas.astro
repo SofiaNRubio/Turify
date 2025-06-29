@@ -1,7 +1,514 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
+
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+// Función para obtener las categorías desde el backend
+async function obtenerCategorias(): Promise<Categoria[]> {
+    try {
+        const response = await fetch("http://localhost:3000/api/categorias");
+        if (!response.ok) {
+            throw new Error("Error al obtener categorías");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener categorías:", error);
+        return [];
+    }
+}
+
+// Función para obtener las empresas desde el backend
+async function obtenerEmpresas(): Promise<Empresa[]> {
+    try {
+        const response = await fetch("http://localhost:3000/api/empresas");
+        if (!response.ok) {
+            throw new Error("Error al obtener empresas");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener empresas:", error);
+        return [];
+    }
+}
+
+// Obtener el parámetro de categoría de la URL
+const url = new URL(Astro.request.url);
+const categoriaFiltro = url.searchParams.get("categoria");
+
+// Obtener datos
+const categorias = await obtenerCategorias();
+const todasLasEmpresas = await obtenerEmpresas();
+
+// Filtrar empresas por categoría si se especifica
+const empresas = categoriaFiltro
+    ? todasLasEmpresas.filter(
+          (empresa) => empresa.categoria_id === categoriaFiltro
+      )
+    : todasLasEmpresas;
+
+// Función para obtener el nombre de la categoría
+function obtenerNombreCategoria(categoriaId: string | null): string {
+    if (!categoriaId) return "Sin categoría";
+    const categoria = categorias.find((cat) => cat.id === categoriaId);
+    return categoria ? categoria.nombre : "Sin categoría";
+}
+
+// Obtener nombre de la categoría filtrada si existe
+const nombreCategoriaFiltro = categoriaFiltro
+    ? obtenerNombreCategoria(categoriaFiltro)
+    : null;
 ---
 
 <MainLayout>
-    <h2>Explorá Empresas Turísticas</h2>
+    <section class="empresas-section">
+        <div class="container">
+            <div class="header">
+                <h1>
+                    {
+                        nombreCategoriaFiltro
+                            ? `Empresas de ${nombreCategoriaFiltro}`
+                            : "Todas las Empresas Turísticas"
+                    }
+                </h1>
+                <p class="subtitle">
+                    {
+                        nombreCategoriaFiltro
+                            ? `Descubre las mejores empresas en la categoría ${nombreCategoriaFiltro}`
+                            : "Explora todas las empresas turísticas disponibles en San Rafael"
+                    }
+                </p>
+
+                {
+                    categoriaFiltro && (
+                        <a href="/empresas" class="btn-ver-todas">
+                            Ver todas las empresas
+                        </a>
+                    )
+                }
+            </div>
+
+            {
+                empresas.length === 0 ? (
+                    <div class="no-empresas">
+                        <h3>No se encontraron empresas</h3>
+                        <p>
+                            {categoriaFiltro
+                                ? "No hay empresas registradas en esta categoría."
+                                : "No hay empresas registradas en el sistema."}
+                        </p>
+                        <a href="/" class="btn-volver">
+                            Volver al inicio
+                        </a>
+                    </div>
+                ) : (
+                    <div class="empresas-grid">
+                        {empresas.map((empresa: Empresa) => (
+                            <div class="empresa-card">
+                                <div class="imagen-container">
+                                    {empresa.img_url ? (
+                                        <img
+                                            src={empresa.img_url}
+                                            alt={empresa.nombre}
+                                            onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"
+                                        />
+                                    ) : null}
+                                    <div
+                                        class="placeholder"
+                                        style={
+                                            empresa.img_url
+                                                ? "display: none;"
+                                                : "display: flex;"
+                                        }>
+                                        <svg
+                                            width="60"
+                                            height="60"
+                                            viewBox="0 0 60 60"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <rect
+                                                width="60"
+                                                height="60"
+                                                rx="12"
+                                                fill="#e0e0e0"
+                                            />
+                                            <path
+                                                d="M15 45L26.25 30L37.5 45H15Z"
+                                                fill="#bdbdbd"
+                                            />
+                                            <circle
+                                                cx="22.5"
+                                                cy="24"
+                                                r="4.5"
+                                                fill="#bdbdbd"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div class="card-content">
+                                    <div class="badge-categoria">
+                                        {obtenerNombreCategoria(
+                                            empresa.categoria_id
+                                        )}
+                                    </div>
+
+                                    <h3>{empresa.nombre}</h3>
+
+                                    <p class="descripcion">
+                                        {empresa.descripcion ||
+                                            "Empresa turística en San Rafael, Mendoza."}
+                                    </p>
+
+                                    <div class="info-empresa">
+                                        <div class="direccion">
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
+                                                    fill="currentColor"
+                                                />
+                                            </svg>
+                                            <span>{empresa.direccion}</span>
+                                        </div>
+
+                                        {empresa.telefono && (
+                                            <div class="telefono">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M6.62 10.79C8.06 13.62 10.38 15.94 13.21 17.38L15.41 15.18C15.69 14.9 16.08 14.82 16.43 14.93C17.55 15.3 18.75 15.5 20 15.5C20.55 15.5 21 15.95 21 16.5V20C21 20.55 20.55 21 20 21C10.61 21 3 13.39 3 4C3 3.45 3.45 3 4 3H7.5C8.05 3 8.5 3.45 8.5 4C8.5 5.25 8.7 6.45 9.07 7.57C9.18 7.92 9.1 8.31 8.82 8.59L6.62 10.79Z"
+                                                        fill="currentColor"
+                                                    />
+                                                </svg>
+                                                <span>{empresa.telefono}</span>
+                                            </div>
+                                        )}
+
+                                        {empresa.email && (
+                                            <div class="email">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                                                        fill="currentColor"
+                                                    />
+                                                </svg>
+                                                <span>{empresa.email}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div class="acciones">
+                                        {empresa.sitio_web && (
+                                            <a
+                                                href={empresa.sitio_web}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="btn-sitio-web">
+                                                Visitar sitio web
+                                            </a>
+                                        )}
+                                        <a
+                                            href={`/empresas/${empresa.id}`}
+                                            class="btn-ver-detalle">
+                                            Ver detalles
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )
+            }
+        </div>
+    </section>
 </MainLayout>
+
+<style>
+    .empresas-section {
+        padding: 2rem 1.5rem;
+        background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .header h1 {
+        color: #2e6c4d;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-ver-todas {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-ver-todas:hover {
+        background: linear-gradient(135deg, #245239, #2e6c4d);
+        transform: translateY(-2px);
+    }
+
+    .no-empresas {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(46, 108, 77, 0.1);
+    }
+
+    .no-empresas h3 {
+        color: #2e6c4d;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .no-empresas p {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .btn-volver {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-volver:hover {
+        background: linear-gradient(135deg, #245239, #2e6c4d);
+        transform: translateY(-2px);
+    }
+
+    .empresas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .empresa-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(46, 108, 77, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .empresa-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(46, 108, 77, 0.15);
+    }
+
+    .imagen-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .imagen-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .empresa-card:hover .imagen-container img {
+        transform: scale(1.05);
+    }
+
+    .placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f3f3;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .badge-categoria {
+        display: inline-block;
+        background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .empresa-card h3 {
+        color: #2e6c4d;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+        line-height: 1.3;
+    }
+
+    .descripcion {
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .info-empresa {
+        margin-bottom: 1.5rem;
+    }
+
+    .info-empresa > div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .info-empresa svg {
+        color: #2e6c4d;
+        flex-shrink: 0;
+    }
+
+    .acciones {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-sitio-web,
+    .btn-ver-detalle {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .btn-sitio-web {
+        background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+        color: white;
+    }
+
+    .btn-sitio-web:hover {
+        background: linear-gradient(135deg, #245239, #2e6c4d);
+        transform: translateY(-2px);
+    }
+
+    .btn-ver-detalle {
+        background: white;
+        color: #2e6c4d;
+        border: 2px solid #2e6c4d;
+    }
+
+    .btn-ver-detalle:hover {
+        background: #2e6c4d;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .empresas-section {
+            padding: 1.5rem 1rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .empresas-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .acciones {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header h1 {
+            font-size: 1.7rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+        }
+
+        .card-content {
+            padding: 1.2rem;
+        }
+
+        .empresa-card h3 {
+            font-size: 1.2rem;
+        }
+    }
+</style>

@@ -20,6 +20,13 @@ interface Categoria {
     nombre: string;
 }
 
+interface CategoriaConImagen {
+    id: string;
+    nombre: string;
+    imagen: string | null;
+    empresasCount: number;
+}
+
 // Función para obtener las categorías desde el backend
 async function obtenerCategorias(): Promise<Categoria[]> {
     try {
@@ -41,89 +48,148 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
         if (!response.ok) {
             throw new Error("Error al obtener empresas");
         }
-        const empresas: Empresa[] = await response.json();
-
-        // Obtener categorías para poder filtrar
-        const categorias = await obtenerCategorias();
-
-        // Filtrar empresas que no sean de emergencia (bomberos, hospitales, etc.)
-        const categoriasExcluidas = [
-            "Cuartel de Bomberos",
-            "Hospital",
-            "Emergencias",
-            "Policía",
-            "Ambulancia",
-        ];
-
-        return empresas.filter((empresa: Empresa) => {
-            if (!empresa.categoria_id) return true;
-
-            const categoria = categorias.find(
-                (cat) => cat.id === empresa.categoria_id
-            );
-            if (!categoria) return true;
-
-            return !categoriasExcluidas.some((categoriaExcluida: string) =>
-                categoria.nombre
-                    .toLowerCase()
-                    .includes(categoriaExcluida.toLowerCase())
-            );
-        });
+        return await response.json();
     } catch (error) {
         console.error("Error al obtener empresas:", error);
         return [];
     }
 }
 
+// Obtener datos
 const categorias = await obtenerCategorias();
 const empresas = await obtenerEmpresas();
 
-// Función para obtener el nombre de la categoría
-function obtenerNombreCategoria(categoriaId: string | null): string {
-    if (!categoriaId) return "Sin categoría";
-    const categoria = categorias.find((cat) => cat.id === categoriaId);
-    return categoria ? categoria.nombre : "Sin categoría";
-}
+// Filtrar categorías de emergencia
+const categoriasExcluidas = [
+    "cuartel de bomberos",
+    "hospital",
+    "emergencias",
+    "policía",
+    "policia",
+    "ambulancia",
+];
 
-// Función para obtener imagen por categoría
-function obtenerImagenPorCategoria(categoriaId: string | null): string {
-    const categoria = obtenerNombreCategoria(categoriaId);
+const categoriasFiltradas = categorias.filter(
+    (categoria) =>
+        !categoriasExcluidas.some((excluida) =>
+            categoria.nombre.toLowerCase().includes(excluida)
+        )
+);
 
-    const imagenesPorCategoria: { [key: string]: string } = {
-        Bodega: "/actividades/bodegas.jpg",
-        Gastronomía: "/actividades/gastronomia.jpg",
-        "Parque Natural": "/actividades/airelibre.jpg",
-        Museo: "/actividades/espaciosociales.jpg",
-        "Centro de Artesanía": "/actividades/espaciosociales.jpg",
-        Hospedaje: "/actividades/espaciosociales.jpg",
-        default: "/actividades/airelibre.jpg",
-    };
+// Crear array de categorías con sus imágenes y conteo de empresas
+const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
+    .map((categoria) => {
+        // Buscar empresas de esta categoría
+        const empresasDeCategoria = empresas.filter(
+            (empresa) => empresa.categoria_id === categoria.id
+        );
 
-    return imagenesPorCategoria[categoria] || imagenesPorCategoria["default"];
-}
+        // Debug: mostrar información de empresas en esta categoría
+        console.log(`Categoría: ${categoria.nombre} (${categoria.id})`);
+        console.log(`Empresas en categoría: ${empresasDeCategoria.length}`);
+
+        // Mostrar todas las empresas y sus imágenes
+        empresasDeCategoria.forEach((empresa, index) => {
+            console.log(`  Empresa ${index + 1}: ${empresa.nombre}`);
+            console.log(`  img_url: "${empresa.img_url}"`);
+            console.log(
+                `  img_url válida: ${!!(empresa.img_url && empresa.img_url.trim() !== "")}`
+            );
+        });
+
+        // Buscar la primera empresa con imagen de esta categoría
+        const empresaConImagen = empresasDeCategoria.find((empresa) => {
+            const tieneImagen =
+                empresa.img_url &&
+                empresa.img_url.trim() !== "" &&
+                empresa.img_url !== "null" &&
+                empresa.img_url !== "undefined";
+
+            if (tieneImagen) {
+                console.log(
+                    `  ✓ Empresa con imagen encontrada: ${empresa.nombre} - ${empresa.img_url}`
+                );
+            }
+
+            return tieneImagen;
+        });
+
+        // Usar imagen de empresa o null si no hay
+        const imagen = empresaConImagen?.img_url || null;
+
+        console.log(`  Imagen final para categoría: ${imagen}`);
+        console.log(`  ---`);
+
+        return {
+            id: categoria.id,
+            nombre: categoria.nombre,
+            imagen: imagen,
+            empresasCount: empresasDeCategoria.length,
+        };
+    })
+    .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
+
+// Debug final
+console.log("=== RESUMEN FINAL ===");
+categoriasConImagen.forEach((cat) => {
+    console.log(
+        `${cat.nombre}: ${cat.imagen ? "CON IMAGEN" : "SIN IMAGEN"} (${cat.empresasCount} empresas)`
+    );
+});
 ---
 
 <section class="actividades-empresas">
-    <h2>Descubre las mejores actividades</h2>
+    <h2>Descubre las mejores categorías</h2>
     <div class="grid-actividades">
         {
-            empresas.map((empresa: Empresa) => (
+            categoriasConImagen.map((categoria: CategoriaConImagen) => (
                 <div class="card-actividad">
-                    <img
-                        src={
-                            empresa.img_url ||
-                            obtenerImagenPorCategoria(empresa.categoria_id)
-                        }
-                        alt={empresa.nombre}
-                    />
+                    {categoria.imagen ? (
+                        <img
+                            src={categoria.imagen}
+                            alt={categoria.nombre}
+                            onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
+                            onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                        />
+                    ) : null}
+                    <div
+                        class="placeholder-imagen"
+                        style={
+                            categoria.imagen
+                                ? "display: none;"
+                                : "display: flex;"
+                        }>
+                        <svg
+                            width="60"
+                            height="60"
+                            viewBox="0 0 60 60"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <rect
+                                width="60"
+                                height="60"
+                                rx="12"
+                                fill="#e0e0e0"
+                            />
+                            <path
+                                d="M15 45L22.5 30L37.5 45H15Z"
+                                fill="#bdbdbd"
+                            />
+                            <circle cx="22.5" cy="24" r="4.5" fill="#bdbdbd" />
+                        </svg>
+                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #666;">
+                            Sin imagen
+                        </div>
+                    </div>
                     <div class="card-content">
-                        <span class="tipo-badge">
-                            {obtenerNombreCategoria(empresa.categoria_id)}
-                        </span>
-                        <h3>{empresa.nombre}</h3>
+                        <span class="tipo-badge">{categoria.nombre}</span>
+                        <h3>{categoria.nombre}</h3>
                         <p class="descripcion">
-                            {empresa.descripcion ||
-                                "Descubre esta increíble experiencia en San Rafael."}
+                            Explora {categoria.empresasCount}{" "}
+                            {categoria.empresasCount === 1
+                                ? "empresa"
+                                : "empresas"}{" "}
+                            en esta categoría.
                         </p>
                         <div class="ubicacion">
                             <svg
@@ -137,22 +203,13 @@ function obtenerImagenPorCategoria(categoriaId: string | null): string {
                                     fill="currentColor"
                                 />
                             </svg>
-                            <span>{empresa.direccion}</span>
+                            <span>San Rafael, Mendoza</span>
                         </div>
-                        {empresa.sitio_web && (
-                            <a
-                                href={empresa.sitio_web}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="ver-mas">
-                                Visitar sitio web
-                            </a>
-                        )}
-                        {!empresa.sitio_web && (
-                            <a href={`/empresas/${empresa.id}`} class="ver-mas">
-                                Ver detalles
-                            </a>
-                        )}
+                        <a
+                            href={`/empresas?categoria=${categoria.id}`}
+                            class="ver-mas">
+                            Ver empresas
+                        </a>
                     </div>
                 </div>
             ))
@@ -162,53 +219,53 @@ function obtenerImagenPorCategoria(categoriaId: string | null): string {
 
 <style>
     .actividades-empresas {
-        padding: 3rem 1.5rem;
+        padding: 2.5rem 1.5rem;
         background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
     }
 
     .actividades-empresas h2 {
         color: #2e6c4d;
-        margin-bottom: 2.5rem;
-        font-size: 2.2rem;
+        margin-bottom: 2rem;
+        font-size: 2rem;
         text-align: center;
         font-weight: 600;
     }
 
     .grid-actividades {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 2rem;
-        max-width: 1400px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 1200px;
         margin: 0 auto;
     }
 
     .card-actividad {
         background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(46, 108, 77, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(46, 108, 77, 0.08);
         overflow: hidden;
         transition: all 0.3s ease;
         position: relative;
     }
 
     .card-actividad:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 16px 48px rgba(46, 108, 77, 0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(46, 108, 77, 0.12);
     }
 
     .card-actividad img {
         width: 100%;
-        height: 220px;
+        height: 160px;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
 
     .card-actividad:hover img {
-        transform: scale(1.05);
+        transform: scale(1.03);
     }
 
     .card-content {
-        padding: 1.5rem;
+        padding: 1.2rem;
         position: relative;
     }
 
@@ -216,56 +273,59 @@ function obtenerImagenPorCategoria(categoriaId: string | null): string {
         display: inline-block;
         background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
         color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
         font-weight: 500;
-        margin-bottom: 1rem;
+        margin-bottom: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
     }
 
     .card-actividad h3 {
-        margin: 0.5rem 0 1rem 0;
+        margin: 0 0 0.8rem 0;
         color: #2e6c4d;
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         font-weight: 600;
         line-height: 1.3;
     }
 
     .descripcion {
         color: #666;
-        margin-bottom: 1.2rem;
-        line-height: 1.5;
-        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+        font-size: 0.9rem;
     }
 
     .ubicacion {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
+        gap: 0.4rem;
+        margin-bottom: 1.2rem;
         color: #888;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     .ubicacion svg {
         color: #2e6c4d;
         flex-shrink: 0;
+        width: 14px;
+        height: 14px;
     }
 
     .ver-mas {
         display: inline-block;
-        padding: 0.75rem 1.5rem;
+        padding: 0.6rem 1.2rem;
         background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
         color: white;
         text-decoration: none;
-        border-radius: 10px;
+        border-radius: 8px;
         transition: all 0.3s ease;
         font-weight: 500;
         text-align: center;
         width: 100%;
         box-sizing: border-box;
+        font-size: 0.9rem;
     }
 
     .ver-mas:hover {
@@ -274,38 +334,63 @@ function obtenerImagenPorCategoria(categoriaId: string | null): string {
         box-shadow: 0 6px 20px rgba(46, 108, 77, 0.3);
     }
 
+    .placeholder-imagen {
+        width: 100%;
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f3f3;
+        position: relative;
+    }
+
+    .placeholder-imagen svg {
+        display: block;
+        width: 60px;
+        height: 60px;
+    }
+
     /* Responsive design */
     @media (max-width: 768px) {
         .actividades-empresas {
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem;
         }
 
         .actividades-empresas h2 {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
         }
 
         .grid-actividades {
             grid-template-columns: 1fr;
-            gap: 1.5rem;
+            gap: 1.2rem;
         }
 
         .card-content {
-            padding: 1.2rem;
+            padding: 1rem;
+        }
+
+        .card-actividad h3 {
+            font-size: 1.1rem;
         }
     }
 
     @media (max-width: 480px) {
         .actividades-empresas h2 {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
         }
 
         .card-actividad h3 {
-            font-size: 1.2rem;
+            font-size: 1rem;
         }
 
         .descripcion {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .ver-mas {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
         }
     }
 </style>
