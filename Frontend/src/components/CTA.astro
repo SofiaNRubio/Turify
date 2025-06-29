@@ -1,6 +1,9 @@
 ---
 import { SignUpButton } from "@clerk/astro/components";
 ---
+
+<link rel="stylesheet" href="/src/style/components.css">
+
 <section class="cta-explora">
   <div class="cta-contenido">
     <h2>¿Listo para descubrir más rutas?</h2>
@@ -13,63 +16,3 @@ import { SignUpButton } from "@clerk/astro/components";
     </div>
   </div>
 </section>
-
-<style>
-.cta-explora {
-  background: linear-gradient(135deg, #eaf7f0, #d2ede0);
-  padding: 3rem 1.5rem;
-  border-radius: 16px;
-  text-align: center;
-  margin: 3rem auto;
-  max-width: 800px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-.cta-contenido h2 {
-  color: #2e6c4d;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-.cta-contenido p {
-  color: #444;
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
-}
-.cta-botones {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.cta-botones > * {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn {
-  padding: 0.8rem 1.4rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-  display: inline-block;
-  border: none;
-}
-.btn.primario {
-  background-color: #2e6c4d;
-  color: #fff;
-}
-.btn.primario:hover {
-  background-color: #24593d;
-}
-.btn.secundario {
-  background-color: #fff;
-  color: #2e6c4d;
-  border: 2px solid #2e6c4d;
-}
-.btn.secundario:hover {
-  background-color: #f0f8f4;
-}
-</style>

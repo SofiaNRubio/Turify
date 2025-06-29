@@ -38,7 +38,7 @@ const columnas = [
 ];
 ---
 
-<link rel="stylesheet" href="/src/style/atractivos.css">
+<link rel="stylesheet" href="/src/style/categorias.css">
 <link rel="stylesheet" href="/src/style/modal.css">
 
 <AdminPanel menu={AdminMenu}>
@@ -198,212 +198,156 @@ const columnas = [
       
       if (tituloNotificacion) {
         tituloNotificacion.textContent = titulo;
-        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
       }
       
       if (textoNotificacion) {
         textoNotificacion.textContent = mensaje;
       }
       
-      if (modalNotificacion) {
-        modalNotificacion.classList.remove('hidden');
-        
-        if (btnAceptarNotificacion) {
-          btnAceptarNotificacion.onclick = () => {
-            modalNotificacion.classList.add('hidden');
-            if (recargar) {
-              window.location.reload();
-            }
-          };
+      modalNotificacion?.classList.remove('hidden');
+      
+      btnAceptarNotificacion?.addEventListener('click', () => {
+        modalNotificacion?.classList.add('hidden');
+        if (recargar) {
+          window.location.reload();
         }
+      }, { once: true });
+    }
+    
+    // Función para cerrar modales
+    function cerrarModal(modal: HTMLElement | null) {
+      if (modal) {
+        modal.classList.add('hidden');
       }
     }
     
-    // Abrir modal de nueva categoría
-    if (btnNuevo && modalNueva) {
-      btnNuevo.addEventListener('click', (e) => {
-        e.preventDefault();
-        modalNueva.classList.remove('hidden');
-      });
-    }
+    // Event listeners para el modal de nueva categoría
+    btnNuevo?.addEventListener('click', (e) => {
+      e.preventDefault();
+      modalNueva?.classList.remove('hidden');
+    });
     
-    // Cancelar nueva categoría
-    if (btnCancelarNueva && modalNueva) {
-      btnCancelarNueva.addEventListener('click', () => {
-        modalNueva.classList.add('hidden');
-      });
-    }
-      // Enviar formulario de nueva categoría
-    if (formNueva) {
-      formNueva.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const nombreInput = document.getElementById('nueva-nombre') as HTMLInputElement;
-        if (!nombreInput) return;
-        
-        const nombre = nombreInput.value;
-        
-        try {
-          const response = await fetch('http://localhost:3000/api/categorias', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nombre })
-          });
-          
-          if (response.ok) {
-            if (modalNueva) {
-              modalNueva.classList.add('hidden');
-            }
-            mostrarNotificacion('¡Éxito!', `Categoría "${nombre}" creada correctamente`, true);
-          } else {
-            mostrarNotificacion('Error', 'No se pudo crear la categoría', false, false);
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          mostrarNotificacion('Error', 'Ha ocurrido un error al crear la categoría', false, false);
-        }
-      });
-    }
-      // Modal de Eliminar
-    if (btnEliminar && modalConfirmarEliminar) {
-      btnEliminar.forEach((btn: Element) => {
-        btn.addEventListener('click', () => {
-          currentId = btn.getAttribute('data-id');
-          currentNombre = btn.getAttribute('data-nombre');
-          
-          // Mostrar el nombre de la categoría en el modal
-          const eliminarNombre = document.getElementById('eliminar-nombre');
-          if (eliminarNombre) {
-            eliminarNombre.textContent = currentNombre;
-          }
-          
-          // Configurar texto de confirmación
-          const textoConfirmar = document.getElementById('texto-confirmar-eliminar');
-          if (textoConfirmar) {
-            textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar la categoría "${currentNombre}"?`;
-          }
-          
-          // Mostrar modal de confirmación
-          if (modalConfirmarEliminar) {
-            modalConfirmarEliminar.classList.remove('hidden');
-          }
+    btnCancelarNueva?.addEventListener('click', () => {
+      cerrarModal(modalNueva);
+    });
+    
+    formNueva?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(formNueva as HTMLFormElement);
+      const nombre = formData.get('nombre') as string;
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/categorias', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nombre }),
         });
-      });
-    }
-    
-    // Botón Cancelar confirmación
-    if (btnCancelarConfirmar && modalConfirmarEliminar) {
-      btnCancelarConfirmar.addEventListener('click', () => {
-        modalConfirmarEliminar.classList.add('hidden');
-      });
-    }
-    
-    // Botón Confirmar eliminación
-    if (btnConfirmarEliminar && modalConfirmarEliminar) {
-      btnConfirmarEliminar.addEventListener('click', async () => {
-        modalConfirmarEliminar.classList.add('hidden');
         
-        try {
-          const response = await fetch(`http://localhost:3000/api/categorias/${currentId}`, {
-            method: 'DELETE'
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            mostrarNotificacion('¡Éxito!', `Categoría "${currentNombre}" eliminada correctamente`, true);
-          } else {
-            mostrarNotificacion('Error', data.error || 'No se pudo eliminar la categoría', false, false);
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          mostrarNotificacion('Error', 'Ha ocurrido un error durante la eliminación', false, false);
+        if (response.ok) {
+          mostrarNotificacion('Éxito', 'Categoría creada correctamente');
+          cerrarModal(modalNueva);
+          (formNueva as HTMLFormElement).reset();
+        } else {
+          mostrarNotificacion('Error', 'Error al crear la categoría', false, false);
         }
-      });
-    }    // Modal de Edición
-    if (btnEditar && modalEditarCategoria) {
-      btnEditar.forEach((btn: Element) => {
-        btn.addEventListener('click', (e: Event) => {
-          e.preventDefault();
-          
-          currentId = btn.getAttribute('data-id');
-          currentNombre = btn.getAttribute('data-nombre');
-          
-          // Llenar el campo de edición con el nombre actual
-          const categoriaIdEditar = document.getElementById('categoria-id-editar') as HTMLInputElement;
-          if (categoriaIdEditar && currentId) {
-            categoriaIdEditar.value = currentId;
-          }
-          
-          if (inputNombreEditar && currentNombre) {
-            inputNombreEditar.value = currentNombre;
-            
-            // Enfocar y seleccionar el texto del campo para facilitar la edición
-            setTimeout(() => {
-              if (inputNombreEditar) {
-                inputNombreEditar.focus();
-                inputNombreEditar.select();
-              }
-            }, 100);
-          }
-          
-          // Mostrar modal de edición
-          if (modalEditarCategoria) {
-            modalEditarCategoria.classList.remove('hidden');
-          }
-        });
-      });
-    }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error', 'Error de conexión', false, false);
+      }
+    });
     
-    // Botón Cancelar edición
-    if (btnCancelarEditar && modalEditarCategoria) {
-      btnCancelarEditar.addEventListener('click', () => {
-        modalEditarCategoria.classList.add('hidden');
-      });
-    }
-      // Enviar formulario de edición
-    if (formEditarCategoria) {
-      formEditarCategoria.addEventListener('submit', async (e: SubmitEvent) => {
-        e.preventDefault();
+    // Event listeners para el modal de eliminación
+    btnEliminar.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const nombre = btn.getAttribute('data-nombre');
         
-        const categoriaId = (document.getElementById('categoria-id-editar') as HTMLInputElement).value;
-        const nuevoNombre = (document.getElementById('nombre-editar') as HTMLInputElement).value;
+        currentId = id;
+        currentNombre = nombre;
         
-        if (!categoriaId || !nuevoNombre) return;
-        
-        try {
-          const response = await fetch(`http://localhost:3000/api/categorias/${categoriaId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nombre: nuevoNombre })
-          });
-            if (response.ok) {
-            if (modalEditarCategoria) {
-              modalEditarCategoria.classList.add('hidden');
-            }
-            mostrarNotificacion('¡Éxito!', `Categoría actualizada correctamente a "${nuevoNombre}"`, true);
-          } else {
-            const data = await response.json();
-            mostrarNotificacion('Error', data.error || 'No se pudo actualizar la categoría', false, false);
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          mostrarNotificacion('Error', 'Ha ocurrido un error durante la actualización', false, false);
+        const textoConfirmar = document.getElementById('texto-confirmar-eliminar');
+        if (textoConfirmar) {
+          textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar la categoría "${nombre}"?`;
         }
+        
+        modalConfirmarEliminar?.classList.remove('hidden');
       });
-    }
-      // Cerrar modales haciendo clic fuera
-    [modalConfirmarEliminar, modalNotificacion, modalEditarCategoria, modalNueva].forEach(modal => {
-      if (modal) {
-        modal.addEventListener('click', (e: MouseEvent) => {
-          if (e.target === modal) {
-            modal.classList.add('hidden');
-          }
+    });
+    
+    btnCancelarConfirmar?.addEventListener('click', () => {
+      cerrarModal(modalConfirmarEliminar);
+    });
+    
+    btnConfirmarEliminar?.addEventListener('click', async () => {
+      if (!currentId) return;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/categorias/${currentId}`, {
+          method: 'DELETE',
         });
+        
+        if (response.ok) {
+          mostrarNotificacion('Éxito', 'Categoría eliminada correctamente');
+          cerrarModal(modalConfirmarEliminar);
+        } else {
+          mostrarNotificacion('Error', 'Error al eliminar la categoría', false, false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error', 'Error de conexión', false, false);
+      }
+    });
+    
+    // Event listeners para el modal de edición
+    btnEditar.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const nombre = btn.getAttribute('data-nombre');
+        
+        currentId = id;
+        currentNombre = nombre;
+        
+        if (inputNombreEditar) {
+          inputNombreEditar.value = nombre || '';
+        }
+        
+        modalEditarCategoria?.classList.remove('hidden');
+      });
+    });
+    
+    btnCancelarEditar?.addEventListener('click', () => {
+      cerrarModal(modalEditarCategoria);
+    });
+    
+    formEditarCategoria?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentId) return;
+      
+      const formData = new FormData(formEditarCategoria as HTMLFormElement);
+      const nombre = formData.get('nombre') as string;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/categorias/${currentId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nombre }),
+        });
+        
+        if (response.ok) {
+          mostrarNotificacion('Éxito', 'Categoría actualizada correctamente');
+          cerrarModal(modalEditarCategoria);
+        } else {
+          mostrarNotificacion('Error', 'Error al actualizar la categoría', false, false);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacion('Error', 'Error de conexión', false, false);
       }
     });
   });

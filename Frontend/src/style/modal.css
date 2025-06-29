@@ -1,21 +1,23 @@
-/* Estilos para modales */
+@import url('./global.css');
+
+/* Estilos específicos para modales */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
+  padding: var(--spacing-xl);
 }
 
 .modal {
   background-color: var(--color-bg-panel);
-  border-radius: 12px;
+  border-radius: var(--border-radius-xl);
   max-width: 500px;
   width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -26,30 +28,30 @@
 .modal-header {
   background-color: var(--color-primary);
   color: white;
-  padding: 15px 20px;
+  padding: 15px var(--spacing-xl);
   font-weight: 600;
-  font-size: 1.1em;
+  font-size: var(--font-size-large);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: var(--spacing-xl);
   color: var(--color-text);
 }
 
 .modal-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md);
   margin: 15px 0;
 }
 
 .modal-option {
   background-color: var(--color-bg-input);
   border: 1px solid var(--color-primary);
-  border-radius: 8px;
-  padding: 12px 15px;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md) 15px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -68,7 +70,7 @@
   opacity: 0.5;
   cursor: not-allowed;
   background-color: #f5f5f5;
-  pointer-events: none; /* Evita que sea clickeable */
+  pointer-events: none;
 }
 
 .modal-option.disabled .modal-option-description {
@@ -91,7 +93,7 @@
 }
 
 .modal-option-description {
-  font-size: 0.85em;
+  font-size: var(--font-size-small);
   opacity: 0.8;
 }
 
@@ -99,18 +101,18 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: var(--spacing-xl);
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 15px;
 }
 
 .modal-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .modal-btn-primary {
@@ -123,9 +125,9 @@
 }
 
 .modal-btn-secondary {
-  background-color: #f8f9fa;
+  background-color: var(--color-light);
   color: var(--color-text);
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
 }
 
 .modal-btn-secondary:hover {
@@ -133,60 +135,36 @@
 }
 
 .modal-btn-danger {
-  background-color: #d9534f;
+  background-color: var(--color-danger);
   color: white;
 }
 
 .modal-btn-danger:hover {
-  background-color: #c9302c;
+  background-color: var(--color-danger-hover);
 }
 
 .modal-form {
   margin-top: 15px;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: var(--color-primary);
-}
-
-.form-control {
-  width: 40%;
-  padding: 8px 10px;
-  border: 1px solid var(--color-primary);
-  border-radius: 5px;
-  background-color: var(--color-bg-input);
-  margin-left: 1em;
-}
-
-.hidden {
-  display: none;
-}
-
 /* Estilos específicos para modal de notificación */
 #modal-notificacion .modal-header {
-  padding: 15px 20px;
+  padding: 15px var(--spacing-xl);
 }
 
 #modal-notificacion #titulo-notificacion {
   margin: 0;
-  font-size: 1.2em;
+  font-size: var(--font-size-xlarge);
 }
 
 #modal-notificacion .modal-body {
   text-align: center;
-  padding: 25px 20px;
+  padding: 25px var(--spacing-xl);
 }
 
 #modal-notificacion #texto-notificacion {
-  font-size: 1.1em;
-  margin-bottom: 20px;
+  font-size: var(--font-size-large);
+  margin-bottom: var(--spacing-xl);
   line-height: 1.4;
 }
 
@@ -194,7 +172,7 @@
   min-width: 120px;
 }
 
-/* Estilos responsivos para el modal */
+/* Media queries específicas para modales */
 @media (max-width: 768px) {
   .modal {
     max-width: 90%;
@@ -202,7 +180,7 @@
   
   .modal-actions {
     flex-direction: column;
-    gap: 8px;
+    gap: var(--spacing-sm);
   }
   
   .modal-btn {

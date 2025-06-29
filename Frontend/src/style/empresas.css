@@ -1,0 +1,262 @@
+@import url('./global.css');
+
+/* Página Empresas */
+.empresas-section {
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header h1 {
+    color: #2e6c4d;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-ver-todas {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.btn-ver-todas:hover {
+    background: linear-gradient(135deg, #245239, #2e6c4d);
+    transform: translateY(-2px);
+}
+
+.no-empresas {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(46, 108, 77, 0.1);
+}
+
+.no-empresas h3 {
+    color: #2e6c4d;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.no-empresas p {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.btn-volver {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.btn-volver:hover {
+    background: linear-gradient(135deg, #245239, #2e6c4d);
+    transform: translateY(-2px);
+}
+
+.empresas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.empresa-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(46, 108, 77, 0.1);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.empresa-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(46, 108, 77, 0.15);
+}
+
+.imagen-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.imagen-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-fast);
+}
+
+.empresa-card:hover .imagen-container img {
+    transform: scale(1.05);
+}
+
+.placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f3f3;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.badge-categoria {
+    display: inline-block;
+    background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.empresa-card h3 {
+    color: #2e6c4d;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+}
+
+.descripcion {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.info-empresa {
+    margin-bottom: 1.5rem;
+}
+
+.info-empresa > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.info-empresa svg {
+    color: #2e6c4d;
+    flex-shrink: 0;
+}
+
+.acciones {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-sitio-web,
+.btn-ver-detalle {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    text-align: center;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.btn-sitio-web {
+    background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
+    color: white;
+}
+
+.btn-sitio-web:hover {
+    background: linear-gradient(135deg, #245239, #2e6c4d);
+    transform: translateY(-2px);
+}
+
+.btn-ver-detalle {
+    background: white;
+    color: #2e6c4d;
+    border: 2px solid #2e6c4d;
+}
+
+.btn-ver-detalle:hover {
+    background: #2e6c4d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Media queries para empresas */
+@media (max-width: 768px) {
+    .empresas-section {
+        padding: 1.5rem 1rem;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .empresas-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .card-content {
+        padding: 1.2rem;
+    }
+
+    .empresa-card h3 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .empresa-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .acciones {
+        flex-direction: column;
+    }
+} 

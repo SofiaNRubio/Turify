@@ -1,0 +1,220 @@
+---
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+interface CategoriaConImagen {
+    id: string;
+    nombre: string;
+    imagen: string | null;
+    empresasCount: number;
+}
+
+// Función para obtener las categorías desde el backend
+async function obtenerCategorias(): Promise<Categoria[]> {
+    try {
+        const response = await fetch("http://localhost:3000/api/categorias");
+        if (!response.ok) {
+            throw new Error("Error al obtener categorías");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener categorías:", error);
+        return [];
+    }
+}
+
+// Función para obtener las empresas desde el backend
+async function obtenerEmpresas(): Promise<Empresa[]> {
+    try {
+        const response = await fetch("http://localhost:3000/api/empresas");
+        if (!response.ok) {
+            throw new Error("Error al obtener empresas");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener empresas:", error);
+        return [];
+    }
+}
+
+// Obtener datos
+const categorias = await obtenerCategorias();
+const empresas = await obtenerEmpresas();
+
+// Filtrar categorías de emergencia
+const categoriasExcluidas = [
+    "cuartel de bomberos",
+    "hospital",
+    "emergencias",
+    "policía",
+    "policia",
+    "ambulancia",
+];
+
+const categoriasFiltradas = categorias.filter(
+    (categoria) =>
+        !categoriasExcluidas.some((excluida) =>
+            categoria.nombre.toLowerCase().includes(excluida)
+        )
+);
+
+// Crear array de categorías con sus imágenes y conteo de empresas
+const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
+    .map((categoria) => {
+        // Buscar empresas de esta categoría
+        const empresasDeCategoria = empresas.filter(
+            (empresa) => empresa.categoria_id === categoria.id
+        );
+
+        // Debug: mostrar información de empresas en esta categoría
+        console.log(`Categoría: ${categoria.nombre} (${categoria.id})`);
+        console.log(`Empresas en categoría: ${empresasDeCategoria.length}`);
+
+        // Mostrar todas las empresas y sus imágenes
+        empresasDeCategoria.forEach((empresa, index) => {
+            console.log(`  Empresa ${index + 1}: ${empresa.nombre}`);
+            console.log(`  img_url: "${empresa.img_url}"`);
+            console.log(
+                `  img_url válida: ${!!(empresa.img_url && empresa.img_url.trim() !== "")}`
+            );
+        });
+
+        // Buscar la primera empresa con imagen de esta categoría
+        const empresaConImagen = empresasDeCategoria.find((empresa) => {
+            const tieneImagen =
+                empresa.img_url &&
+                empresa.img_url.trim() !== "" &&
+                empresa.img_url !== "null" &&
+                empresa.img_url !== "undefined";
+
+            if (tieneImagen) {
+                console.log(
+                    `  ✓ Empresa con imagen encontrada: ${empresa.nombre} - ${empresa.img_url}`
+                );
+            }
+
+            return tieneImagen;
+        });
+
+        // Usar imagen de empresa o null si no hay
+        const imagen = empresaConImagen?.img_url || null;
+
+        console.log(`  Imagen final para categoría: ${imagen}`);
+        console.log(`  ---`);
+
+        return {
+            id: categoria.id,
+            nombre: categoria.nombre,
+            imagen: imagen,
+            empresasCount: empresasDeCategoria.length,
+        };
+    })
+    .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
+
+// Debug final
+console.log("=== RESUMEN FINAL ===");
+categoriasConImagen.forEach((cat) => {
+    console.log(
+        `${cat.nombre}: ${cat.imagen ? "CON IMAGEN" : "SIN IMAGEN"} (${cat.empresasCount} empresas)`
+    );
+});
+---
+
+<link rel="stylesheet" href="/src/style/categorias-component.css">
+
+<section class="actividades-empresas">
+    <h2>Descubre las mejores categorías</h2>
+    <div class="grid-actividades">
+        {
+            categoriasConImagen.map((categoria: CategoriaConImagen) => (
+                <div class="card-actividad">
+                    {categoria.imagen ? (
+                        <img
+                            src={categoria.imagen}
+                            alt={categoria.nombre}
+                            onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
+                            onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                        />
+                    ) : null}
+                    <div
+                        class="placeholder-imagen"
+                        style={
+                            categoria.imagen
+                                ? "display: none;"
+                                : "display: flex;"
+                        }>
+                        <svg
+                            width="60"
+                            height="60"
+                            viewBox="0 0 60 60"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <rect
+                                width="60"
+                                height="60"
+                                rx="12"
+                                fill="#e0e0e0"
+                            />
+                            <path
+                                d="M15 45L22.5 30L37.5 45H15Z"
+                                fill="#bdbdbd"
+                            />
+                            <circle cx="22.5" cy="24" r="4.5" fill="#bdbdbd" />
+                        </svg>
+                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #666;">
+                            Sin imagen
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <span class="tipo-badge">{categoria.nombre}</span>
+                        <h3>{categoria.nombre}</h3>
+                        <p class="descripcion">
+                            Explora {categoria.empresasCount}{" "}
+                            {categoria.empresasCount === 1
+                                ? "empresa"
+                                : "empresas"}{" "}
+                            en esta categoría.
+                        </p>
+                        <div class="ubicacion">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                            <span>San Rafael, Mendoza</span>
+                        </div>
+                        <a
+                            href={`/empresas?categoria=${categoria.id}`}
+                            class="ver-mas">
+                            Ver empresas
+                        </a>
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+</section>

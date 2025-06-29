@@ -1,0 +1,217 @@
+@import url('./global.css');
+
+/* Estilos específicos para el Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-width: unset;
+    max-width: unset;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px var(--color-shadow-light);
+    z-index: 1000;
+    gap: 2rem;
+}
+
+.logo {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin-right: 0;
+}
+
+.logo-img {
+    max-width: 120px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    transition: max-width var(--transition-fast);
+    display: block;
+}
+
+.nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 0 0 auto;
+    min-width: 48px;
+    margin-right: 4rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+    justify-content: right;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.nav-links a:hover {
+    color: #4baf49;
+}
+
+.nav-links a.emergencias {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.nav-links a.emergencias:hover {
+    color: #cc0000;
+}
+
+.nav-links a.active {
+    color: #4baf49;
+}
+
+/* Botón hamburguesa */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 1100;
+    margin-left: 1rem;
+}
+
+.hamburger span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background: #333;
+    margin: 4px 0;
+    border-radius: 2px;
+    transition: var(--transition-normal);
+}
+
+.menu-toggle {
+    display: none;
+}
+
+/* Dropdown */
+.dropdown-btn {
+    position: relative;
+    display: inline-block;
+}
+
+.indicaciones-btn {
+    background: none;
+    border: none;
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition-fast);
+}
+
+.indicaciones-btn:hover {
+    color: #4baf49;
+}
+
+.dropdown-content-btn {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 200px;
+    box-shadow: 0 8px 16px var(--color-shadow);
+    z-index: 1;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+}
+
+.dropdown-content-btn a {
+    color: #333;
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-decoration: none;
+    display: block;
+    transition: background var(--transition-fast);
+}
+
+.dropdown-content-btn a:hover {
+    background-color: #f1f1f1;
+    color: #4baf49;
+}
+
+.dropdown-btn:hover .dropdown-content-btn {
+    display: block;
+}
+
+/* Media queries específicas para el Navbar */
+@media (max-width: 600px) {
+    .logo-img {
+        max-width: 80px;
+    }
+    
+    .navbar {
+        padding: 0.5rem 1rem;
+        gap: 1rem;
+    }
+    
+    .nav-auth {
+        margin-right: 0.5rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .nav-links {
+        position: fixed;
+        top: 70px;
+        right: 0;
+        background: #fff;
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 70vw;
+        max-width: 300px;
+        height: 100vh;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 2rem 1.5rem;
+        box-shadow: -2px 0 8px var(--color-shadow);
+        transform: translateX(100%);
+        transition: transform var(--transition-normal);
+        z-index: 1050;
+        display: flex;
+    }
+    
+    .menu-toggle:checked ~ .hamburger + .nav-links,
+    .menu-toggle:checked + .hamburger + .nav-links {
+        transform: translateX(0);
+    }
+    
+    .hamburger {
+        display: flex;
+    }
+    
+    .dropdown-content-btn {
+        position: static;
+        display: none;
+        box-shadow: none;
+        background: transparent;
+        min-width: auto;
+        margin-left: var(--spacing-lg);
+    }
+    
+    .dropdown-btn:hover .dropdown-content-btn {
+        display: block;
+    }
+    
+    .dropdown-content-btn a {
+        padding: var(--spacing-sm) 0;
+        color: #666;
+    }
+} 

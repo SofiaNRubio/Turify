@@ -1,3 +1,9 @@
+---
+// Importar estilos CSS
+---
+
+<link rel="stylesheet" href="/src/style/components.css">
+
 <footer class="footer">
     <div class="footer-content">
         <div class="left">
@@ -22,48 +28,3 @@
         <p>© {new Date().getFullYear()} San Rafael Turismo. Todos los derechos reservados. Hecho con 🤍 en San Rafael.</p>
     </div>
 </footer>
-<style>
-    .footer {
-        background: #1b3a2b;
-        color: #fff;
-        text-align: center;
-        padding: 1.5rem 1rem 1rem 1rem;
-        
-        font-size: 0.95rem;
-        margin-top: 2rem;
-    }
-    .footer-content {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        gap: 5rem;
-        text-align: left;
-    }
-    .left {
-        flex: 0 1 auto;
-        min-width: 220px;
-    }
-    .right {
-        flex: 0 1 auto;
-        min-width: 220px;
-        text-align: left;
-        margin-bottom: 1rem;
-    }
-    .footer-link {
-        cursor: pointer;
-        transition: text-decoration 0.2s;
-    }
-    .footer-link:hover {
-        text-decoration: underline;
-    }
-    @media (max-width: 700px) {
-        .footer-content {
-            flex-direction: column;
-            text-align: center;
-            gap: 0.5rem;
-        }
-        .right, .left {
-            text-align: center;
-        }
-    }
-</style>

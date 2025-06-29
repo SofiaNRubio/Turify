@@ -1,5 +1,6 @@
 import express from "express";
 import { db } from "../db.js";
+import { randomUUID } from "crypto";
 
 const router = express.Router();
 
@@ -25,24 +26,24 @@ const router = express.Router();
 router.get("/", async (req, res) => {
     try {
         const { nombre } = req.query;
-        
+
         let sql = "SELECT * FROM categorias";
         let args = [];
-        
+
         // Filtrar por nombre si se proporciona
         if (nombre) {
             sql += " WHERE nombre LIKE ?";
             args.push(`%${nombre}%`);
         }
-        
-        // Ordenar por ID numéricamente (extrayendo el número después de 'cat')
-        sql += " ORDER BY CAST(SUBSTR(id, 4) AS INTEGER)";
-        
+
+        // Ordenar por nombre alfabéticamente
+        sql += " ORDER BY nombre";
+
         const result = await db.execute({
             sql: sql,
             args: args,
         });
-        
+
         res.json(result.rows);
     } catch (err) {
         console.error("Error al obtener categorías:", err);
@@ -118,62 +119,15 @@ router.post("/", async (req, res) => {
 
     if (!nombre) {
         return res.status(400).json({ error: "El nombre es requerido" });
-    }    try {
-        // Primero, intentamos crear una tabla de seguimiento de IDs si no existe
-        try {
-            await db.execute({
-                sql: `CREATE TABLE IF NOT EXISTS id_tracking (
-                    tipo TEXT NOT NULL,
-                    ultimo_numero INTEGER NOT NULL,
-                    PRIMARY KEY (tipo)
-                )`
-            });
-        } catch (createErr) {
-            console.error("Error al crear tabla de seguimiento:", createErr);
-            // Continuamos con la ejecución aunque haya fallado la creación
-        }
-        
-        // Obtener el número más alto utilizado para categorías
-        let nextNum = 1;
-        
-        // Primero verificamos en la tabla de seguimiento
-        const trackingResult = await db.execute({
-            sql: "SELECT ultimo_numero FROM id_tracking WHERE tipo = 'categoria'"
-        });
-        
-        if (trackingResult.rows.length > 0) {
-            // Ya hay un registro de seguimiento, usamos ese número + 1
-            nextNum = trackingResult.rows[0].ultimo_numero + 1;
-        } else {
-            // No hay registro en la tabla de seguimiento, buscamos en la tabla categorias
-            const lastIdResult = await db.execute({
-                sql: "SELECT id FROM categorias WHERE id LIKE 'cat%' ORDER BY CAST(SUBSTR(id, 4) AS INTEGER) DESC LIMIT 1"
-            });
-            
-            if (lastIdResult.rows.length > 0) {
-                const lastId = lastIdResult.rows[0].id;
-                const lastNum = parseInt(lastId.replace('cat', ''));
-                nextNum = lastNum + 1;
-            }
-            
-            // Insertamos un registro inicial en la tabla de seguimiento
-            await db.execute({
-                sql: "INSERT INTO id_tracking (tipo, ultimo_numero) VALUES (?, ?)",
-                args: ['categoria', nextNum]
-            });
-        }
-        
-        const id = `cat${nextNum}`;
-        
+    }
+
+    try {
+        // Generar un UUID único para la categoría
+        const id = randomUUID();
+
         await db.execute({
             sql: "INSERT INTO categorias (id, nombre) VALUES (?, ?)",
             args: [id, nombre],
-        });
-        
-        // Actualizamos el contador en la tabla de seguimiento
-        await db.execute({
-            sql: "UPDATE id_tracking SET ultimo_numero = ? WHERE tipo = ?",
-            args: [nextNum, 'categoria']
         });
 
         res.status(201).json({ id, nombre });
@@ -213,10 +167,10 @@ router.delete("/:id", async (req, res) => {
             sql: "SELECT COUNT(*) as count FROM atractivos WHERE categoria_id = ?",
             args: [id],
         });
-        
+
         if (checkResult.rows[0].count > 0) {
-            return res.status(400).json({ 
-                error: "No se puede eliminar la categoría porque está siendo utilizada por atractivos" 
+            return res.status(400).json({
+                error: "No se puede eliminar la categoría porque está siendo utilizada por atractivos",
             });
         }
 

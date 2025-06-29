@@ -3,264 +3,497 @@ import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 
 // Obtener el ID del atractivo a editar
-const id = Astro.url.searchParams.get('id');
+const id = Astro.url.searchParams.get("id");
 
 if (!id) {
-  return Astro.redirect('/admin/gestion');
+    return Astro.redirect("/admin/gestion");
 }
 
 // Obtener los datos del atractivo
 let atractivo: any = null;
-let error = '';
-let mensaje = '';
+let error = "";
+let mensaje = "";
 let empresas: any[] = [];
 let categorias: any[] = [];
 
 try {
-  const atractivoResponse = await fetch(`http://localhost:3000/api/atractivos/${id}`);
-  
-  if (!atractivoResponse.ok) {
-    throw new Error('Atractivo no encontrado');
-  }
-  
-  atractivo = await atractivoResponse.json();
-    // Obtener empresas y categorías para los selectores
-  const empresasResponse = await fetch('http://localhost:3000/api/empresas');
-  
-  if (empresasResponse.ok) {
-    empresas = await empresasResponse.json();
-  } else {
-    console.error('Error al cargar empresas:', empresasResponse.statusText);
-    empresas = [];
-  }
-  
-  // Obtener las categorías reales de la API
-  const categoriasResponse = await fetch('http://localhost:3000/api/categorias');
-  
-  if (categoriasResponse.ok) {
-    categorias = await categoriasResponse.json();
-  } else {
-    console.error('Error al cargar categorías:', categoriasResponse.statusText);
-    // Categorías de respaldo en caso de error
-    categorias = [
-      { id: "cat1", nombre: "Naturaleza" },
-      { id: "cat2", nombre: "Monumento" },
-    ];
-  }
-  
-  // Procesar el formulario de actualización
-  if (Astro.request.method === "POST") {
-    try {
-      const formData = await Astro.request.formData();
-      
-      const atractivoActualizado = {
-        nombre: formData.get('nombre'),
-        descripcion: formData.get('descripcion'),
-        empresa_id: formData.get('empresa_id'),
-        categoria_id: formData.get('categoria_id'),
-        latitud: parseFloat(formData.get('latitud')?.toString() || '0'),
-        longitud: parseFloat(formData.get('longitud')?.toString() || '0'),
-        direccion: formData.get('direccion'),
-      };
-      
-      const updateResponse = await fetch(`http://localhost:3000/api/atractivos/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(atractivoActualizado)
-      });
-      
-      if (!updateResponse.ok) {
-        throw new Error('Error al actualizar el atractivo');
-      }
-      
-      mensaje = "Atractivo actualizado correctamente";
-        // Actualizar los datos del atractivo para mostrar la info actualizada
-      const nuevoAtractivoResponse = await fetch(`http://localhost:3000/api/atractivos/${id}`);
-      atractivo = await nuevoAtractivoResponse.json();
-        // Redirigir a la página de administración de gestión después de actualizar exitosamente
-      return Astro.redirect('/admin/gestion');
-    } catch (err: any) {
-      error = err.message || "Error al actualizar";
+    const atractivoResponse = await fetch(
+        `http://localhost:3000/api/atractivos/${id}`
+    );
+
+    if (!atractivoResponse.ok) {
+        throw new Error("Atractivo no encontrado");
     }
-  }
-  
+
+    atractivo = await atractivoResponse.json();
+    // Obtener empresas y categorías para los selectores
+    const empresasResponse = await fetch("http://localhost:3000/api/empresas");
+
+    if (empresasResponse.ok) {
+        empresas = await empresasResponse.json();
+    } else {
+        console.error("Error al cargar empresas:", empresasResponse.statusText);
+        empresas = [];
+    }
+
+    // Obtener las categorías reales de la API
+    const categoriasResponse = await fetch(
+        "http://localhost:3000/api/categorias"
+    );
+
+    if (categoriasResponse.ok) {
+        categorias = await categoriasResponse.json();
+    } else {
+        console.error(
+            "Error al cargar categorías:",
+            categoriasResponse.statusText
+        );
+        // Categorías de respaldo en caso de error
+        categorias = [
+            { id: "cat1", nombre: "Naturaleza" },
+            { id: "cat2", nombre: "Monumento" },
+        ];
+    }
+
+    // Procesar el formulario de actualización
+    if (Astro.request.method === "POST") {
+        try {
+            const formData = await Astro.request.formData();
+
+            const atractivoActualizado = {
+                nombre: formData.get("nombre"),
+                descripcion: formData.get("descripcion"),
+                empresa_id: formData.get("empresa_id"),
+                categoria_id: formData.get("categoria_id"),
+                latitud: parseFloat(formData.get("latitud")?.toString() || "0"),
+                longitud: parseFloat(
+                    formData.get("longitud")?.toString() || "0"
+                ),
+                direccion: formData.get("direccion"),
+                img_url: formData.get("img_url"),
+            };
+
+            const updateResponse = await fetch(
+                `http://localhost:3000/api/atractivos/${id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(atractivoActualizado),
+                }
+            );
+
+            if (!updateResponse.ok) {
+                throw new Error("Error al actualizar el atractivo");
+            }
+
+            mensaje = "Atractivo actualizado correctamente";
+            // Actualizar los datos del atractivo para mostrar la info actualizada
+            const nuevoAtractivoResponse = await fetch(
+                `http://localhost:3000/api/atractivos/${id}`
+            );
+            atractivo = await nuevoAtractivoResponse.json();
+            // Redirigir a la página de administración de gestión después de actualizar exitosamente
+            return Astro.redirect("/admin/gestion");
+        } catch (err: any) {
+            error = err.message || "Error al actualizar";
+        }
+    }
 } catch (err: any) {
-  error = err.message;
-  atractivo = null;
+    error = err.message;
+    atractivo = null;
 }
 
 // Si no se pudo cargar el atractivo, mostrar un mensaje de error
 if (!atractivo) {
-  error = 'No se pudo cargar la información del atractivo';
+    error = "No se pudo cargar la información del atractivo";
 }
 ---
 
-<link rel="stylesheet" href="/src/style/atractivos-nuevo.css">
-<link rel="stylesheet" href="/src/style/form-editar.css">
+<link rel="stylesheet" href="/src/style/atractivos-nuevo.css" />
+<link rel="stylesheet" href="/src/style/form-editar.css" />
 
 <AdminPanel menu={AdminMenu}>
     <div class="admin-content">
-      <h1>Editar atractivo turístico</h1>
-      
-      {mensaje && <div class="mensaje mensaje-exito">{mensaje}</div>}
-      {error && <div class="mensaje mensaje-error">{error}</div>}
-      
-      {atractivo && (
-        <form method="POST" class="form-atractivo">
-          <div class="form-section">
-            <h3>Información general</h3>
-            <label>
-              Nombre:
-              <input type="text" name="nombre" value={atractivo.nombre} required>
-            </label>
-            <label>              Descripción:
-              <textarea name="descripcion" rows="3" required>{atractivo.descripcion || ''}</textarea>
-            </label>
-            <label>
-              Empresa:
-              <select name="empresa_id" required>
-                {empresas?.map((empresa: any) => (
-                  <option value={empresa.id} selected={empresa.id === atractivo.empresa_id}>
-                    {empresa.nombre}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Categoría:
-              <select name="categoria_id" required>
-                {categorias.map((cat: any) => (
-                  <option value={cat.id} selected={cat.id === atractivo.categoria_id}>
-                    {cat.nombre}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          
-          <div class="form-section">
-            <h3>Ubicación</h3>
-            <div class="form-row">
-              <label>                Latitud:
-                <input type="number" step="0.000001" name="latitud" value={atractivo.latitud || 0} required>
-              </label>
-              <label>
-                Longitud:
-                <input type="number" step="0.000001" name="longitud" value={atractivo.longitud || 0} required>
-              </label>
-            </div>
-            <label>
-              Dirección:
-              <input type="text" name="direccion" value={atractivo.direccion || ''} required>
-            </label>
-          </div>
-            <div class="form-atractivo-buttons">
-            <button type="submit" class="btn-nuevo">Guardar cambios</button>
-            <a href="/admin/gestion" class="btn-cancelar">Cancelar</a>
-          </div>
-        </form>
-      )}
+        <h1>Editar atractivo turístico</h1>
+
+        {mensaje && <div class="mensaje mensaje-exito">{mensaje}</div>}
+        {error && <div class="mensaje mensaje-error">{error}</div>}
+
+        {
+            atractivo && (
+                <form method="POST" class="form-atractivo">
+                    <div class="form-section">
+                        <h3>Información general</h3>
+                        <label>
+                            Nombre:
+                            <input
+                                type="text"
+                                name="nombre"
+                                value={atractivo.nombre}
+                                required
+                            />
+                        </label>
+                        <label>
+                            {" "}
+                            Descripción:
+                            <textarea name="descripcion" rows="3" required>
+                                {atractivo.descripcion || ""}
+                            </textarea>
+                        </label>
+                        <label>
+                            Empresa:
+                            <select name="empresa_id" required>
+                                {empresas?.map((empresa: any) => (
+                                    <option
+                                        value={empresa.id}
+                                        selected={
+                                            empresa.id === atractivo.empresa_id
+                                        }>
+                                        {empresa.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Categoría:
+                            <select name="categoria_id" required>
+                                {categorias.map((cat: any) => (
+                                    <option
+                                        value={cat.id}
+                                        selected={
+                                            cat.id === atractivo.categoria_id
+                                        }>
+                                        {cat.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Imagen:
+                            <div class="imagen-upload-container">
+                                <input
+                                    type="file"
+                                    id="imagen-file"
+                                    accept="image/*"
+                                    style="display: none;"
+                                />
+                                <input
+                                    type="url"
+                                    name="img_url"
+                                    id="img-url-input"
+                                    value={atractivo.img_url || ""}
+                                    placeholder="URL de la imagen"
+                                    readonly
+                                />
+                                <button
+                                    type="button"
+                                    id="btn-subir-imagen"
+                                    class="btn-upload">
+                                    Subir Imagen
+                                </button>
+                                <div id="upload-status" class="upload-status" />
+                            </div>
+                            <small>
+                                Haz clic en "Subir Imagen" para seleccionar y
+                                subir una imagen a ImgBB automáticamente
+                            </small>
+                        </label>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Ubicación</h3>
+                        <div class="form-row">
+                            <label>
+                                {" "}
+                                Latitud:
+                                <input
+                                    type="number"
+                                    step="0.000001"
+                                    name="latitud"
+                                    value={atractivo.latitud || 0}
+                                    required
+                                />
+                            </label>
+                            <label>
+                                Longitud:
+                                <input
+                                    type="number"
+                                    step="0.000001"
+                                    name="longitud"
+                                    value={atractivo.longitud || 0}
+                                    required
+                                />
+                            </label>
+                        </div>
+                        <label>
+                            Dirección:
+                            <input
+                                type="text"
+                                name="direccion"
+                                value={atractivo.direccion || ""}
+                                required
+                            />
+                        </label>
+                    </div>
+                    <div class="form-atractivo-buttons">
+                        <button type="submit" class="btn-nuevo">
+                            Guardar cambios
+                        </button>
+                        <a href="/admin/gestion" class="btn-cancelar">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            )
+        }
     </div>
 </AdminPanel>
 
 <script>
-  // Validación básica del formulario
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('.form-atractivo');
-    
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        const nombreInput = document.querySelector('input[name="nombre"]') as HTMLInputElement;
-        
-        if (!nombreInput.value.trim()) {
-          e.preventDefault();
-          alert('Por favor, ingresa un nombre para el atractivo.');
-          nombreInput.focus();
+    // Validación básica del formulario
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector(".form-atractivo");
+
+        if (form) {
+            form.addEventListener("submit", (e) => {
+                const nombreInput = document.querySelector(
+                    'input[name="nombre"]'
+                ) as HTMLInputElement;
+
+                if (!nombreInput.value.trim()) {
+                    e.preventDefault();
+                    alert("Por favor, ingresa un nombre para el atractivo.");
+                    nombreInput.focus();
+                }
+            });
         }
-      });
-    }
 
-    // Botón cancelar - confirmar antes de salir si hay cambios
-    const btnCancelar = document.querySelector('.btn-cancelar');
-    let formModificado = false;
+        // Botón cancelar - confirmar antes de salir si hay cambios
+        const btnCancelar = document.querySelector(".btn-cancelar");
+        let formModificado = false;
 
-    // Detectar cambios en el formulario
-    const inputs = document.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-      input.addEventListener('change', () => {
-        formModificado = true;
-      });
+        // Detectar cambios en el formulario
+        const inputs = document.querySelectorAll("input, textarea, select");
+        inputs.forEach((input) => {
+            input.addEventListener("change", () => {
+                formModificado = true;
+            });
+        });
+
+        if (btnCancelar) {
+            btnCancelar.addEventListener("click", (e) => {
+                if (formModificado) {
+                    const confirmar = confirm(
+                        "¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán."
+                    );
+                    if (!confirmar) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+
+        // Prevenir clics múltiples en botones y envíos de formularios
+        const preventMultipleSubmits = () => {
+            // Prevenir clics múltiples en botones tipo submit
+            const submitButtons = document.querySelectorAll(
+                'button[type="submit"]'
+            );
+            submitButtons.forEach((button) => {
+                button.addEventListener("click", function (e) {
+                    if (this.classList.contains("procesando")) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    this.classList.add("procesando");
+                    const textoOriginal = this.textContent || "";
+                    this.dataset.textoOriginal = textoOriginal;
+                    this.textContent = "Procesando...";
+                    this.style.opacity = "0.7";
+
+                    // No deshabilitar pointer-events completamente para permitir el envío del formulario
+                    // this.style.pointerEvents = 'none';
+
+                    // Timeout de seguridad
+                    setTimeout(() => {
+                        if (this.classList.contains("procesando")) {
+                            this.classList.remove("procesando");
+                            this.textContent = textoOriginal;
+                            this.style.opacity = "";
+                        }
+                    }, 10000); // Aumentar a 10 segundos
+                });
+            });
+
+            // Prevenir envíos múltiples de formularios
+            const forms = document.querySelectorAll("form");
+            forms.forEach((form) => {
+                form.addEventListener("submit", function (e) {
+                    if (this.classList.contains("enviando")) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    this.classList.add("enviando");
+
+                    // No vamos a detener el envío del formulario, solo evitar envíos múltiples
+                    // El formulario se procesará normalmente
+
+                    // Timeout de seguridad para resetear el estado en caso de error
+                    setTimeout(() => {
+                        if (this.classList.contains("enviando")) {
+                            this.classList.remove("enviando");
+                        }
+                    }, 10000); // Aumentar el timeout a 10 segundos para dar más tiempo al servidor
+                });
+            });
+        };
+
+        // Ejecutar la protección contra clics múltiples
+        preventMultipleSubmits();
     });
 
-    if (btnCancelar) {
-      btnCancelar.addEventListener('click', (e) => {
-        if (formModificado) {
-          const confirmar = confirm('¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.');
-          if (!confirmar) {
-            e.preventDefault();
-          }
+    document.addEventListener("DOMContentLoaded", () => {
+        // Funcionalidad para subir imágenes a ImgBB
+        const API_KEY = "a0d050547832d68853fc714d2b5b41ba"; // Clave API de ImgBB (debe ser reemplazada por una real)
+        const btnSubirImagen = document.getElementById("btn-subir-imagen");
+        const imagenFile = document.getElementById("imagen-file");
+        const imgUrlInput = document.getElementById("img-url-input");
+        const uploadStatus = document.getElementById("upload-status");
+
+        if (btnSubirImagen && imagenFile && imgUrlInput && uploadStatus) {
+            btnSubirImagen.addEventListener("click", () => {
+                imagenFile.click();
+            });
+
+            imagenFile.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validar tipo de archivo
+                if (!file.type.startsWith("image/")) {
+                    uploadStatus.innerHTML =
+                        '<span class="error">Por favor selecciona una imagen válida</span>';
+                    return;
+                }
+
+                // Validar tamaño (máximo 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    uploadStatus.innerHTML =
+                        '<span class="error">La imagen es muy grande. Máximo 5MB</span>';
+                    return;
+                }
+
+                try {
+                    uploadStatus.innerHTML =
+                        '<span class="loading">Subiendo imagen...</span>';
+                    btnSubirImagen.disabled = true;
+                    btnSubirImagen.textContent = "Subiendo...";
+
+                    // Crear FormData para enviar a ImgBB
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    // Subir a ImgBB
+                    const response = await fetch(
+                        `https://api.imgbb.com/1/upload?key=${API_KEY}`,
+                        {
+                            method: "POST",
+                            body: formData,
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Extraer la URL de la imagen
+                        const imageUrl = result.data.url;
+                        imgUrlInput.value = imageUrl;
+                        imgUrlInput.removeAttribute("readonly");
+                        uploadStatus.innerHTML =
+                            '<span class="success">✓ Imagen subida exitosamente</span>';
+
+                        // Marcar el formulario como modificado
+                        const changeEvent = new Event("change", {
+                            bubbles: true,
+                        });
+                        imgUrlInput.dispatchEvent(changeEvent);
+
+                        // Volver a hacer readonly después de un momento
+                        setTimeout(() => {
+                            imgUrlInput.setAttribute("readonly", "true");
+                        }, 100);
+                    } else {
+                        throw new Error(
+                            result.error?.message || "Error al subir la imagen"
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error al subir imagen:", error);
+                    uploadStatus.innerHTML =
+                        '<span class="error">Error al subir la imagen. Inténtalo de nuevo.</span>';
+                } finally {
+                    btnSubirImagen.disabled = false;
+                    btnSubirImagen.textContent = "Subir Imagen";
+                    // Limpiar el input file para permitir subir la misma imagen nuevamente si es necesario
+                    imagenFile.value = "";
+                }
+            });
         }
-      });
+    });
+</script>
+
+<style>
+    .imagen-upload-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
-    // Prevenir clics múltiples en botones y envíos de formularios
-    const preventMultipleSubmits = () => {
-      // Prevenir clics múltiples en botones tipo submit
-      const submitButtons = document.querySelectorAll('button[type="submit"]');
-      submitButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-          if (this.classList.contains('procesando')) {
-            e.preventDefault();
-            return false;
-          }
-          
-          this.classList.add('procesando');
-          const textoOriginal = this.textContent || '';
-          this.dataset.textoOriginal = textoOriginal;
-          this.textContent = 'Procesando...';
-          this.style.opacity = '0.7';
-          
-          // No deshabilitar pointer-events completamente para permitir el envío del formulario
-          // this.style.pointerEvents = 'none';
-          
-          // Timeout de seguridad
-          setTimeout(() => {
-            if (this.classList.contains('procesando')) {
-              this.classList.remove('procesando');
-              this.textContent = textoOriginal;
-              this.style.opacity = '';
-            }
-          }, 10000); // Aumentar a 10 segundos
-        });
-      });
-      
-      // Prevenir envíos múltiples de formularios
-      const forms = document.querySelectorAll('form');
-      forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-          if (this.classList.contains('enviando')) {
-            e.preventDefault();
-            return false;
-          }
-          
-          this.classList.add('enviando');
-          
-          // No vamos a detener el envío del formulario, solo evitar envíos múltiples
-          // El formulario se procesará normalmente
-          
-          // Timeout de seguridad para resetear el estado en caso de error
-          setTimeout(() => {
-            if (this.classList.contains('enviando')) {
-              this.classList.remove('enviando');
-            }
-          }, 10000); // Aumentar el timeout a 10 segundos para dar más tiempo al servidor
-        });
-      });
-    };
-    
-    // Ejecutar la protección contra clics múltiples
-    preventMultipleSubmits();
-  });
-</script>
+    #img-url-input {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .btn-upload {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .btn-upload:hover:not(:disabled) {
+        background: #218838;
+    }
+
+    .btn-upload:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .upload-status {
+        width: 100%;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    .upload-status .success {
+        color: #28a745;
+    }
+
+    .upload-status .error {
+        color: #dc3545;
+    }
+
+    .upload-status .loading {
+        color: #007bff;
+    }
+</style>
