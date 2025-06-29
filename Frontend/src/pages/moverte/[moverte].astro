@@ -1,0 +1,515 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import FiltroUbicacion from "../../components/FiltroUbicacion.astro";
+import { apiFetch } from "../../utils/api";
+
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+interface Atractivo {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    empresa_id: string | null;
+    categoria_id: string | null;
+    created_at: string;
+    distrito: string | null;
+}
+
+// Función para obtener las categorías desde el backend
+async function obtenerCategorias(): Promise<Categoria[]> {
+    try {
+        const categoriasResponse = await apiFetch("/categorias");
+        if (!categoriasResponse.ok) {
+            throw new Error("Error al obtener categorías");
+        }
+        return await categoriasResponse.json();
+    } catch (error) {
+        console.error("Error al obtener categorías:", error);
+        return [];
+    }
+}
+
+// Función para obtener una empresa por ID
+async function obtenerEmpresa(id: string): Promise<Empresa | null> {
+    try {
+        const empresaResponse = await apiFetch(`/empresas/${id}`);
+        if (!empresaResponse.ok) {
+            return null;
+        }
+        return await empresaResponse.json();
+    } catch (error) {
+        console.error("Error al obtener empresa:", error);
+        return null;
+    }
+}
+
+// Función para obtener los atractivos de una empresa
+async function obtenerAtractivos(empresaId: string): Promise<Atractivo[]> {
+    try {
+        const atractivosResponse = await apiFetch(`/atractivos?empresa_id=${empresaId}`);
+        if (!atractivosResponse.ok) {
+            return [];
+        }
+        return await atractivosResponse.json();
+    } catch (error) {
+        console.error("Error al obtener atractivos:", error);
+        return [];
+    }
+}
+
+// Obtener el ID de la empresa desde los parámetros de la URL
+const { moverte: empresaId } = Astro.params;
+
+// Obtener datos
+const categorias = await obtenerCategorias();
+const empresa = empresaId ? await obtenerEmpresa(empresaId) : null;
+const atractivos = empresa ? await obtenerAtractivos(empresa.id) : [];
+
+// Función para obtener el nombre de la categoría
+function obtenerNombreCategoria(categoriaId: string | null): string {
+    if (!categoriaId) return "Sin categoría";
+    const categoria = categorias.find((cat) => cat.id === categoriaId);
+    return categoria ? categoria.nombre : "Sin categoría";
+}
+
+// Si no se encuentra la empresa, redirigir a la página principal
+if (!empresa) {
+    return Astro.redirect("/moverte");
+}
+---
+
+<link rel="stylesheet" href="/src/style/moverte.css">
+
+<MainLayout title={`${empresa.nombre} - Servicios de Transporte - Turify`}>
+    <div class="moverte-section">
+        <div class="container">
+            <div class="empresa-detalle">
+                <div class="imagen-principal">
+                    {empresa.img_url ? (
+                        <img
+                            src={empresa.img_url}
+                            alt={empresa.nombre}
+                            onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"
+                        />
+                    ) : null}
+                    <div class="placeholder">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
+                                fill="#1e40af"
+                            />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="info-principal">
+                    <div class="breadcrumb">
+                        <a href="/">Inicio</a>
+                        <span>›</span>
+                        <a href="/moverte">Servicios de Transporte</a>
+                        <span>›</span>
+                        <span>{empresa.nombre}</span>
+                    </div>
+
+                    <div class="badge-categoria transporte">
+                        {obtenerNombreCategoria(empresa.categoria_id)}
+                    </div>
+
+                    <h1>{empresa.nombre}</h1>
+
+                    <p class="descripcion-principal">
+                        {
+                            empresa.descripcion ||
+                                "Servicio de transporte ubicado en San Rafael, Mendoza."
+                        }
+                    </p>
+
+                    <div class="info-contacto-principal">
+                        {empresa.direccion && (
+                            <div class="info-item">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#1e40af" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                                <span>{empresa.direccion}</span>
+                            </div>
+                        )}
+
+                        {empresa.telefono && (
+                            <div class="info-item">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#1e40af" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+                                </svg>
+                                <a href={`tel:${empresa.telefono}`}>{empresa.telefono}</a>
+                            </div>
+                        )}
+
+                        {empresa.email && (
+                            <div class="info-item">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#1e40af" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                </svg>
+                                <a href={`mailto:${empresa.email}`}>{empresa.email}</a>
+                            </div>
+                        )}
+
+                        {empresa.sitio_web && (
+                            <div class="info-item">
+                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#1e40af" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                                <a href={empresa.sitio_web} target="_blank" rel="noopener noreferrer">
+                                    Visitar sitio web
+                                </a>
+                            </div>
+                        )}
+                    </div>
+
+                    <div class="acciones-principales">
+                        {empresa.telefono && (
+                            <a href={`tel:${empresa.telefono}`} class="btn-llamar-principal">
+                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+                                </svg>
+                                Llamar ahora
+                            </a>
+                        )}
+
+                        {empresa.sitio_web && (
+                            <a href={empresa.sitio_web} target="_blank" rel="noopener noreferrer" class="btn-sitio-principal">
+                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                                Visitar sitio web
+                            </a>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {atractivos.length > 0 && (
+                <div class="atractivos-section">
+                    <h2>Atractivos relacionados</h2>
+                    <div class="atractivos-grid">
+                        {atractivos.map((atractivo) => (
+                            <div class="atractivo-card">
+                                {atractivo.img_url && (
+                                    <img
+                                        src={atractivo.img_url}
+                                        alt={atractivo.nombre}
+                                        class="atractivo-imagen"
+                                    />
+                                )}
+                                <div class="atractivo-content">
+                                    <h3>{atractivo.nombre}</h3>
+                                    {atractivo.descripcion && (
+                                        <p>{atractivo.descripcion}</p>
+                                    )}
+                                    {atractivo.direccion && (
+                                        <div class="atractivo-ubicacion">
+                                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#1e40af" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                            </svg>
+                                            {atractivo.direccion}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    </div>
+</MainLayout>
+
+<style>
+    .moverte-section {
+        padding: 2rem 1.5rem;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .empresa-detalle {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 3rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(30, 64, 175, 0.1);
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .imagen-principal {
+        position: relative;
+        height: 400px;
+        overflow: hidden;
+    }
+
+    .imagen-principal img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        color: #1e40af;
+    }
+
+    .info-principal {
+        padding: 2rem;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .breadcrumb a {
+        color: #1e40af;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .badge-categoria.transporte {
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .info-principal h1 {
+        color: #1e40af;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+        line-height: 1.2;
+    }
+
+    .descripcion-principal {
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .info-contacto-principal {
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #666;
+        font-size: 1rem;
+    }
+
+    .info-item svg {
+        flex-shrink: 0;
+    }
+
+    .info-item a {
+        color: #1e40af;
+        text-decoration: none;
+    }
+
+    .info-item a:hover {
+        text-decoration: underline;
+    }
+
+    .acciones-principales {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-llamar-principal,
+    .btn-sitio-principal {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-llamar-principal {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-llamar-principal:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-sitio-principal {
+        background: transparent;
+        color: #1e40af;
+        border: 2px solid #1e40af;
+    }
+
+    .btn-sitio-principal:hover {
+        background: #1e40af;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .atractivos-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(30, 64, 175, 0.1);
+    }
+
+    .atractivos-section h2 {
+        color: #1e40af;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .atractivos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .atractivo-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .atractivo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .atractivo-imagen {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .atractivo-content {
+        padding: 1.5rem;
+    }
+
+    .atractivo-content h3 {
+        color: #1e40af;
+        font-size: 1.2rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .atractivo-content p {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+
+    .atractivo-ubicacion {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .empresa-detalle {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .imagen-principal {
+            height: 250px;
+        }
+
+        .info-principal {
+            padding: 1.5rem;
+        }
+
+        .info-principal h1 {
+            font-size: 2rem;
+        }
+
+        .acciones-principales {
+            flex-direction: column;
+        }
+
+        .atractivos-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .moverte-section {
+            padding: 1rem;
+        }
+
+        .info-principal h1 {
+            font-size: 1.75rem;
+        }
+
+        .descripcion-principal {
+            font-size: 1rem;
+        }
+
+        .atractivos-section {
+            padding: 1.5rem;
+        }
+    }
+</style> 

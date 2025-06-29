@@ -1,0 +1,626 @@
+@import url('./global.css');
+
+/* Llegar Component */
+.servicios-llegada {
+    padding: 2.5rem 1.5rem;
+}
+
+.header-llegada {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.servicios-llegada h2 {
+    color: #059669;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ver-todos {
+    color: #059669;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border: 2px solid #059669;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.ver-todos:hover {
+    background: #059669;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.grid-llegada {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card-llegada {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.08);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.card-llegada:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(5, 150, 105, 0.15);
+    border-color: #059669;
+}
+
+.card-llegada img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    transition: transform var(--transition-fast);
+}
+
+.card-llegada:hover img {
+    transform: scale(1.03);
+}
+
+.card-content {
+    padding: 1.2rem;
+    position: relative;
+}
+
+.card-llegada h3 {
+    margin: 0 0 0.8rem 0;
+    color: #059669;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.tipo-llegada {
+    display: inline-block;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.descripcion {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    font-size: 0.9rem;
+}
+
+.ubicacion {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.ubicacion svg {
+    color: #059669;
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+}
+
+.ver-mas {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+
+.ver-mas:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+}
+
+.placeholder-imagen {
+    width: 100%;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    position: relative;
+}
+
+.placeholder-imagen svg {
+    display: block;
+    width: 40px;
+    height: 40px;
+}
+
+/* Página de Llegar */
+.llegar-section {
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    min-height: 100vh;
+}
+
+.llegar-section .container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.llegar-section .header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.llegar-section .header h1 {
+    color: #059669;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.llegar-section .subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.llegar-section .no-empresas {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.llegar-section .no-empresas h3 {
+    color: #059669;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.llegar-section .no-empresas p {
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.llegar-section .btn-volver {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.llegar-section .btn-volver:hover {
+    background: #047857;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.llegar-section .empresas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.llegar-section .empresa-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.llegar-section .empresa-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.llegar-section .imagen-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.llegar-section .imagen-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.llegar-section .empresa-card:hover .imagen-container img {
+    transform: scale(1.05);
+}
+
+.llegar-section .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    color: #059669;
+    font-size: 3rem;
+}
+
+.llegar-section .imagen-container:has(img) .placeholder {
+    display: none;
+}
+
+.llegar-section .imagen-container:not(:has(img)) .placeholder {
+    display: flex;
+}
+
+.llegar-section .card-content {
+    padding: 1.5rem;
+}
+
+.llegar-section .badge-categoria {
+    display: inline-block;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.llegar-section .empresa-card h3 {
+    color: #059669;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+}
+
+.llegar-section .info-empresa {
+    margin-bottom: 1.5rem;
+}
+
+.llegar-section .info-empresa > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.llegar-section .info-empresa svg {
+    color: #059669;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.llegar-section .acciones {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.llegar-section .btn-llamar,
+.llegar-section .btn-ver-detalle {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.llegar-section .btn-llamar {
+    background: #059669;
+    color: white;
+}
+
+.llegar-section .btn-llamar:hover {
+    background: #047857;
+    transform: translateY(-2px);
+}
+
+.llegar-section .btn-ver-detalle {
+    background: transparent;
+    color: #059669;
+    border: 1px solid #059669;
+}
+
+.llegar-section .btn-ver-detalle:hover {
+    background: #059669;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .servicios-llegada {
+        padding: 1.5rem 1rem;
+    }
+
+    .header-llegada {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .servicios-llegada h2 {
+        font-size: 1.5rem;
+    }
+
+    .grid-llegada {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    .card-llegada h3 {
+        font-size: 1.1rem;
+    }
+
+    .llegar-section {
+        padding: 1rem;
+    }
+
+    .llegar-section .header h1 {
+        font-size: 2rem;
+    }
+
+    .llegar-section .empresas-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .llegar-section .card-content {
+        padding: 1rem;
+    }
+
+    .llegar-section .empresa-card h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .servicios-llegada h2 {
+        font-size: 1.25rem;
+    }
+
+    .card-llegada h3 {
+        font-size: 1rem;
+    }
+
+    .descripcion {
+        font-size: 0.85rem;
+    }
+
+    .ver-mas {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .llegar-section .header h1 {
+        font-size: 1.75rem;
+    }
+
+    .llegar-section .subtitle {
+        font-size: 1rem;
+    }
+
+    .llegar-section .empresa-card h3 {
+        font-size: 1rem;
+    }
+
+    .llegar-section .acciones {
+        flex-direction: column;
+    }
+}
+
+.card-llegada:has(img) .placeholder-imagen {
+    display: none;
+}
+
+.card-llegada:not(:has(img)) .placeholder-imagen {
+    display: flex;
+}
+
+/* HERO Y TÍTULO PRINCIPAL */
+.llegar-hero {
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.llegar-title {
+    font-size: 2.3rem;
+    color: #25644a;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+}
+
+.llegar-underline {
+    width: 60px;
+    height: 4px;
+    background: #25644a;
+    margin: 0 auto 0.5rem auto;
+    border-radius: 2px;
+}
+
+/* TARJETAS DE LLEGADA */
+.grid-llegada {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.card-llegada {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(60, 60, 60, 0.10);
+    overflow: hidden;
+    width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1.5px solid #e5e7eb;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card-llegada:hover {
+    box-shadow: 0 8px 24px rgba(60, 60, 60, 0.18);
+    transform: translateY(-4px) scale(1.03);
+}
+
+.card-llegada img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.card-content {
+    padding: 1.2rem 1rem 1.5rem 1rem;
+    text-align: center;
+    width: 100%;
+}
+
+.card-content h3 {
+    color: #25644a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-content .descripcion {
+    color: #444;
+    font-size: 0.98rem;
+    margin-bottom: 1.1rem;
+    display: block;
+}
+
+.ver-mas {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: #fff;
+    color: #25644a;
+    border: 1.5px solid #25644a;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+}
+
+.ver-mas:hover {
+    background: #25644a;
+    color: #fff;
+}
+
+/* SECCIÓN SUGERENCIAS */
+.llegar-sugerencias {
+    background: #b6e2d6;
+    padding: 2.5rem 1rem 2.5rem 1rem;
+    text-align: center;
+    border-radius: 0 0 12px 12px;
+    margin-top: 2.5rem;
+}
+
+.llegar-sugerencias h2 {
+    color: #25644a;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.llegar-sugerencias-desc {
+    color: #25644a;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.llegar-btn-hospedaje {
+    background: #25644a;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+    cursor: pointer;
+}
+
+.llegar-btn-hospedaje:hover {
+    background: #17422e;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .grid-llegada {
+        gap: 1.2rem;
+    }
+    .card-llegada {
+        width: 90vw;
+        max-width: 340px;
+    }
+}
+
+@media (max-width: 600px) {
+    .llegar-title {
+        font-size: 1.5rem;
+    }
+    .llegar-underline {
+        width: 36px;
+        height: 3px;
+    }
+    .llegar-sugerencias {
+        padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+    }
+    .card-content {
+        padding: 1rem 0.5rem 1.2rem 0.5rem;
+    }
+} 

@@ -1,0 +1,247 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import HospedajeComponent from "../components/Hospedaje.astro";
+import { apiFetch } from "../utils/api";
+
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+const url = new URL(Astro.request.url);
+const categoriaId = url.searchParams.get('categoria');
+
+let hospedajesFiltrados: Empresa[] = [];
+let categoriaSeleccionada: Categoria | null = null;
+
+if (categoriaId) {
+    try {
+        const responseCategoria = await apiFetch(`/categorias/${categoriaId}`);
+        if (responseCategoria.ok) {
+            categoriaSeleccionada = await responseCategoria.json();
+        }
+        const responseEmpresas = await apiFetch("/empresas");
+        if (responseEmpresas.ok) {
+            const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
+            hospedajesFiltrados = todasLasEmpresas.filter(
+                empresa => empresa.categoria_id === categoriaId
+            );
+        }
+    } catch (error) {
+        console.error("Error al obtener hospedajes filtrados:", error);
+    }
+}
+---
+
+<MainLayout>
+    {categoriaId && categoriaSeleccionada ? (
+        <div class="hospedaje-filtrados">
+            <div class="header-hospedaje">
+                <a href="/hospedaje" class="volver-btn">
+                    ← Volver a hospedaje
+                </a>
+                <h2>Hospedaje: {categoriaSeleccionada.nombre}</h2>
+            </div>
+            {hospedajesFiltrados.length > 0 ? (
+                <div class="grid-hospedaje">
+                    {hospedajesFiltrados.map((hospedaje: Empresa) => (
+                        <div class="card-hospedaje">
+                            {hospedaje.img_url && (
+                                <img 
+                                    src={hospedaje.img_url} 
+                                    alt={hospedaje.nombre}
+                                    class="imagen-hospedaje"
+                                />
+                            )}
+                            <div class="card-content">
+                                <h3>{hospedaje.nombre}</h3>
+                                {hospedaje.descripcion && (
+                                    <p class="descripcion">{hospedaje.descripcion}</p>
+                                )}
+                                <div class="info-contacto">
+                                    {hospedaje.direccion && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#0ea5e9" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                            </svg>
+                                            {hospedaje.direccion}
+                                        </div>
+                                    )}
+                                    {hospedaje.telefono && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#0ea5e9" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+                                            </svg>
+                                            {hospedaje.telefono}
+                                        </div>
+                                    )}
+                                    {hospedaje.email && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#0ea5e9" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                                            </svg>
+                                            {hospedaje.email}
+                                        </div>
+                                    )}
+                                </div>
+                                <div class="card-actions">
+                                    {hospedaje.sitio_web && (
+                                        <a href={hospedaje.sitio_web} target="_blank" rel="noopener noreferrer" class="sitio-web">
+                                            Visitar sitio web
+                                        </a>
+                                    )}
+                                    <a href={`/hospedaje/${hospedaje.id}`} class="ver-detalles">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div class="no-hospedaje">
+                    <p>No se encontraron hospedajes de {categoriaSeleccionada.nombre} disponibles.</p>
+                </div>
+            )}
+        </div>
+    ) : (
+        <HospedajeComponent />
+    )}
+</MainLayout>
+
+<style>
+    .hospedaje-filtrados {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .volver-btn {
+        display: inline-flex;
+        align-items: center;
+        color: #0ea5e9;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+    .volver-btn:hover {
+        color: #0369a1;
+    }
+    .header-hospedaje {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .header-hospedaje h2 {
+        color: #0ea5e9;
+        font-size: 2rem;
+        margin: 0;
+    }
+    .grid-hospedaje {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    .card-hospedaje {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-hospedaje:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+    }
+    .imagen-hospedaje {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .card-content {
+        padding: 1.5rem;
+    }
+    .card-content h3 {
+        color: #0ea5e9;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+    }
+    .descripcion {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+    .info-contacto {
+        margin-bottom: 1.5rem;
+    }
+    .ubicacion {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .card-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .sitio-web,
+    .ver-detalles {
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    .sitio-web {
+        background: #0ea5e9;
+        color: white;
+    }
+    .sitio-web:hover {
+        background: #0369a1;
+    }
+    .ver-detalles {
+        background: transparent;
+        color: #0ea5e9;
+        border: 1px solid #0ea5e9;
+    }
+    .ver-detalles:hover {
+        background: #0ea5e9;
+        color: white;
+    }
+    .no-hospedaje {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+    @media (max-width: 768px) {
+        .hospedaje-filtrados {
+            padding: 1rem;
+        }
+        .header-hospedaje h2 {
+            font-size: 1.5rem;
+        }
+        .grid-hospedaje {
+            grid-template-columns: 1fr;
+        }
+        .card-actions {
+            flex-direction: column;
+        }
+    }
+</style> 

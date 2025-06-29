@@ -1,0 +1,278 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import MoverteComponent from "../components/Moverte.astro";
+import { apiFetch } from "../utils/api";
+
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+// Obtener parámetros de la URL
+const url = new URL(Astro.request.url);
+const categoriaId = url.searchParams.get('categoria');
+
+// Si hay un parámetro de categoría, obtener los servicios filtrados
+let serviciosFiltrados: Empresa[] = [];
+let categoriaSeleccionada: Categoria | null = null;
+
+if (categoriaId) {
+    try {
+        // Obtener la categoría
+        const responseCategoria = await apiFetch(`/categorias/${categoriaId}`);
+        if (responseCategoria.ok) {
+            categoriaSeleccionada = await responseCategoria.json();
+        }
+
+        // Obtener todas las empresas
+        const responseEmpresas = await apiFetch("/empresas");
+        if (responseEmpresas.ok) {
+            const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
+            serviciosFiltrados = todasLasEmpresas.filter(
+                empresa => empresa.categoria_id === categoriaId
+            );
+        }
+    } catch (error) {
+        console.error("Error al obtener servicios filtrados:", error);
+    }
+}
+---
+
+<MainLayout>
+    {categoriaId && categoriaSeleccionada ? (
+        <div class="servicios-filtrados">
+            <div class="header-transporte">
+                <a href="/moverte" class="volver-btn">
+                    ← Volver a servicios de transporte
+                </a>
+                <h2>Servicios de {categoriaSeleccionada.nombre}</h2>
+            </div>
+            
+            {serviciosFiltrados.length > 0 ? (
+                <div class="grid-servicios">
+                    {serviciosFiltrados.map((servicio: Empresa) => (
+                        <div class="card-servicio">
+                            {servicio.img_url && (
+                                <img 
+                                    src={servicio.img_url} 
+                                    alt={servicio.nombre}
+                                    class="imagen-servicio"
+                                />
+                            )}
+                            <div class="card-content">
+                                <h3>{servicio.nombre}</h3>
+                                {servicio.descripcion && (
+                                    <p class="descripcion">{servicio.descripcion}</p>
+                                )}
+                                <div class="info-contacto">
+                                    {servicio.direccion && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#1e40af" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                            </svg>
+                                            {servicio.direccion}
+                                        </div>
+                                    )}
+                                    {servicio.telefono && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#1e40af" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+                                            </svg>
+                                            {servicio.telefono}
+                                        </div>
+                                    )}
+                                    {servicio.email && (
+                                        <div class="ubicacion">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                                                <path fill="#1e40af" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                                            </svg>
+                                            {servicio.email}
+                                        </div>
+                                    )}
+                                </div>
+                                <div class="card-actions">
+                                    {servicio.sitio_web && (
+                                        <a href={servicio.sitio_web} target="_blank" rel="noopener noreferrer" class="sitio-web">
+                                            Visitar sitio web
+                                        </a>
+                                    )}
+                                    <a href={`/moverte/${servicio.id}`} class="ver-detalles">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div class="no-servicios">
+                    <p>No se encontraron servicios de {categoriaSeleccionada.nombre} disponibles.</p>
+                </div>
+            )}
+        </div>
+    ) : (
+        <MoverteComponent />
+    )}
+</MainLayout>
+
+<style>
+    .servicios-filtrados {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .volver-btn {
+        display: inline-flex;
+        align-items: center;
+        color: #1e40af;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .volver-btn:hover {
+        color: #1d4ed8;
+    }
+
+    .header-transporte {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-transporte h2 {
+        color: #1e40af;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .grid-servicios {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .card-servicio {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-servicio:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .imagen-servicio {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .card-content h3 {
+        color: #1e40af;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+    }
+
+    .descripcion {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+
+    .info-contacto {
+        margin-bottom: 1.5rem;
+    }
+
+    .ubicacion {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .sitio-web,
+    .ver-detalles {
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .sitio-web {
+        background: #1e40af;
+        color: white;
+    }
+
+    .sitio-web:hover {
+        background: #1d4ed8;
+    }
+
+    .ver-detalles {
+        background: transparent;
+        color: #1e40af;
+        border: 1px solid #1e40af;
+    }
+
+    .ver-detalles:hover {
+        background: #1e40af;
+        color: white;
+    }
+
+    .no-servicios {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    @media (max-width: 768px) {
+        .servicios-filtrados {
+            padding: 1rem;
+        }
+
+        .header-transporte h2 {
+            font-size: 1.5rem;
+        }
+
+        .grid-servicios {
+            grid-template-columns: 1fr;
+        }
+
+        .card-actions {
+            flex-direction: column;
+        }
+    }
+</style> 

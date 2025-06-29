@@ -161,6 +161,212 @@
     height: 40px;
 }
 
+/* Página de Emergencias */
+.emergencias-section {
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #fef2f2 0%, #ffeaea 100%);
+    min-height: 100vh;
+}
+
+.emergencias-section .container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.emergencias-section .header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.emergencias-section .header h1 {
+    color: #dc2626;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.emergencias-section .subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.emergencias-section .no-empresas {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.1);
+}
+
+.emergencias-section .no-empresas h3 {
+    color: #dc2626;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.emergencias-section .no-empresas p {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.emergencias-section .btn-volver {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+}
+
+.emergencias-section .btn-volver:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-2px);
+}
+
+.emergencias-section .empresas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.emergencias-section .empresa-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.1);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    border: 2px solid transparent;
+}
+
+.emergencias-section .empresa-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(220, 38, 38, 0.15);
+    border-color: #dc2626;
+}
+
+.emergencias-section .imagen-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.emergencias-section .imagen-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-fast);
+}
+
+.emergencias-section .empresa-card:hover .imagen-container img {
+    transform: scale(1.05);
+}
+
+.emergencias-section .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+/* Ocultar placeholder cuando hay imagen */
+.emergencias-section .imagen-container:has(img) .placeholder {
+    display: none;
+}
+
+.emergencias-section .imagen-container:not(:has(img)) .placeholder {
+    display: flex;
+}
+
+.emergencias-section .card-content {
+    padding: 1.5rem;
+}
+
+.emergencias-section .badge-categoria {
+    display: inline-block;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.emergencias-section .empresa-card h3 {
+    color: #dc2626;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    line-height: 1.3;
+}
+
+.emergencias-section .info-empresa {
+    margin-bottom: 1.5rem;
+}
+
+.emergencias-section .info-empresa > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.emergencias-section .info-empresa svg {
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+.emergencias-section .acciones {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.emergencias-section .btn-llamar,
+.emergencias-section .btn-ver-detalle {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    text-align: center;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.emergencias-section .btn-llamar {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+}
+
+.emergencias-section .btn-llamar:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-2px);
+}
+
+.emergencias-section .btn-ver-detalle {
+    background: linear-gradient(135deg, #374151, #4b5563);
+    color: white;
+}
+
+.emergencias-section .btn-ver-detalle:hover {
+    background: linear-gradient(135deg, #1f2937, #374151);
+    transform: translateY(-2px);
+}
+
 /* Media queries para emergencias */
 @media (max-width: 768px) {
     .servicios-emergencia {
@@ -190,6 +396,28 @@
     .card-emergencia h3 {
         font-size: 1.1rem;
     }
+
+    /* Media queries para página de emergencias */
+    .emergencias-section {
+        padding: 1.5rem 1rem;
+    }
+
+    .emergencias-section .header h1 {
+        font-size: 2rem;
+    }
+
+    .emergencias-section .empresas-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .emergencias-section .card-content {
+        padding: 1.2rem;
+    }
+
+    .emergencias-section .empresa-card h3 {
+        font-size: 1.2rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -209,4 +437,30 @@
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
     }
+
+    /* Media queries para página de emergencias */
+    .emergencias-section .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .emergencias-section .subtitle {
+        font-size: 1rem;
+    }
+
+    .emergencias-section .empresa-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .emergencias-section .acciones {
+        flex-direction: column;
+    }
+}
+
+/* Ocultar placeholder-imagen cuando hay imagen */
+.card-emergencia:has(img) .placeholder-imagen {
+    display: none;
+}
+
+.card-emergencia:not(:has(img)) .placeholder-imagen {
+    display: flex;
 } 

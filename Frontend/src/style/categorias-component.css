@@ -1,12 +1,12 @@
 @import url('./global.css');
 
 /* Categorias Component */
-.actividades-empresas {
+.cat-actividades-empresas {
     padding: 2.5rem 1.5rem;
-    background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
+    background-color: #F5F2E8;
 }
 
-.actividades-empresas h2 {
+.cat-actividades-empresas h2 {
     color: #2e6c4d;
     margin-bottom: 2rem;
     font-size: 2rem;
@@ -14,7 +14,7 @@
     font-weight: 600;
 }
 
-.grid-actividades {
+.cat-grid-actividades {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
@@ -22,7 +22,7 @@
     margin: 0 auto;
 }
 
-.card-actividad {
+.cat-card-actividad {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(46, 108, 77, 0.08);
@@ -31,28 +31,28 @@
     position: relative;
 }
 
-.card-actividad:hover {
+.cat-card-actividad:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 30px rgba(46, 108, 77, 0.12);
 }
 
-.card-actividad img {
+.cat-card-actividad img {
     width: 100%;
     height: 160px;
     object-fit: cover;
     transition: transform var(--transition-fast);
 }
 
-.card-actividad:hover img {
+.cat-card-actividad:hover img {
     transform: scale(1.03);
 }
 
-.card-content {
+.cat-card-content {
     padding: 1.2rem;
     position: relative;
 }
 
-.tipo-badge {
+.cat-tipo-badge {
     display: inline-block;
     background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
     color: white;
@@ -65,7 +65,7 @@
     letter-spacing: 0.3px;
 }
 
-.card-actividad h3 {
+.cat-card-actividad h3 {
     margin: 0 0 0.8rem 0;
     color: #2e6c4d;
     font-size: 1.2rem;
@@ -73,14 +73,14 @@
     line-height: 1.3;
 }
 
-.descripcion {
+.cat-descripcion {
     color: #666;
     margin-bottom: 1rem;
     line-height: 1.4;
     font-size: 0.9rem;
 }
 
-.ubicacion {
+.cat-ubicacion {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -89,14 +89,14 @@
     font-size: 0.85rem;
 }
 
-.ubicacion svg {
+.cat-ubicacion svg {
     color: #2e6c4d;
     flex-shrink: 0;
     width: 14px;
     height: 14px;
 }
 
-.ver-mas {
+.cat-ver-mas {
     display: inline-block;
     padding: 0.6rem 1.2rem;
     background: linear-gradient(135deg, #2e6c4d, #3d8b5c);
@@ -111,13 +111,13 @@
     font-size: 0.9rem;
 }
 
-.ver-mas:hover {
+.cat-ver-mas:hover {
     background: linear-gradient(135deg, #245239, #2e6c4d);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(46, 108, 77, 0.3);
 }
 
-.placeholder-imagen {
+.cat-placeholder-imagen {
     width: 100%;
     height: 160px;
     display: flex;
@@ -127,7 +127,7 @@
     position: relative;
 }
 
-.placeholder-imagen svg {
+.cat-placeholder-imagen svg {
     display: block;
     width: 60px;
     height: 60px;
@@ -135,43 +135,43 @@
 
 /* Media queries para categorías */
 @media (max-width: 768px) {
-    .actividades-empresas {
+    .cat-actividades-empresas {
         padding: 1.5rem 1rem;
     }
 
-    .actividades-empresas h2 {
+    .cat-actividades-empresas h2 {
         font-size: 1.6rem;
         margin-bottom: 1.5rem;
     }
 
-    .grid-actividades {
+    .cat-grid-actividades {
         grid-template-columns: 1fr;
         gap: 1.2rem;
     }
 
-    .card-content {
+    .cat-card-content {
         padding: 1rem;
     }
 
-    .card-actividad h3 {
+    .cat-card-actividad h3 {
         font-size: 1.1rem;
     }
 }
 
 @media (max-width: 480px) {
-    .actividades-empresas h2 {
+    .cat-actividades-empresas h2 {
         font-size: 1.4rem;
     }
 
-    .card-actividad h3 {
+    .cat-card-actividad h3 {
         font-size: 1rem;
     }
 
-    .descripcion {
+    .cat-descripcion {
         font-size: 0.85rem;
     }
 
-    .ver-mas {
+    .cat-ver-mas {
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
     }

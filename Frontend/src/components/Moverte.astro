@@ -61,17 +61,16 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
 const categorias = await obtenerCategorias();
 const empresas = await obtenerEmpresas();
 
-// Filtrar categorías de emergencia (incluir solo estas)
-const categoriasEmergencia = [
-    "hospitales",
-    "policía",
-    "bomberos",
-    "farmacias",
+// Filtrar categorías de transporte (incluir solo estas)
+const categoriasTransporte = [
+    "taxis",
+    "renta_vehiculos",
+    "terminal_omnibus",
 ];
 
 const categoriasFiltradas = categorias.filter((categoria) =>
-    categoriasEmergencia.some((emergencia) =>
-        categoria.nombre.toLowerCase().includes(emergencia)
+    categoriasTransporte.some((transporte) =>
+        categoria.nombre.toLowerCase().includes(transporte)
     )
 );
 
@@ -129,7 +128,7 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
 
 // Debug final
-console.log("=== RESUMEN FINAL EMERGENCIAS ===");
+console.log("=== RESUMEN FINAL TRANSPORTE ===");
 categoriasConImagen.forEach((cat) => {
     console.log(
         `${cat.nombre}: ${cat.imagen ? "CON IMAGEN" : "SIN IMAGEN"} (${cat.empresasCount} empresas)`
@@ -137,22 +136,24 @@ categoriasConImagen.forEach((cat) => {
 });
 ---
 
-<link rel="stylesheet" href="/src/style/emergencias.css">
+<link rel="stylesheet" href="/src/style/moverte.css">
 
-<section class="servicios-emergencia">
-    <div class="header-emergencia">
-        <h2>Servicios de Emergencia</h2>
-    </div>
-    <div class="grid-emergencias">
+<section class="moverte-hero">
+  <h1 class="moverte-title">Moverte en San Rafael</h1>
+  <div class="moverte-underline"></div>
+</section>
+
+<section class="servicios-transporte">
+    <div class="grid-transporte">
         {
             categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="card-emergencia">
+                <div class="card-transporte">
                     {categoria.imagen ? (
                         <img
                             src={categoria.imagen}
                             alt={categoria.nombre}
                             onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
-                            onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                            onload={`console.log('\u2713 Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
                         />
                     ) : null}
                     <div class="placeholder-imagen">
@@ -164,24 +165,16 @@ categoriasConImagen.forEach((cat) => {
                             xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                fill="#dc2626"
+                                fill="#1e40af"
                             />
                         </svg>
                     </div>
                     <div class="card-content">
-                        <span class="tipo-emergencia">{categoria.nombre}</span>
                         <h3>{categoria.nombre}</h3>
-                        <p class="descripcion">
-                            Encuentra {categoria.empresasCount}{" "}
-                            {categoria.empresasCount === 1
-                                ? "servicio"
-                                : "servicios"}{" "}
-                            de emergencia disponibles.
-                        </p>
                         <a
-                            href={`/emergencias?categoria=${categoria.id}`}
+                            href={`/moverte?categoria=${categoria.id}`}
                             class="ver-mas">
-                            Ver servicios
+                            Ver Más
                         </a>
                     </div>
                 </div>
@@ -189,3 +182,12 @@ categoriasConImagen.forEach((cat) => {
         }
     </div>
 </section>
+
+<section class="moverte-sugerencias">
+  <h2>¿No sabes a donde ir? Click en el botón de abajo</h2>
+  <p class="moverte-sugerencias-desc">
+    Aquí tendrás distintas sugerencias sobre<br />
+    Actividades al aire libre, Gastronomía, Bodegas y Espacios Sociales
+  </p>
+  <a href="/" class="moverte-btn-principal">Principal</a>
+</section> 

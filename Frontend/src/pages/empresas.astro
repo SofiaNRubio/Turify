@@ -79,6 +79,33 @@ async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
 const categorias = await obtenerCategorias();
 const empresas = await obtenerEmpresas();
 
+// Filtrar categorías de emergencia (excluir las mismas que en el componente Categorias)
+const categoriasExcluidas = [
+    "hospitales",
+    "policía",
+    "bomberos",
+    "farmacias",
+];
+
+const categoriasFiltradas = categorias.filter(
+    (categoria) =>
+        !categoriasExcluidas.some((excluida) =>
+            categoria.nombre.toLowerCase().includes(excluida)
+        )
+);
+
+// Filtrar empresas para excluir las de categorías de emergencia
+const empresasFiltradas = empresas.filter((empresa) => {
+    if (!empresa.categoria_id) return true; // Incluir empresas sin categoría
+    
+    const categoria = categorias.find((cat) => cat.id === empresa.categoria_id);
+    if (!categoria) return true; // Incluir empresas con categoría no encontrada
+    
+    return !categoriasExcluidas.some((excluida) =>
+        categoria.nombre.toLowerCase().includes(excluida)
+    );
+});
+
 // Obtener parámetros de la URL
 const url = new URL(Astro.request.url);
 const categoriaId = url.searchParams.get("categoria");
@@ -87,9 +114,9 @@ const categoriaId = url.searchParams.get("categoria");
 const distritos = await obtenerDistritos(categoriaId || undefined);
 
 // Filtrar empresas por categoría si se especifica
-let empresasFiltradas = categoriaId
-    ? empresas.filter((empresa) => empresa.categoria_id === categoriaId)
-    : empresas;
+let empresasFinales = categoriaId
+    ? empresasFiltradas.filter((empresa) => empresa.categoria_id === categoriaId)
+    : empresasFiltradas;
 
 // Filtrar por distrito si se especifica
 const distritoFiltro = url.searchParams.get("distrito");
@@ -97,14 +124,14 @@ const distritosSeleccionados = distritoFiltro
   ? distritoFiltro.split(",")
   : [];
 if (distritosSeleccionados.length > 0) {
-    empresasFiltradas = empresasFiltradas.filter((empresa) =>
+    empresasFinales = empresasFinales.filter((empresa) =>
         distritosSeleccionados.some((d) => empresa.distrito && empresa.distrito.toLowerCase().includes(d.toLowerCase()))
     );
 }
 
 // Obtener información de la categoría si se filtra
 const categoriaSeleccionada = categoriaId
-    ? categorias.find((cat) => cat.id === categoriaId)
+    ? categoriasFiltradas.find((cat) => cat.id === categoriaId)
     : null;
 ---
 
@@ -138,7 +165,7 @@ const categoriaSeleccionada = categoriaId
                 />
             )}
 
-            {empresasFiltradas.length === 0 ? (
+            {empresasFinales.length === 0 ? (
                 <div class="no-empresas">
                     <h3>No se encontraron empresas</h3>
                     <p>
@@ -152,8 +179,8 @@ const categoriaSeleccionada = categoriaId
                 </div>
             ) : (
                 <div class="empresas-grid">
-                    {empresasFiltradas.map((empresa) => {
-                        const categoria = categorias.find(
+                    {empresasFinales.map((empresa) => {
+                        const categoria = categoriasFiltradas.find(
                             (cat) => cat.id === empresa.categoria_id
                         );
                         return (
