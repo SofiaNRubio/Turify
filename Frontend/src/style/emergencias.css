@@ -3,7 +3,6 @@
 /* Emergencias Component */
 .servicios-emergencia {
     padding: 2.5rem 1.5rem;
-    background: linear-gradient(135deg, #fef2f2 0%, #ffeaea 100%);
 }
 
 .header-emergencia {
@@ -164,8 +163,9 @@
 /* Página de Emergencias */
 .emergencias-section {
     padding: 2rem 1.5rem;
-    background: linear-gradient(135deg, #fef2f2 0%, #ffeaea 100%);
+    background: #f7f5ed;
     min-height: 100vh;
+    padding-bottom: 3rem;
 }
 
 .emergencias-section .container {
@@ -174,15 +174,27 @@
 }
 
 .emergencias-section .header {
-    text-align: center;
-    margin-bottom: 3rem;
+    text-align: center !important;
+    margin-bottom: 1rem;
+    display: block !important;
+    flex-direction: unset !important;
+    align-items: unset !important;
 }
 
 .emergencias-section .header h1 {
-    color: #dc2626;
-    font-size: 2.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+    color: #a61919;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+.emergencias-section .decorative-underline {
+    width: 80px;
+    height: 5px;
+    background: #a61919;
+    border-radius: 3px;
+    margin: 0 auto 0.5rem auto;
 }
 
 .emergencias-section .subtitle {
@@ -193,7 +205,6 @@
     margin-left: auto;
     margin-right: auto;
 }
-
 
 .emergencias-section .no-empresas {
     text-align: center;
@@ -402,6 +413,13 @@
         padding: 1.5rem 1rem;
     }
 
+    .emergencias-section .header {
+        text-align: center !important;
+        display: block !important;
+        flex-direction: unset !important;
+        align-items: unset !important;
+    }
+
     .emergencias-section .header h1 {
         font-size: 2rem;
     }
@@ -463,4 +481,211 @@
 
 .card-emergencia:not(:has(img)) .placeholder-imagen {
     display: flex;
+}
+
+@media (max-width: 900px) {
+    .grid-emergencias {
+        gap: 1.5rem 1rem;
+    }
+    .card-emergencia {
+        width: 90vw;
+        max-width: 340px;
+    }
+}
+
+@media (max-width: 600px) {
+    .header h1 {
+        font-size: 2.1rem;
+    }
+    .decorative-underline {
+        width: 50px;
+        height: 4px;
+    }
+    .grid-emergencias {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+    }
+    .card-emergencia {
+        width: 98vw;
+        max-width: 340px;
+    }
+}
+
+/* Breadcrumb */
+.emergencias-section .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.emergencias-section .breadcrumb a {
+    color: #a61919;
+    text-decoration: none;
+}
+
+.emergencias-section .breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* Título de categoría */
+.emergencias-section .titulo-categoria {
+    color: #a61919;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Info de empresa */
+.emergencias-section .empresa-info {
+    padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.emergencias-section .empresa-info h3 {
+    color: #a61919;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.emergencias-section .empresa-descripcion {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.emergencias-section .empresa-contacto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.emergencias-section .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #666;
+    font-size: 1rem;
+}
+
+.emergencias-section .info-item svg {
+    flex-shrink: 0;
+}
+
+.emergencias-section .info-item a {
+    color: #a61919;
+    text-decoration: none;
+}
+
+.emergencias-section .info-item a:hover {
+    text-decoration: underline;
+}
+
+/* Placeholder de imagen de empresa */
+.emergencias-section .empresa-imagen .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f5ed;
+    color: #a61919;
+}
+
+/* Estilos globales para las cards de categorías de emergencia */
+.grid-emergencias {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card-emergencia {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.08);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.card-emergencia:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(220, 38, 38, 0.15);
+    border-color: #dc2626;
+}
+
+.card-emergencia img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    transition: transform var(--transition-fast);
+}
+
+.card-emergencia:hover img {
+    transform: scale(1.03);
+}
+
+.card-content {
+    padding: 1.2rem;
+    position: relative;
+}
+
+.card-emergencia h3 {
+    margin: 0 0 0.8rem 0;
+    color: #dc2626;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.descripcion {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    font-size: 0.9rem;
+}
+
+.ver-mas {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+
+.ver-mas:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+}
+
+.placeholder-imagen {
+    width: 100%;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    position: relative;
+}
+
+.placeholder-imagen svg {
+    display: block;
+    width: 40px;
+    height: 40px;
 } 

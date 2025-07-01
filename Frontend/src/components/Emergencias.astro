@@ -67,6 +67,9 @@ const categoriasEmergencia = [
     "policía",
     "bomberos",
     "farmacias",
+    "ambulancia",
+    "centro de salud",
+    "mecánicos"
 ];
 
 const categoriasFiltradas = categorias.filter((categoria) =>
@@ -151,11 +154,10 @@ categoriasConImagen.forEach((cat) => {
                         <img
                             src={categoria.imagen}
                             alt={categoria.nombre}
-                            onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
-                            onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                            onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
                         />
                     ) : null}
-                    <div class="placeholder-imagen">
+                    <div class="placeholder-imagen" style={categoria.imagen ? 'display:none;' : 'display:flex;'}>
                         <svg
                             width="40"
                             height="40"
@@ -169,19 +171,12 @@ categoriasConImagen.forEach((cat) => {
                         </svg>
                     </div>
                     <div class="card-content">
-                        <span class="tipo-emergencia">{categoria.nombre}</span>
-                        <h3>{categoria.nombre}</h3>
-                        <p class="descripcion">
-                            Encuentra {categoria.empresasCount}{" "}
-                            {categoria.empresasCount === 1
-                                ? "servicio"
-                                : "servicios"}{" "}
-                            de emergencia disponibles.
-                        </p>
+                        <h3>{categoria.nombre.charAt(0).toUpperCase() + categoria.nombre.slice(1)}</h3>
+                        <p class="descripcion">Encuentra {categoria.empresasCount} servicios de emergencia disponibles.</p>
                         <a
                             href={`/emergencias?categoria=${categoria.id}`}
                             class="ver-mas">
-                            Ver servicios
+                            Ver Más
                         </a>
                     </div>
                 </div>

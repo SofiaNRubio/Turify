@@ -29,12 +29,23 @@
 }
 
 .footer-link {
+    color: #f7c873;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s, text-decoration 0.2s;
     cursor: pointer;
-    transition: text-decoration var(--transition-fast);
+    border-radius: 4px;
+    padding: 2px 4px;
 }
 
-.footer-link:hover {
+.footer-link:hover, .footer-link:focus {
+    color: #fff;
     text-decoration: underline;
+    background: rgba(247, 200, 115, 0.15);
+}
+
+.footer-link:visited {
+    color: #f7c873;
 }
 
 /* CTA Component */
