@@ -1,0 +1,147 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+---
+
+<MainLayout>
+  <section class="info-header">
+    <h1>Información Útil</h1>
+    <div class="decorative-underline"></div>
+    <p class="info-intro">Encuentra aquí todo lo que necesitas saber para disfrutar y moverte por la ciudad de manera segura y cómoda.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>Emergencias</h2>
+    <ul>
+      <li><strong>Policía:</strong> 911</li>
+      <li><strong>Bomberos:</strong> 100</li>
+      <li><strong>Hospital Central:</strong> Av. Principal 1234, Tel: (0260) 123-4567</li>
+      <li><strong>Defensa Civil:</strong> (0260) 765-4321</li>
+    </ul>
+    <a href="/emergencias" class="btn primario">Ver información ampliada de emergencias</a>
+  </section>
+
+  <section class="info-section">
+    <h2>Cómo Llegar</h2>
+    <p>Puedes llegar a la ciudad en avión (Aeropuerto Internacional San Rafael), en bus desde las principales ciudades del país, o en auto por la Ruta Nacional 143.</p>
+    <ul>
+      <li><strong>Aeropuerto:</strong> 15 km del centro, taxis y remises disponibles.</li>
+      <li><strong>Terminal de Ómnibus:</strong> Av. Libertador 5678.</li>
+    </ul>
+    <a href="/llegar" class="btn secundario">Ver detalles y mapas de acceso</a>
+  </section>
+
+  <section class="info-section">
+    <h2>Cómo Moverse</h2>
+    <ul>
+      <li><strong>Colectivos urbanos:</strong> Líneas 1, 2, 3. Horarios: 6:00 a 23:00.</li>
+      <li><strong>Taxis y remises:</strong> Disponibles las 24 horas.</li>
+      <li><strong>Alquiler de autos y bicicletas:</strong> Varias agencias en el centro.</li>
+    </ul>
+    <a href="/moverte" class="btn secundario">Ver opciones de transporte y recorridos</a>
+  </section>
+
+  <section class="info-section">
+    <h2>Clima</h2>
+    <p>El clima es templado y seco. Temperaturas promedio:</p>
+    <ul>
+      <li><strong>Verano:</strong> 18°C - 33°C</li>
+      <li><strong>Invierno:</strong> 2°C - 16°C</li>
+    </ul>
+    <p>La mejor época para visitar es de septiembre a abril.</p>
+  </section>
+
+  <section class="info-section">
+    <h2>Recomendaciones Generales</h2>
+    <ul>
+      <li><strong>Moneda:</strong> Peso argentino (ARS). Hay cajeros automáticos y casas de cambio en el centro.</li>
+      <li><strong>Idioma:</strong> Español. Inglés básico en zonas turísticas.</li>
+      <li><strong>Costumbres:</strong> Saludar con un apretón de manos, propina opcional (10%).</li>
+    </ul>
+  </section>
+
+  <section class="info-section">
+    <h2>Servicios</h2>
+    <ul>
+      <li><strong>Farmacias:</strong> Abiertas de 8:00 a 22:00. Guardia nocturna disponible.</li>
+      <li><strong>Supermercados:</strong> Lunes a sábados de 8:00 a 21:00.</li>
+      <li><strong>Estaciones de servicio:</strong> 24 horas.</li>
+      <li><strong>Centro de Información Turística:</strong> Plaza Central, de 9:00 a 19:00.</li>
+    </ul>
+    <a href="/servicios" class="btn secundario">Ver todos los servicios disponibles</a>
+  </section>
+
+  <section class="info-section">
+    <h2>Accesibilidad</h2>
+    <ul>
+      <li>Rampas y accesos adaptados en la mayoría de los edificios públicos.</li>
+      <li>Transporte público con unidades adaptadas.</li>
+    </ul>
+  </section>
+
+  <section class="info-section">
+    <h2>Contacto</h2>
+    <p>¿Tienes dudas? Contáctanos:</p>
+    <ul>
+      <li><strong>Email:</strong> info@turify.com</li>
+      <li><strong>Teléfono:</strong> (0260) 555-1234</li>
+      <li><strong>Redes sociales:</strong> @TurifyOficial</li>
+    </ul>
+  </section>
+
+  <style>
+    .info-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      margin-top: 5rem;
+    }
+    .info-header h1 {
+      color: var(--color-primary);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .decorative-underline {
+      width: 80px;
+      height: 5px;
+      background: var(--color-primary);
+      border-radius: 3px;
+      margin: 0 auto 1rem auto;
+    }
+    .info-intro {
+      color: #444;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .info-section {
+      background: var(--color-bg-panel);
+      border-radius: 16px;
+      box-shadow: 0 2px 12px var(--color-shadow-light);
+      padding: 2rem 1.5rem;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .info-section h2 {
+      color: var(--color-primary);
+      font-size: 1.5rem;
+      margin-top: 0;
+    }
+    .info-section ul {
+      margin: 0 0 1rem 0;
+      padding-left: 1.2rem;
+    }
+    .info-section a.btn {
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+    @media (max-width: 700px) {
+      .info-header h1 {
+        font-size: 2rem;
+      }
+      .info-section {
+        padding: 1.2rem 0.5rem;
+      }
+    }
+  </style>
+</MainLayout> 
