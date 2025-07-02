@@ -25,6 +25,40 @@
     margin: 0;
 }
 
+/* Botón Ver Todos */
+.ver-todos {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #dc2626;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    border: 2px solid #dc2626;
+    position: relative;
+    overflow: hidden;
+}
+
+.ver-todos:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(220, 38, 38, 0.3);
+}
+
+.ver-todos:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
+}
+
+.ver-todos:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+}
+
 /* Página de Emergencias */
 .emergencias-section {
     padding: 2rem 1.5rem;
