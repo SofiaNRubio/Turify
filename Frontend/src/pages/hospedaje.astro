@@ -1,6 +1,7 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
 import HospedajeComponent from "../components/Hospedaje.astro";
+import FiltroUbicacion from "../components/FiltroUbicacion.astro";
 import { apiFetch } from "../utils/api";
 import "../style/hospedaje.css";
 
@@ -17,6 +18,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -24,14 +26,88 @@ interface Categoria {
     nombre: string;
 }
 
+// Función para obtener distritos únicos donde hay empresas de hospedaje
+async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
+    try {
+        if (categoriaId) {
+            // Si hay una categoría específica, obtener distritos para esa categoría
+            const response = await apiFetch(
+                `/empresas/distritos?categoria_id=${categoriaId}`
+            );
+            if (response.ok) {
+                return await response.json();
+            }
+        } else {
+            // Si no hay categoría específica, obtener distritos de todas las categorías de hospedaje
+            const responseCategoria = await apiFetch("/categorias");
+            if (!responseCategoria.ok) return [];
+
+            const categorias: Categoria[] = await responseCategoria.json();
+
+            const categoriasHospedaje = [
+                "hoteles",
+                "albergues",
+                "cabañas",
+                "camping",
+                "complejos",
+                "departamentos",
+                "motel",
+                "viviendas",
+                "hotel",
+                "albergue",
+                "cabaña",
+                "complejo",
+                "departamento",
+                "vivienda",
+            ];
+
+            const categoriasFiltradas = categorias.filter((categoria) =>
+                categoriasHospedaje.some((hospedaje) =>
+                    categoria.nombre.toLowerCase().includes(hospedaje)
+                )
+            );
+
+            const todosLosDistritos: string[] = [];
+
+            for (const categoria of categoriasFiltradas) {
+                try {
+                    const response = await apiFetch(
+                        `/empresas/distritos?categoria_id=${categoria.id}`
+                    );
+                    if (response.ok) {
+                        const distritos = await response.json();
+                        todosLosDistritos.push(...distritos);
+                    }
+                } catch (error) {
+                    console.error(
+                        `Error al obtener distritos para categoría ${categoria.nombre}:`,
+                        error
+                    );
+                }
+            }
+
+            return [...new Set(todosLosDistritos)].sort();
+        }
+        return [];
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
+        return [];
+    }
+}
+
 const url = new URL(Astro.request.url);
 const categoriaId = url.searchParams.get("categoria");
+const distritoSeleccionado = url.searchParams.get("distrito") || "";
 
 let hospedajesFiltrados: Empresa[] = [];
 let categoriaSeleccionada: Categoria | null = null;
+let distritos: string[] = [];
 
 if (categoriaId) {
     try {
+        // Obtener distritos para la categoría específica
+        distritos = await obtenerDistritos(categoriaId);
+
         const responseCategoria = await apiFetch(`/categorias/${categoriaId}`);
         if (responseCategoria.ok) {
             categoriaSeleccionada = await responseCategoria.json();
@@ -39,9 +115,22 @@ if (categoriaId) {
         const responseEmpresas = await apiFetch("/empresas");
         if (responseEmpresas.ok) {
             const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
-            hospedajesFiltrados = todasLasEmpresas.filter(
+            let empresasFiltradas = todasLasEmpresas.filter(
                 (empresa) => empresa.categoria_id === categoriaId
             );
+
+            // Filtrar por distrito si se seleccionó uno
+            if (distritoSeleccionado) {
+                empresasFiltradas = empresasFiltradas.filter(
+                    (empresa) =>
+                        empresa.distrito &&
+                        empresa.distrito
+                            .toLowerCase()
+                            .includes(distritoSeleccionado.toLowerCase())
+                );
+            }
+
+            hospedajesFiltrados = empresasFiltradas;
         }
     } catch (error) {
         console.error("Error al obtener hospedajes filtrados:", error);
@@ -53,113 +142,131 @@ if (categoriaId) {
     {
         categoriaId && categoriaSeleccionada ? (
             <div class="hospedaje-filtrados">
-                {hospedajesFiltrados.length > 0 ? (
-                    <div class="empresas-grid">
-                        {hospedajesFiltrados.map((hospedaje: Empresa) => (
-                            <div class="empresa-card">
-                                <div class="imagen-container">
-                                    {hospedaje.img_url ? (
-                                        <img
-                                            src={hospedaje.img_url}
-                                            alt={hospedaje.nombre}
-                                        />
-                                    ) : (
-                                        <div class="placeholder">
-                                            <svg
-                                                width="40"
-                                                height="40"
-                                                fill="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                                            </svg>
+                <div class="hospedaje-container">
+                    <div class="filtro-ubicacion-container">
+                        <FiltroUbicacion
+                            distritos={distritos}
+                            distritoSeleccionado={distritoSeleccionado}
+                        />
+                    </div>
+                    <div class="contenido-hospedajes">
+                        {hospedajesFiltrados.length > 0 ? (
+                            <div class="empresas-grid">
+                                {hospedajesFiltrados.map(
+                                    (hospedaje: Empresa) => (
+                                        <div class="empresa-card">
+                                            <div class="imagen-container">
+                                                {hospedaje.img_url ? (
+                                                    <img
+                                                        src={hospedaje.img_url}
+                                                        alt={hospedaje.nombre}
+                                                    />
+                                                ) : (
+                                                    <div class="placeholder">
+                                                        <svg
+                                                            width="40"
+                                                            height="40"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div class="card-content">
+                                                <span class="badge-categoria">
+                                                    {
+                                                        categoriaSeleccionada.nombre
+                                                    }
+                                                </span>
+                                                <h3>{hospedaje.nombre}</h3>
+                                                {hospedaje.descripcion && (
+                                                    <p class="descripcion">
+                                                        {hospedaje.descripcion}
+                                                    </p>
+                                                )}
+                                                <div class="info-empresa">
+                                                    {hospedaje.direccion && (
+                                                        <div>
+                                                            <svg
+                                                                width="16"
+                                                                height="16"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24">
+                                                                <path
+                                                                    fill="#0ea5e9"
+                                                                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                                                />
+                                                            </svg>
+                                                            {
+                                                                hospedaje.direccion
+                                                            }
+                                                        </div>
+                                                    )}
+                                                    {hospedaje.telefono && (
+                                                        <div>
+                                                            <svg
+                                                                width="16"
+                                                                height="16"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24">
+                                                                <path
+                                                                    fill="#0ea5e9"
+                                                                    d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                                                />
+                                                            </svg>
+                                                            {hospedaje.telefono}
+                                                        </div>
+                                                    )}
+                                                    {hospedaje.email && (
+                                                        <div>
+                                                            <svg
+                                                                width="16"
+                                                                height="16"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24">
+                                                                <path
+                                                                    fill="#0ea5e9"
+                                                                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                                                                />
+                                                            </svg>
+                                                            {hospedaje.email}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div class="acciones">
+                                                    {hospedaje.sitio_web && (
+                                                        <a
+                                                            href={
+                                                                hospedaje.sitio_web
+                                                            }
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            class="btn-sitio-web">
+                                                            Visitar sitio web
+                                                        </a>
+                                                    )}
+                                                    <a
+                                                        href={`/hospedaje/${hospedaje.id}`}
+                                                        class="btn-ver-detalle">
+                                                        Ver detalles
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                                <div class="card-content">
-                                    <span class="badge-categoria">
-                                        {categoriaSeleccionada.nombre}
-                                    </span>
-                                    <h3>{hospedaje.nombre}</h3>
-                                    {hospedaje.descripcion && (
-                                        <p class="descripcion">
-                                            {hospedaje.descripcion}
-                                        </p>
-                                    )}
-                                    <div class="info-empresa">
-                                        {hospedaje.direccion && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        fill="#0ea5e9"
-                                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                                                    />
-                                                </svg>
-                                                {hospedaje.direccion}
-                                            </div>
-                                        )}
-                                        {hospedaje.telefono && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        fill="#0ea5e9"
-                                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
-                                                    />
-                                                </svg>
-                                                {hospedaje.telefono}
-                                            </div>
-                                        )}
-                                        {hospedaje.email && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        fill="#0ea5e9"
-                                                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-                                                    />
-                                                </svg>
-                                                {hospedaje.email}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div class="acciones">
-                                        {hospedaje.sitio_web && (
-                                            <a
-                                                href={hospedaje.sitio_web}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                class="btn-sitio-web">
-                                                Visitar sitio web
-                                            </a>
-                                        )}
-                                        <a
-                                            href={`/hospedaje/${hospedaje.id}`}
-                                            class="btn-ver-detalle">
-                                            Ver detalles
-                                        </a>
-                                    </div>
-                                </div>
+                                    )
+                                )}
                             </div>
-                        ))}
+                        ) : (
+                            <div class="no-hospedaje">
+                                <p>
+                                    No se encontraron hospedajes de{" "}
+                                    {categoriaSeleccionada.nombre} disponibles.
+                                </p>
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    <div class="no-hospedaje">
-                        <p>
-                            No se encontraron hospedajes de{" "}
-                            {categoriaSeleccionada.nombre} disponibles.
-                        </p>
-                    </div>
-                )}
+                </div>
             </div>
         ) : (
             <HospedajeComponent />
@@ -172,6 +279,31 @@ if (categoriaId) {
         padding: 2rem;
         max-width: 1200px;
         margin: 0 auto;
+    }
+
+    .hospedaje-container {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        margin-top: 2rem;
+    }
+
+    .filtro-ubicacion-container {
+        flex-shrink: 0;
+        width: 300px;
+        position: sticky;
+        top: 100px;
+    }
+
+    .contenido-hospedajes {
+        flex: 1;
+    }
+
+    .empresas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 0;
     }
 
     .volver-btn {
@@ -205,9 +337,33 @@ if (categoriaId) {
         color: #666;
     }
 
+    @media (max-width: 1024px) {
+        .hospedaje-container {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .filtro-ubicacion-container {
+            width: 100%;
+            position: relative;
+            top: auto;
+            order: -1;
+        }
+
+        .empresas-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+
     @media (max-width: 768px) {
         .hospedaje-filtrados {
             padding: 1rem;
+        }
+
+        .empresas-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
         .header-hospedaje h2 {

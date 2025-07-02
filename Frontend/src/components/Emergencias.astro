@@ -1,5 +1,6 @@
 ---
 import { apiFetch } from "../utils/api";
+import FiltroUbicacion from "./FiltroUbicacion.astro";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -15,6 +16,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -27,6 +29,56 @@ interface CategoriaConImagen {
     nombre: string;
     imagen: string | null;
     empresasCount: number;
+}
+
+// Función para obtener distritos únicos donde hay empresas de las categorías de emergencia
+async function obtenerDistritos(): Promise<string[]> {
+    try {
+        const categorias = await obtenerCategorias();
+
+        // Filtrar categorías de emergencia
+        const categoriasEmergencia = [
+            "hospitales",
+            "policía",
+            "bomberos",
+            "farmacias",
+            "ambulancia",
+            "centro de salud",
+            "mecánicos",
+        ];
+
+        const categoriasFiltradas = categorias.filter((categoria) =>
+            categoriasEmergencia.some((emergencia) =>
+                categoria.nombre.toLowerCase().includes(emergencia)
+            )
+        );
+
+        // Obtener distritos de todas las categorías de emergencia
+        const todosLosDistritos: string[] = [];
+
+        for (const categoria of categoriasFiltradas) {
+            try {
+                const response = await apiFetch(
+                    `/empresas/distritos?categoria_id=${categoria.id}`
+                );
+                if (response.ok) {
+                    const distritos = await response.json();
+                    todosLosDistritos.push(...distritos);
+                }
+            } catch (error) {
+                console.error(
+                    `Error al obtener distritos para categoría ${categoria.nombre}:`,
+                    error
+                );
+            }
+        }
+
+        // Eliminar duplicados y ordenar
+        return [...new Set(todosLosDistritos)].sort();
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
+        return [];
+    }
 }
 
 // Función para obtener las categorías desde el backend
@@ -60,6 +112,22 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
 // Obtener datos
 const categorias = await obtenerCategorias();
 const empresas = await obtenerEmpresas();
+const distritos = await obtenerDistritos();
+
+// Obtener parámetros de consulta
+const url = new URL(Astro.request.url);
+const distritoSeleccionado = url.searchParams.get("distrito") || "";
+
+// Filtrar empresas por distrito si se seleccionó uno
+const empresasFiltradas = distritoSeleccionado
+    ? empresas.filter(
+          (empresa) =>
+              empresa.distrito &&
+              empresa.distrito
+                  .toLowerCase()
+                  .includes(distritoSeleccionado.toLowerCase())
+      )
+    : empresas;
 
 // Filtrar categorías de emergencia (incluir solo estas)
 const categoriasEmergencia = [
@@ -81,8 +149,8 @@ const categoriasFiltradas = categorias.filter((categoria) =>
 // Crear array de categorías con sus imágenes y conteo de empresas
 const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .map((categoria) => {
-        // Buscar empresas de esta categoría
-        const empresasDeCategoria = empresas.filter(
+        // Buscar empresas de esta categoría (usando empresas filtradas por distrito)
+        const empresasDeCategoria = empresasFiltradas.filter(
             (empresa) => empresa.categoria_id === categoria.id
         );
 
@@ -111,86 +179,145 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
 ---
 
 <section class="servicios-emergencia">
-    <div class="empresas-grid">
-        {
-            categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="empresa-card">
-                    <div class="imagen-container">
-                        {categoria.imagen ? (
-                            <img
-                                src={categoria.imagen}
-                                alt={categoria.nombre}
-                                onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
-                            />
-                        ) : null}
-                        <div
-                            class="placeholder"
-                            style={
-                                categoria.imagen
-                                    ? "display:none;"
-                                    : "display:flex;"
-                            }>
-                            <svg
-                                width="60"
-                                height="60"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                    fill="#dc2626"
+    <div class="emergencias-container">
+        <div class="filtro-ubicacion-container">
+            <FiltroUbicacion
+                distritos={distritos}
+                distritoSeleccionado={distritoSeleccionado}
+            />
+        </div>
+        <div class="empresas-grid">
+            {
+                categoriasConImagen.map((categoria: CategoriaConImagen) => (
+                    <div class="empresa-card">
+                        <div class="imagen-container">
+                            {categoria.imagen ? (
+                                <img
+                                    src={categoria.imagen}
+                                    alt={categoria.nombre}
+                                    onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
                                 />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="badge-categoria">Emergencia</div>
-                        <h3>
-                            {categoria.nombre.charAt(0).toUpperCase() +
-                                categoria.nombre.slice(1)}
-                        </h3>
-                        <p class="descripcion">
-                            Encuentra {categoria.empresasCount} servicios de
-                            emergencia disponibles las 24 horas.
-                        </p>
-                        <div class="info-empresa">
-                            <div>
+                            ) : null}
+                            <div
+                                class="placeholder"
+                                style={
+                                    categoria.imagen
+                                        ? "display:none;"
+                                        : "display:flex;"
+                                }>
                                 <svg
-                                    width="20"
-                                    height="20"
+                                    width="60"
+                                    height="60"
                                     viewBox="0 0 24 24"
-                                    fill="none">
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <path
+                                        d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
                                         fill="#dc2626"
-                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 14.58c-1.29 1.29-3.05 2.09-5 2.32V18c0-1.66-1.34-3-3-3s-3 1.34-3 3v2.9c-1.95-.23-3.71-1.03-5-2.32.49-1.94 2.19-3.65 4.13-4.12C9.07 14.19 10.48 14 12 14s2.93.19 3.87.46c1.94.47 3.64 2.18 4.13 4.12z"
                                     />
                                 </svg>
-                                <span>Servicios las 24 horas</span>
-                            </div>
-                            <div>
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none">
-                                    <path
-                                        fill="#dc2626"
-                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
-                                    />
-                                </svg>
-                                <span>Atención inmediata</span>
                             </div>
                         </div>
-                        <div class="acciones">
-                            <a
-                                href={`/emergencias?categoria=${categoria.id}`}
-                                class="btn-ver-detalle">
-                                Ver Servicios
-                            </a>
+                        <div class="card-content">
+                            <div class="badge-categoria">Emergencia</div>
+                            <h3>
+                                {categoria.nombre.charAt(0).toUpperCase() +
+                                    categoria.nombre.slice(1)}
+                            </h3>
+                            <p class="descripcion">
+                                Encuentra {categoria.empresasCount} servicios de
+                                emergencia disponibles las 24 horas.
+                            </p>
+                            <div class="info-empresa">
+                                <div>
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            fill="#dc2626"
+                                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 14.58c-1.29 1.29-3.05 2.09-5 2.32V18c0-1.66-1.34-3-3-3s-3 1.34-3 3v2.9c-1.95-.23-3.71-1.03-5-2.32.49-1.94 2.19-3.65 4.13-4.12C9.07 14.19 10.48 14 12 14s2.93.19 3.87.46c1.94.47 3.64 2.18 4.13 4.12z"
+                                        />
+                                    </svg>
+                                    <span>Servicios las 24 horas</span>
+                                </div>
+                                <div>
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            fill="#dc2626"
+                                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                        />
+                                    </svg>
+                                    <span>Atención inmediata</span>
+                                </div>
+                            </div>
+                            <div class="acciones">
+                                <a
+                                    href={`/emergencias?categoria=${categoria.id}`}
+                                    class="btn-ver-detalle">
+                                    Ver Servicios
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))
-        }
+                ))
+            }
+        </div>
     </div>
 </section>
+
+<style>
+    .emergencias-container {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        margin-top: 2rem;
+    }
+
+    .filtro-ubicacion-container {
+        flex-shrink: 0;
+        width: 300px;
+        position: sticky;
+        top: 100px;
+    }
+
+    .empresas-grid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .emergencias-container {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .filtro-ubicacion-container {
+            width: 100%;
+            position: relative;
+            top: auto;
+            order: -1;
+        }
+
+        .empresas-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .empresas-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+</style>
