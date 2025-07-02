@@ -1,8 +1,9 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
 import LlegarComponent from "../components/Llegar.astro";
+import FiltroDistrito from "../components/FiltroUbicacion.astro";
 import { apiFetch } from "../utils/api";
-import "../style/hospedaje.css";
+import "../style/empresas.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -18,6 +19,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -25,13 +27,34 @@ interface Categoria {
     nombre: string;
 }
 
+// Función para obtener los distritos únicos filtrados por categoría
+async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
+    try {
+        let endpoint = "/empresas/distritos";
+        if (categoriaId) {
+            endpoint += `?categoria_id=${categoriaId}`;
+        }
+        const response = await apiFetch(endpoint);
+        if (!response.ok) {
+            throw new Error("Error al obtener distritos");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
+        return [];
+    }
+}
+
 // Obtener parámetros de la URL
 const url = new URL(Astro.request.url);
 const categoriaId = url.searchParams.get("categoria");
+const distritoFiltro = url.searchParams.get("distrito");
+const distritosSeleccionados = distritoFiltro ? distritoFiltro.split(",") : [];
 
 // Si hay un parámetro de categoría, obtener los servicios filtrados
 let serviciosFiltrados: Empresa[] = [];
 let categoriaSeleccionada: Categoria | null = null;
+let distritos: string[] = [];
 
 if (categoriaId) {
     try {
@@ -41,6 +64,9 @@ if (categoriaId) {
             categoriaSeleccionada = await responseCategoria.json();
         }
 
+        // Obtener distritos filtrados por categoría
+        distritos = await obtenerDistritos(categoriaId);
+
         // Obtener todas las empresas
         const responseEmpresas = await apiFetch("/empresas");
         if (responseEmpresas.ok) {
@@ -48,6 +74,19 @@ if (categoriaId) {
             serviciosFiltrados = todasLasEmpresas.filter(
                 (empresa) => empresa.categoria_id === categoriaId
             );
+
+            // Filtrar por distrito si se especifica
+            if (distritosSeleccionados.length > 0) {
+                serviciosFiltrados = serviciosFiltrados.filter((empresa) =>
+                    distritosSeleccionados.some(
+                        (d) =>
+                            empresa.distrito &&
+                            empresa.distrito
+                                .toLowerCase()
+                                .includes(d.toLowerCase())
+                    )
+                );
+            }
         }
     } catch (error) {
         console.error("Error al obtener servicios filtrados:", error);
@@ -58,115 +97,202 @@ if (categoriaId) {
 <MainLayout>
     {
         categoriaId && categoriaSeleccionada ? (
-            <div class="servicios-filtrados">
-                {serviciosFiltrados.length > 0 ? (
-                    <div class="empresas-grid">
-                        {serviciosFiltrados.map((servicio: Empresa) => (
-                            <div class="empresa-card">
-                                <div class="imagen-container">
-                                    {servicio.img_url ? (
-                                        <img
-                                            src={servicio.img_url}
-                                            alt={servicio.nombre}
-                                        />
-                                    ) : (
-                                        <div class="placeholder">
-                                            <svg
-                                                width="40"
-                                                height="40"
-                                                fill="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                                            </svg>
-                                        </div>
-                                    )}
-                                </div>
-                                <div class="card-content">
-                                    <span class="badge-categoria">
-                                        {categoriaSeleccionada.nombre}
-                                    </span>
-                                    <h3>{servicio.nombre}</h3>
-                                    {servicio.descripcion && (
-                                        <p class="descripcion">
-                                            {servicio.descripcion}
-                                        </p>
-                                    )}
-                                    <div class="info-empresa">
-                                        {servicio.direccion && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        fill="#059669"
-                                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                                                    />
-                                                </svg>
-                                                {servicio.direccion}
-                                            </div>
-                                        )}
-                                        {servicio.telefono && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        fill="#059669"
-                                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
-                                                    />
-                                                </svg>
-                                                {servicio.telefono}
-                                            </div>
-                                        )}
-                                        {servicio.email && (
-                                            <div>
-                                                <svg
-                                                    width="16"
-                                                    height="16"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <path
-                                                        fill="#059669"
-                                                        d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"
-                                                    />
-                                                </svg>
-                                                {servicio.email}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div class="acciones">
-                                        {servicio.sitio_web && (
-                                            <a
-                                                href={servicio.sitio_web}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                class="btn-sitio-web">
-                                                Visitar sitio web
-                                            </a>
-                                        )}
-                                        <a
-                                            href={`/llegar/${servicio.id}`}
-                                            class="btn-ver-detalle">
-                                            Ver detalles
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div class="no-servicios">
-                        <p>
-                            No se encontraron servicios de{" "}
-                            {categoriaSeleccionada.nombre} disponibles.
+            <section class="servicios-section">
+                <div class="container">
+                    <div class="header">
+                        <h1>{categoriaSeleccionada.nombre}</h1>
+                        <p class="subtitle">
+                            Descubre los mejores servicios de{" "}
+                            {categoriaSeleccionada.nombre.toLowerCase()} en San
+                            Rafael
                         </p>
+                        <a href="/llegar" class="btn-ver-todas">
+                            Ver todas las opciones
+                        </a>
                     </div>
-                )}
-            </div>
+
+                    {/* Contenedor principal con filtro y contenido */}
+                    <div class="main-content-wrapper">
+                        {/* Filtro de distrito fijo en el lado izquierdo */}
+                        {distritos.length > 0 && (
+                            <div class="filtro-sidebar">
+                                <FiltroDistrito
+                                    distritos={distritos}
+                                    distritoSeleccionado={
+                                        distritosSeleccionados
+                                    }
+                                    placeholder="Filtrar por distrito..."
+                                />
+                            </div>
+                        )}
+
+                        <div class="content-main">
+                            {serviciosFiltrados.length > 0 ? (
+                                <div class="empresas-grid">
+                                    {serviciosFiltrados.map(
+                                        (servicio: Empresa) => (
+                                            <div class="empresa-card">
+                                                <div class="imagen-container">
+                                                    {servicio.img_url ? (
+                                                        <img
+                                                            src={
+                                                                servicio.img_url
+                                                            }
+                                                            alt={
+                                                                servicio.nombre
+                                                            }
+                                                            onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"
+                                                        />
+                                                    ) : null}
+                                                    <div
+                                                        class="placeholder"
+                                                        style={
+                                                            servicio.img_url
+                                                                ? "display: none;"
+                                                                : "display: flex;"
+                                                        }>
+                                                        <svg
+                                                            width="60"
+                                                            height="60"
+                                                            viewBox="0 0 60 60"
+                                                            fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <rect
+                                                                width="60"
+                                                                height="60"
+                                                                rx="12"
+                                                                fill="#e0e0e0"
+                                                            />
+                                                            <path
+                                                                d="M15 45L22.5 30L37.5 45H15Z"
+                                                                fill="#bdbdbd"
+                                                            />
+                                                            <circle
+                                                                cx="22.5"
+                                                                cy="24"
+                                                                r="4.5"
+                                                                fill="#bdbdbd"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div class="card-content">
+                                                    <span class="badge-categoria">
+                                                        {
+                                                            categoriaSeleccionada.nombre
+                                                        }
+                                                    </span>
+                                                    <h3>{servicio.nombre}</h3>
+                                                    {servicio.descripcion && (
+                                                        <p class="descripcion">
+                                                            {
+                                                                servicio.descripcion
+                                                            }
+                                                        </p>
+                                                    )}
+                                                    <div class="info-empresa">
+                                                        {servicio.direccion && (
+                                                            <div>
+                                                                <svg
+                                                                    width="16"
+                                                                    height="16"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
+                                                                        fill="currentColor"
+                                                                    />
+                                                                </svg>
+                                                                <span>
+                                                                    {
+                                                                        servicio.direccion
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {servicio.telefono && (
+                                                            <div>
+                                                                <svg
+                                                                    width="16"
+                                                                    height="16"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M6.62 10.79C8.06 12.21 9.77 13.92 11.19 15.35L12.61 13.93C12.83 13.71 13.16 13.65 13.43 13.78C14.08 14.08 14.83 14.25 15.61 14.25C16.16 14.25 16.61 14.7 16.61 15.25V18.75C16.61 19.3 16.16 19.75 15.61 19.75C8.61 19.75 3 14.14 3 7.14C3 6.59 3.45 6.14 4 6.14H7.5C8.05 6.14 8.5 6.59 8.5 7.14C8.5 7.92 8.67 8.67 8.97 9.32C9.1 9.59 9.04 9.92 8.82 10.14L7.4 11.56L6.62 10.79Z"
+                                                                        fill="currentColor"
+                                                                    />
+                                                                </svg>
+                                                                <span>
+                                                                    {
+                                                                        servicio.telefono
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {servicio.email && (
+                                                            <div>
+                                                                <svg
+                                                                    width="16"
+                                                                    height="16"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path
+                                                                        d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                                                                        fill="currentColor"
+                                                                    />
+                                                                </svg>
+                                                                <span>
+                                                                    {
+                                                                        servicio.email
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div class="acciones">
+                                                        {servicio.sitio_web && (
+                                                            <a
+                                                                href={
+                                                                    servicio.sitio_web
+                                                                }
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                class="btn-sitio-web">
+                                                                Visitar sitio
+                                                                web
+                                                            </a>
+                                                        )}
+                                                        <a
+                                                            href={`/llegar/${servicio.id}`}
+                                                            class="btn-ver-detalle">
+                                                            Ver detalles
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            ) : (
+                                <div class="no-empresas">
+                                    <h3>No se encontraron servicios</h3>
+                                    <p>
+                                        {distritoFiltro
+                                            ? `No hay servicios de ${categoriaSeleccionada.nombre} en el distrito "${distritoFiltro}"`
+                                            : `No hay servicios de ${categoriaSeleccionada.nombre} registrados en este momento`}
+                                    </p>
+                                    <a href="/llegar" class="btn-volver">
+                                        Volver a todas las opciones
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </section>
         ) : (
             <LlegarComponent />
         )
@@ -174,50 +300,317 @@ if (categoriaId) {
 </MainLayout>
 
 <style>
-    .servicios-filtrados {
-        padding: 2rem;
-        max-width: 1200px;
+    .servicios-section {
+        padding: 2rem 1.5rem;
+        background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
         margin: 0 auto;
     }
 
-    .volver-btn {
-        display: inline-flex;
-        align-items: center;
-        color: #059669;
-        text-decoration: none;
-        font-weight: 500;
-        margin-bottom: 1rem;
-        transition: color 0.3s ease;
-    }
-
-    .volver-btn:hover {
-        color: #047857;
-    }
-
-    .header-llegada {
+    .header {
         text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .header h1 {
+        color: #228b22;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-ver-todas {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #228b22, #32cd32);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-ver-todas:hover {
+        background: linear-gradient(135deg, #006400, #228b22);
+        transform: translateY(-2px);
+    }
+
+    /* Estructura principal con filtro lateral */
+    .main-content-wrapper {
+        display: flex;
+        gap: 0;
+        align-items: flex-start;
+        min-height: 60vh;
+        position: relative;
+    }
+
+    .filtro-sidebar {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1000;
+        padding-left: 1rem;
+    }
+
+    .content-main {
+        flex: 1;
+        margin-left: 200px;
+        /* Espacio para el filtro fijo */
+        min-height: 60vh;
+    }
+
+    .empresas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .empresa-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e8f5e8;
+    }
+
+    .empresa-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+    }
+
+    .imagen-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    .imagen-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .empresa-card:hover .imagen-container img {
+        transform: scale(1.05);
+    }
+
+    .placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        color: #6c757d;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .badge-categoria {
+        display: inline-block;
+        background: linear-gradient(135deg, #2e6c4d, #3d8b64);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-content h3 {
+        color: #2e6c4d;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.3;
+    }
+
+    .descripcion {
+        color: #5a6c57;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0 0 1rem 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .info-empresa {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-empresa > div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #4a7c59;
+        font-size: 0.9rem;
+    }
+
+    .info-empresa svg {
+        color: #2e6c4d;
+        flex-shrink: 0;
+    }
+
+    .acciones {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-sitio-web,
+    .btn-ver-detalle {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .btn-sitio-web {
+        background: linear-gradient(135deg, #2e6c4d, #3d8b64);
+        color: white;
+        border: none;
+    }
+
+    .btn-sitio-web:hover {
+        background: linear-gradient(135deg, #1e4832, #2d6b4a);
+        transform: translateY(-1px);
+    }
+
+    .btn-ver-detalle {
+        background: transparent;
+        color: #2e6c4d;
+        border: 2px solid #2e6c4d;
+    }
+
+    .btn-ver-detalle:hover {
+        background: #2e6c4d;
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .no-empresas {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(34, 139, 34, 0.08);
+    }
+
+    .no-empresas h3 {
+        color: #228b22;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .no-empresas p {
+        color: #666;
         margin-bottom: 2rem;
     }
 
-    .header-llegada h2 {
-        color: #059669;
-        font-size: 2rem;
-        margin: 0;
+    .btn-volver {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #228b22, #32cd32);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
     }
 
-    .no-servicios {
-        text-align: center;
-        padding: 3rem;
-        color: #666;
+    .btn-volver:hover {
+        background: linear-gradient(135deg, #006400, #228b22);
+        transform: translateY(-2px);
     }
 
+    /* Media queries para empresas */
     @media (max-width: 768px) {
-        .servicios-filtrados {
-            padding: 1rem;
+        .servicios-section {
+            padding: 1.5rem 1rem;
         }
 
-        .header-llegada h2 {
-            font-size: 1.5rem;
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        /* En móviles, cambiar a layout vertical */
+        .main-content-wrapper {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .filtro-sidebar {
+            position: static;
+            transform: none;
+            left: auto;
+            padding-left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .content-main {
+            margin-left: 0;
+        }
+
+        .empresas-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .empresa-card {
+            margin: 0;
+        }
+
+        .acciones {
+            flex-direction: column;
+        }
+
+        .btn-sitio-web,
+        .btn-ver-detalle {
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
         }
     }
 </style>

@@ -1,4 +1,5 @@
 ---
+import FiltroDistrito from "./FiltroUbicacion.astro";
 import { apiFetch } from "../utils/api";
 import "../style/moverte.css";
 
@@ -16,6 +17,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -28,6 +30,24 @@ interface CategoriaConImagen {
     nombre: string;
     imagen: string | null;
     empresasCount: number;
+}
+
+// Función para obtener los distritos únicos filtrados por categoría
+async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
+    try {
+        let endpoint = "/empresas/distritos";
+        if (categoriaId) {
+            endpoint += `?categoria_id=${categoriaId}`;
+        }
+        const response = await apiFetch(endpoint);
+        if (!response.ok) {
+            throw new Error("Error al obtener distritos");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
+        return [];
+    }
 }
 
 // Función para obtener las categorías desde el backend
@@ -58,6 +78,23 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
     }
 }
 
+// Obtener parámetros de la URL si estamos en la página principal
+let url: URL | null = null;
+let distritoFiltro: string | null = null;
+let distritosSeleccionados: string[] = [];
+
+try {
+    if (typeof Astro !== "undefined" && Astro.request) {
+        url = new URL(Astro.request.url);
+        distritoFiltro = url.searchParams.get("distrito");
+        distritosSeleccionados = distritoFiltro
+            ? distritoFiltro.split(",")
+            : [];
+    }
+} catch (error) {
+    // En caso de error, mantener valores por defecto
+}
+
 // Obtener datos
 const categorias = await obtenerCategorias();
 const empresas = await obtenerEmpresas();
@@ -71,11 +108,40 @@ const categoriasFiltradas = categorias.filter((categoria) =>
     )
 );
 
+// Obtener distritos solo para las categorías de transporte
+// Combinar todas las categorías de transporte para obtener distritos únicos
+let distritos: string[] = [];
+try {
+    const distritosPromises = categoriasFiltradas.map((categoria) =>
+        obtenerDistritos(categoria.id)
+    );
+    const distritosArrays = await Promise.all(distritosPromises);
+
+    // Combinar y eliminar duplicados
+    const todosLosDistritos = distritosArrays.flat();
+    distritos = Array.from(new Set(todosLosDistritos)).sort();
+} catch (error) {
+    console.error("Error al obtener distritos de transporte:", error);
+    distritos = [];
+}
+
+// Filtrar empresas por distrito si se especifica
+let empresasFiltradas = empresas;
+if (distritosSeleccionados.length > 0) {
+    empresasFiltradas = empresas.filter((empresa) =>
+        distritosSeleccionados.some(
+            (d) =>
+                empresa.distrito &&
+                empresa.distrito.toLowerCase().includes(d.toLowerCase())
+        )
+    );
+}
+
 // Crear array de categorías con sus imágenes y conteo de empresas
 const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .map((categoria) => {
-        // Buscar empresas de esta categoría
-        const empresasDeCategoria = empresas.filter(
+        // Buscar empresas de esta categoría (filtradas por distrito si aplica)
+        const empresasDeCategoria = empresasFiltradas.filter(
             (empresa) => empresa.categoria_id === categoria.id
         );
 
@@ -109,56 +175,97 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
 </section>
 
 <section class="servicios-transporte">
-    <div class="empresas-grid">
+    <div class="main-content-wrapper">
+        {/* Filtro de distrito fijo en el lado izquierdo */}
         {
-            categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="empresa-card">
-                    <div class="imagen-container">
-                        {categoria.imagen ? (
-                            <img
-                                src={categoria.imagen}
-                                alt={categoria.nombre}
-                                onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
-                                onload={`;`}
-                            />
-                        ) : null}
-                        <div class="placeholder">
-                            <svg
-                                width="40"
-                                height="40"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                    fill="#228B22"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <span class="badge-categoria">{categoria.nombre}</span>
-                        <h3>Servicios disponibles</h3>
-                        <p class="descripcion">
-                            Descubre los servicios de{" "}
-                            {categoria.nombre.toLowerCase()} disponibles en San
-                            Rafael. {categoria.empresasCount}{" "}
-                            {categoria.empresasCount === 1
-                                ? "empresa disponible"
-                                : "empresas disponibles"}
-                            .
-                        </p>
-                        <div class="acciones">
-                            <a
-                                href={`/moverte?categoria=${categoria.id}`}
-                                class="btn-ver-detalle">
-                                Ver Servicios
-                            </a>
-                        </div>
-                    </div>
+            distritos.length > 0 && (
+                <div class="filtro-sidebar">
+                    <FiltroDistrito
+                        distritos={distritos}
+                        distritoSeleccionado={distritosSeleccionados}
+                        placeholder="Filtrar por distrito..."
+                    />
                 </div>
-            ))
+            )
         }
+
+        <div class="content-main">
+            {
+                categoriasConImagen.length > 0 ? (
+                    <div class="empresas-grid">
+                        {categoriasConImagen.map(
+                            (categoria: CategoriaConImagen) => (
+                                <div class="empresa-card">
+                                    <div class="imagen-container">
+                                        {categoria.imagen ? (
+                                            <img
+                                                src={categoria.imagen}
+                                                alt={categoria.nombre}
+                                                onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
+                                                onload={`;`}
+                                            />
+                                        ) : null}
+                                        <div class="placeholder">
+                                            <svg
+                                                width="40"
+                                                height="40"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
+                                                    fill="#228B22"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="card-content">
+                                        <span class="badge-categoria">
+                                            {categoria.nombre}
+                                        </span>
+                                        <h3>Servicios disponibles</h3>
+                                        <p class="descripcion">
+                                            Descubre los servicios de{" "}
+                                            {categoria.nombre.toLowerCase()}{" "}
+                                            disponibles en San Rafael
+                                            {distritosSeleccionados.length > 0
+                                                ? ` en ${distritosSeleccionados.join(", ")}`
+                                                : ""}
+                                            . {categoria.empresasCount}{" "}
+                                            {categoria.empresasCount === 1
+                                                ? "empresa disponible"
+                                                : "empresas disponibles"}
+                                            .
+                                        </p>
+                                        <div class="acciones">
+                                            <a
+                                                href={`/moverte?categoria=${categoria.id}${distritosSeleccionados.length > 0 ? `&distrito=${distritosSeleccionados.join(",")}` : ""}`}
+                                                class="btn-ver-detalle">
+                                                Ver Servicios
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
+                ) : (
+                    <div class="no-empresas">
+                        <h3>No se encontraron servicios</h3>
+                        <p>
+                            {distritosSeleccionados.length > 0
+                                ? `No hay servicios de transporte disponibles en ${distritosSeleccionados.join(", ")}`
+                                : "No hay servicios de transporte registrados en este momento"}
+                        </p>
+                        {distritosSeleccionados.length > 0 && (
+                            <a href="/moverte" class="btn-volver">
+                                Ver todos los servicios
+                            </a>
+                        )}
+                    </div>
+                )
+            }
+        </div>
     </div>
 </section>
 

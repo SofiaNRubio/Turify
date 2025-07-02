@@ -38,7 +38,8 @@
     padding: 2px 4px;
 }
 
-.footer-link:hover, .footer-link:focus {
+.footer-link:hover,
+.footer-link:focus {
     color: #fff;
     text-decoration: underline;
     background: rgba(247, 200, 115, 0.15);
@@ -56,7 +57,7 @@
     text-align: center;
     margin: 3rem auto;
     max-width: 800px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .cta-contenido h2 {
@@ -79,7 +80,7 @@
     flex-wrap: wrap;
 }
 
-.cta-botones > * {
+.cta-botones>* {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,6 +144,7 @@
     text-align: center;
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 #historia-map {
@@ -159,8 +161,9 @@
         text-align: center;
         gap: 0.5rem;
     }
-    
-    .right, .left {
+
+    .right,
+    .left {
         text-align: center;
     }
 }
@@ -174,4 +177,4 @@
     #historia-map {
         height: 200px !important;
     }
-} 
+}
