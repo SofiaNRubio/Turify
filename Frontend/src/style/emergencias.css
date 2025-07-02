@@ -130,7 +130,17 @@
     background: linear-gradient(135deg, #b91c1c, #dc2626);
 }
 
+.servicios-emergencia .btn-ver-detalle,
+.emergencias-section .btn-ver-detalle {
+    background: linear-gradient(135deg, #374151, #4b5563);
+    color: white;
+    border: none;
+}
 
+.servicios-emergencia .btn-ver-detalle:hover,
+.emergencias-section .btn-ver-detalle:hover {
+    background: linear-gradient(135deg, #1f2937, #374151);
+}
 
 .servicios-emergencia .empresa-card:hover,
 .emergencias-section .empresa-card:hover {
