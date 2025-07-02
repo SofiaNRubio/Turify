@@ -91,13 +91,8 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
         );
 
         // Debug: mostrar información de empresas en esta categoría
-        console.log(`Categoría: ${categoria.nombre} (${categoria.id})`);
-        console.log(`Empresas en categoría: ${empresasDeCategoria.length}`);
-
         // Mostrar todas las empresas y sus imágenes
         empresasDeCategoria.forEach((empresa, index) => {
-            console.log(`  Empresa ${index + 1}: ${empresa.nombre}`);
-            console.log(`  img_url: "${empresa.img_url}"`);
             console.log(
                 `  img_url válida: ${!!(empresa.img_url && empresa.img_url.trim() !== "")}`
             );
@@ -123,9 +118,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
         // Usar imagen de empresa o null si no hay
         const imagen = empresaConImagen?.img_url || null;
 
-        console.log(`  Imagen final para categoría: ${imagen}`);
-        console.log(`  ---`);
-
         return {
             id: categoria.id,
             nombre: categoria.nombre,
@@ -136,7 +128,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
 
 // Debug final
-console.log("=== RESUMEN FINAL LLEGADA ===");
 categoriasConImagen.forEach((cat) => {
     console.log(
         `${cat.nombre}: ${cat.imagen ? "CON IMAGEN" : "SIN IMAGEN"} (${cat.empresasCount} empresas)`
@@ -160,7 +151,7 @@ categoriasConImagen.forEach((cat) => {
                                 src={categoria.imagen}
                                 alt={categoria.nombre}
                                 onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
-                                onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                                onload={`;`}
                             />
                         ) : null}
                         <div class="placeholder">
