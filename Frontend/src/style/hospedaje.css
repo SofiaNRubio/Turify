@@ -1,3 +1,6 @@
+@import url('./global.css');
+@import url('./empresas_cards.css');
+
 /* Estilos para la página de hospedaje */
 .hospedaje-hospedaje {
     padding: 2rem;
@@ -17,138 +20,72 @@
     font-weight: 700;
 }
 
-.grid-hospedaje {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+/* Estilos específicos para las cards de hospedaje usando el sistema unificado */
+.hospedaje-hospedaje .badge-categoria {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
 }
 
-.card-hospedaje {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: all 0.3s ease;
-    position: relative;
-    border: 2px solid transparent;
+.hospedaje-hospedaje .btn-ver-detalle {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+    color: white;
+    border: none;
+    width: 100%;
 }
 
-.card-hospedaje:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+.hospedaje-hospedaje .btn-ver-detalle:hover {
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+}
+
+.hospedaje-hospedaje .placeholder {
+    background: linear-gradient(135deg, #bae6fd, #0ea5e9);
+}
+
+.hospedaje-hospedaje .empresa-card:hover {
+    box-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
     border-color: #0ea5e9;
 }
 
-.card-hospedaje img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.card-hospedaje:hover img {
-    transform: scale(1.05);
-}
-
-.placeholder-imagen {
-    display: none;
-    width: 100%;
-    height: 200px;
-    background: linear-gradient(135deg, #bae6fd 0%, #0ea5e9 100%);
-    align-items: center;
+.hospedaje-hospedaje .empresas-grid {
+    display: flex;
     justify-content: center;
-    position: relative;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
 }
 
-.card-content {
-    padding: 1.5rem;
-    position: relative;
+.hospedaje-hospedaje .empresa-card {
+    max-width: 340px;
+    margin: 0 auto;
 }
 
-.tipo-hospedaje {
-    display: inline-block;
-    background: #0ea5e9;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.75rem;
+.hospedaje-hospedaje .card-content {
+    text-align: center;
 }
 
-.card-content h3 {
-    color: #0ea5e9;
-    margin: 0 0 0.75rem 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+/* Funcionalidad de placeholders */
+.empresa-card:has(img) .placeholder {
+    display: none;
 }
 
-.descripcion {
-    color: #666;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-    font-size: 0.95rem;
-}
-
-.ver-mas {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #0ea5e9;
-    color: white;
-    text-decoration: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.ver-mas:hover {
-    background: #0369a1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-}
-
-.ver-mas::after {
-    content: '→';
-    font-size: 1.1rem;
-    transition: transform 0.3s ease;
-}
-
-.ver-mas:hover::after {
-    transform: translateX(4px);
+.empresa-card:not(:has(img)) .placeholder {
+    display: flex;
 }
 
 @media (max-width: 768px) {
     .hospedaje-hospedaje {
         padding: 1rem;
     }
+
     .header-hospedaje h2 {
         font-size: 2rem;
-    }
-    .grid-hospedaje {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    .card-content h3 {
-        font-size: 1.25rem;
-    }
-    .ver-mas {
-        width: 100%;
-        justify-content: center;
     }
 }
 
 @media (max-width: 480px) {
     .header-hospedaje h2 {
         font-size: 1.75rem;
-    }
-    .card-content {
-        padding: 1rem;
     }
 }
 
@@ -173,80 +110,6 @@
     background: #25644a;
     margin: 0 auto 0.5rem auto;
     border-radius: 2px;
-}
-
-/* TARJETAS DE HOSPEDAJE */
-.grid-hospedaje {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-    flex-wrap: wrap;
-}
-
-.card-hospedaje {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(60, 60, 60, 0.10);
-    overflow: hidden;
-    width: 270px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1.5px solid #e5e7eb;
-    transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.card-hospedaje:hover {
-    box-shadow: 0 8px 24px rgba(60, 60, 60, 0.18);
-    transform: translateY(-4px) scale(1.03);
-}
-
-.card-hospedaje img {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
-
-.card-content {
-    padding: 1.2rem 1rem 1.5rem 1rem;
-    text-align: center;
-    width: 100%;
-}
-
-.card-content h3 {
-    color: #25644a;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.card-content .descripcion {
-    color: #444;
-    font-size: 0.98rem;
-    margin-bottom: 1.1rem;
-    display: block;
-}
-
-.ver-mas {
-    display: inline-block;
-    padding: 0.5rem 1.5rem;
-    background: #fff;
-    color: #25644a;
-    border: 1.5px solid #25644a;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 1rem;
-    margin-top: 0.5rem;
-    transition: background 0.2s, color 0.2s;
-    cursor: pointer;
-}
-
-.ver-mas:hover {
-    background: #25644a;
-    color: #fff;
 }
 
 /* SECCIÓN SUGERENCIAS */
@@ -281,7 +144,7 @@
     font-weight: 600;
     text-decoration: none;
     transition: background 0.2s;
-    box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+    box-shadow: 0 2px 8px rgba(60, 60, 60, 0.10);
     cursor: pointer;
 }
 
@@ -291,10 +154,7 @@
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-    .grid-hospedaje {
-        gap: 1.2rem;
-    }
-    .card-hospedaje {
+    .empresa-card {
         width: 90vw;
         max-width: 340px;
     }
@@ -304,14 +164,13 @@
     .hospedaje-title {
         font-size: 1.5rem;
     }
+
     .hospedaje-underline {
         width: 36px;
         height: 3px;
     }
+
     .hospedaje-sugerencias {
         padding: 1.5rem 0.5rem 1.5rem 0.5rem;
     }
-    .card-content {
-        padding: 1rem 0.5rem 1.2rem 0.5rem;
-    }
-} 
+}
