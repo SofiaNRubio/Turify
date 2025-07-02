@@ -4,5 +4,46 @@
             "ENABLE_VC_BUILD": "1"
         }
     },
-    "framework": "astro"
+    "framework": "astro",
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "routes": [
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/_astro/(.*)",
+            "headers": {
+                "cache-control": "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/_astro/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                },
+                {
+                    "key": "Content-Type",
+                    "value": "text/css"
+                }
+            ]
+        },
+        {
+            "source": "/(.*\\.(css|js|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000"
+                }
+            ]
+        }
+    ]
 }

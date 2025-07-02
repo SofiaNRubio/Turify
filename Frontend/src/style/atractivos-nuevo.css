@@ -239,11 +239,11 @@ h3 {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .empresas-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .paso-texto {
     font-size: 0.8em;
   }
@@ -253,16 +253,16 @@ h3 {
   .modo-botones {
     flex-direction: column;
   }
-  
+
   .btn-modo {
     width: 100%;
   }
-  
+
   .pasos-container {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .paso-linea {
     display: none;
   }
@@ -275,7 +275,7 @@ h3 {
   background: var(--color-bg-panel);
   padding: 32px;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
   color: var(--color-text);
 }
 
@@ -369,7 +369,6 @@ textarea {
   display: inline-block;
   text-align: center;
   margin: 0;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
 .btn-nuevo {
@@ -403,13 +402,16 @@ textarea {
     padding: 20px;
     margin: 20px auto;
   }
+
   .form-row {
     flex-direction: column;
     gap: 10px;
   }
+
   .empresas-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
+
   .paso-texto {
     font-size: 0.8em;
   }
@@ -419,13 +421,16 @@ textarea {
   .modo-botones {
     flex-direction: column;
   }
+
   .btn-modo {
     width: 100%;
   }
+
   .pasos-container {
     flex-direction: column;
     gap: 20px;
   }
+
   .paso-linea {
     display: none;
   }

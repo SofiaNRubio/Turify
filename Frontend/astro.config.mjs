@@ -11,6 +11,24 @@ export default defineConfig({
         webAnalytics: {
             enabled: true,
         },
+        imageService: true,
+        imagesConfig: {
+            sizes: [320, 640, 1280],
+            domains: [],
+        },
     }),
     output: "server",
+    build: {
+        assets: "_astro",
+        assetsPrefix: undefined,
+    },
+    vite: {
+        build: {
+            rollupOptions: {
+                output: {
+                    assetFileNames: "_astro/[name].[hash][extname]",
+                },
+            },
+        },
+    },
 });
