@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import HospedajeComponent from "../components/Hospedaje.astro";
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 interface Empresa {
     id: string;
@@ -48,7 +49,6 @@ if (categoriaId) {
 }
 ---
 
-<link rel="stylesheet" href="/src/style/hospedaje.css" />
 <MainLayout>
     {
         categoriaId && categoriaSeleccionada ? (

@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout.astro";
 import FiltroDistrito from "../components/FiltroUbicacion.astro";
 import getToken from "../utils/getToken";
 import { apiFetch } from "../utils/api";
+import "../style/empresas.css";
 
 // Obtener el token de autenticación
 const token = getToken();
@@ -133,8 +134,6 @@ const categoriaSeleccionada = categoriaId
     ? categoriasFiltradas.find((cat) => cat.id === categoriaId)
     : null;
 ---
-
-<link rel="stylesheet" href="/src/style/empresas.css" />
 
 <MainLayout title="Empresas - Turify">
     <section class="empresas-section">
@@ -352,9 +351,5 @@ const categoriaSeleccionada = categoriaId
 
 <script>
     // Inicializar filtro al cargar la página
-    document.addEventListener("DOMContentLoaded", () => {
-        console.log("DOM cargado, página lista");
-    });
-
-    console.log("Script de empresas cargado");
+    document.addEventListener("DOMContentLoaded", () => {});
 </script>

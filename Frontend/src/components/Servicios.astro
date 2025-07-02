@@ -1,5 +1,6 @@
 ---
 import { apiFetch } from "../utils/api";
+import "../style/servicios.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -74,7 +75,7 @@ const categoriasServicios = [
     "supermercado",
     "negocio",
     "servicio",
-    "servicios"
+    "servicios",
 ];
 
 const categoriasFiltradas = categorias.filter((categoria) =>
@@ -145,8 +146,6 @@ categoriasConImagen.forEach((cat) => {
 });
 ---
 
-<link rel="stylesheet" href="/src/style/servicios.css">
-
 <section class="servicios-servicios">
     <div class="header-servicios">
         <h2>Servicios</h2>
@@ -196,4 +195,4 @@ categoriasConImagen.forEach((cat) => {
             ))
         }
     </div>
-</section> 
+</section>

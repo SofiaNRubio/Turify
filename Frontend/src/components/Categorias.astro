@@ -1,5 +1,6 @@
 ---
 import { apiFetch } from "../utils/api";
+import "../style/categorias-component.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -60,7 +61,7 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
 // Obtener datos
 const [categorias, empresas] = await Promise.all([
     obtenerCategorias(),
-    obtenerEmpresas()
+    obtenerEmpresas(),
 ]);
 
 // Filtrar categorías de emergencia
@@ -74,8 +75,7 @@ const categoriasExcluidas = [
     "aerolineas",
     "renta_vehiculos",
     "taxis",
-    "terminal_omnibus"
-
+    "terminal_omnibus",
 ];
 
 const categoriasFiltradas = categorias.filter(
@@ -147,117 +147,139 @@ categoriasConImagen.forEach((cat) => {
 });
 ---
 
-<link rel="stylesheet" href="/src/style/categorias-component.css">
-
-<section class="cat-actividades-empresas" role="region" aria-labelledby="titulo-categorias">
+<section
+    class="cat-actividades-empresas"
+    role="region"
+    aria-labelledby="titulo-categorias">
     <h2 id="titulo-categorias">Explora lo mejor de San Rafael</h2>
-    <div class="cat-grid-actividades" role="grid" aria-label="Categorías de atractivos turísticos">
+    <div
+        class="cat-grid-actividades"
+        role="grid"
+        aria-label="Categorías de atractivos turísticos">
         {
-            categoriasConImagen.map((categoria: CategoriaConImagen, index: number) => (
-                <div class="cat-card-actividad" role="gridcell" tabindex="0" aria-label={`${categoria.nombre}, ${categoria.empresasCount} ${categoria.empresasCount === 1 ? 'empresa' : 'empresas'}`}>
-                    {categoria.imagen ? (
-                        <img
-                            src={categoria.imagen}
-                            alt={`Imagen representativa de ${categoria.nombre}`}
-                            loading="lazy"
-                            onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.cat-placeholder-imagen').style.display='flex';`}
-                            onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
-                        />
-                    ) : null}
+            categoriasConImagen.map(
+                (categoria: CategoriaConImagen, index: number) => (
                     <div
-                        class="cat-placeholder-imagen"
-                        style={
-                            categoria.imagen
-                                ? "display: none;"
-                                : "display: flex;"
-                        }
-                        aria-hidden="true">
-                        <svg
-                            width="60"
-                            height="60"
-                            viewBox="0 0 60 60"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                        class="cat-card-actividad"
+                        role="gridcell"
+                        tabindex="0"
+                        aria-label={`${categoria.nombre}, ${categoria.empresasCount} ${categoria.empresasCount === 1 ? "empresa" : "empresas"}`}>
+                        {categoria.imagen ? (
+                            <img
+                                src={categoria.imagen}
+                                alt={`Imagen representativa de ${categoria.nombre}`}
+                                loading="lazy"
+                                onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.cat-placeholder-imagen').style.display='flex';`}
+                                onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
+                            />
+                        ) : null}
+                        <div
+                            class="cat-placeholder-imagen"
+                            style={
+                                categoria.imagen
+                                    ? "display: none;"
+                                    : "display: flex;"
+                            }
                             aria-hidden="true">
-                            <rect
+                            <svg
                                 width="60"
                                 height="60"
-                                rx="12"
-                                fill="#e0e0e0"
-                            />
-                            <path
-                                d="M15 45L22.5 30L37.5 45H15Z"
-                                fill="#bdbdbd"
-                            />
-                            <circle cx="22.5" cy="24" r="4.5" fill="#bdbdbd" />
-                        </svg>
-                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #666;">
-                            Sin imagen
+                                viewBox="0 0 60 60"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                aria-hidden="true">
+                                <rect
+                                    width="60"
+                                    height="60"
+                                    rx="12"
+                                    fill="#e0e0e0"
+                                />
+                                <path
+                                    d="M15 45L22.5 30L37.5 45H15Z"
+                                    fill="#bdbdbd"
+                                />
+                                <circle
+                                    cx="22.5"
+                                    cy="24"
+                                    r="4.5"
+                                    fill="#bdbdbd"
+                                />
+                            </svg>
+                            <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #666;">
+                                Sin imagen
+                            </div>
+                        </div>
+                        <div class="cat-card-content">
+                            <h3>{categoria.nombre}</h3>
+                            <p class="cat-descripcion">
+                                Explora {categoria.empresasCount}{" "}
+                                {categoria.empresasCount === 1
+                                    ? "empresa"
+                                    : "empresas"}{" "}
+                                en esta categoría.
+                            </p>
+                            <a
+                                href={`/empresas?categoria=${categoria.id}`}
+                                class="cat-ver-mas"
+                                aria-label={`Ver todas las empresas de ${categoria.nombre}`}
+                                tabindex="0">
+                                Ver empresas
+                            </a>
                         </div>
                     </div>
-                    <div class="cat-card-content">
-                        <h3>{categoria.nombre}</h3>
-                        <p class="cat-descripcion">
-                            Explora {categoria.empresasCount}{" "}
-                            {categoria.empresasCount === 1
-                                ? "empresa"
-                                : "empresas"}{" "}
-                            en esta categoría.
-                        </p>
-                        <a 
-                            href={`/empresas?categoria=${categoria.id}`}
-                            class="cat-ver-mas"
-                            aria-label={`Ver todas las empresas de ${categoria.nombre}`}
-                            tabindex="0">
-                            Ver empresas
-                        </a>
-                    </div>
-                </div>
-            ))
+                )
+            )
         }
     </div>
 </section>
 
 <script>
     // Script para cambiar aleatoriamente la primera palabra del título
-    document.addEventListener('DOMContentLoaded', function() {
-        const titulo = document.getElementById('titulo-categorias');
+    document.addEventListener("DOMContentLoaded", function () {
+        const titulo = document.getElementById("titulo-categorias");
         if (titulo && titulo.textContent) {
-            const palabras = ['Explora', 'Encuentra'];
-            const palabraAleatoria = palabras[Math.floor(Math.random() * palabras.length)];
-            
+            const palabras = ["Explora", "Encuentra"];
+            const palabraAleatoria =
+                palabras[Math.floor(Math.random() * palabras.length)];
+
             // Reemplazar solo la primera palabra manteniendo el resto del texto
-            titulo.textContent = titulo.textContent.replace(/^(Explora|Encuentra)/, palabraAleatoria);
+            titulo.textContent = titulo.textContent.replace(
+                /^(Explora|Encuentra)/,
+                palabraAleatoria
+            );
         }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function () {
         // Mejorar navegación por teclado en las tarjetas de categorías
-        const categoryCards = document.querySelectorAll('.cat-card-actividad');
-        
+        const categoryCards = document.querySelectorAll(".cat-card-actividad");
+
         categoryCards.forEach((card: Element) => {
             const cardElement = card as HTMLElement;
-            
+
             // Permitir activación con Enter o Espacio
-            cardElement.addEventListener('keydown', function(e: KeyboardEvent) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    const link = cardElement.querySelector('a');
-                    if (link) {
-                        link.click();
+            cardElement.addEventListener(
+                "keydown",
+                function (e: KeyboardEvent) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        const link = cardElement.querySelector("a");
+                        if (link) {
+                            link.click();
+                        }
                     }
                 }
-            });
-            
+            );
+
             // Mejorar el focus visual
-            cardElement.addEventListener('focus', function() {
-                cardElement.style.outline = '2px solid #007bff';
-                cardElement.style.outlineOffset = '2px';
+            cardElement.addEventListener("focus", function () {
+                cardElement.style.outline = "2px solid #007bff";
+                cardElement.style.outlineOffset = "2px";
             });
-            
-            cardElement.addEventListener('blur', function() {
-                cardElement.style.outline = '';
-                cardElement.style.outlineOffset = '';
+
+            cardElement.addEventListener("blur", function () {
+                cardElement.style.outline = "";
+                cardElement.style.outlineOffset = "";
             });
         });
     });

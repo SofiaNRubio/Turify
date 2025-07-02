@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import MoverteComponent from "../components/Moverte.astro";
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -53,8 +54,6 @@ if (categoriaId) {
     }
 }
 ---
-
-<link rel="stylesheet" href="/src/style/hospedaje.css" />
 
 <MainLayout>
     {

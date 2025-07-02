@@ -1,18 +1,19 @@
 ---
 import { SignUpButton } from "@clerk/astro/components";
+import "../style/components.css";
 ---
 
-<link rel="stylesheet" href="/src/style/components.css">
-
 <section class="cta-explora">
-  <div class="cta-contenido">
-    <h2>¿Listo para descubrir más rutas?</h2>
-    <p>Explorá destinos increíbles y registrate para guardar tus favoritos.</p>
-    <div class="cta-botones">
-      <a href="/rutas" class="btn primario">Explorar rutas</a>
-      <SignUpButton mode="modal">
-        <span class="btn secundario">Registrarme</span>
-      </SignUpButton>
+    <div class="cta-contenido">
+        <h2>¿Listo para descubrir más rutas?</h2>
+        <p>
+            Explorá destinos increíbles y registrate para guardar tus favoritos.
+        </p>
+        <div class="cta-botones">
+            <a href="/rutas" class="btn primario">Explorar rutas</a>
+            <SignUpButton mode="modal">
+                <span class="btn secundario">Registrarme</span>
+            </SignUpButton>
+        </div>
     </div>
-  </div>
 </section>

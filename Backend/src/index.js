@@ -55,8 +55,6 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
     try {
         await initializedb();
-        console.log("Base de datos inicializada exitosamente");
-
         app.listen(PORT, () => {
             console.log(
                 `Servidor backend corriendo en http://localhost:${PORT}`
