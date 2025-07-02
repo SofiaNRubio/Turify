@@ -1,5 +1,6 @@
 ---
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 interface Empresa {
     id: string;
@@ -67,7 +68,7 @@ const categoriasHospedaje = [
     "cabaña",
     "complejo",
     "departamento",
-    "vivienda"
+    "vivienda",
 ];
 
 const categoriasFiltradas = categorias.filter((categoria) =>
@@ -81,8 +82,12 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
         const empresasDeCategoria = empresas.filter(
             (empresa) => empresa.categoria_id === categoria.id
         );
-        const empresaConImagen = empresasDeCategoria.find((empresa) =>
-            empresa.img_url && empresa.img_url.trim() !== "" && empresa.img_url !== "null" && empresa.img_url !== "undefined"
+        const empresaConImagen = empresasDeCategoria.find(
+            (empresa) =>
+                empresa.img_url &&
+                empresa.img_url.trim() !== "" &&
+                empresa.img_url !== "null" &&
+                empresa.img_url !== "undefined"
         );
         const imagen = empresaConImagen?.img_url || null;
         return {
@@ -95,46 +100,55 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .filter((categoria) => categoria.empresasCount > 0);
 ---
 
-<link rel="stylesheet" href="/src/style/hospedaje.css">
-
 <section class="hospedaje-hero">
-  <h1 class="hospedaje-title">Hospedaje</h1>
-  <div class="hospedaje-underline"></div>
+    <h1 class="hospedaje-title">Hospedaje</h1>
+    <div class="hospedaje-underline"></div>
 </section>
 
 <section class="hospedaje-hospedaje">
-    <div class="grid-hospedaje">
+    <div class="empresas-grid">
         {
             categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="card-hospedaje">
-                    {categoria.imagen ? (
-                        <img
-                            src={categoria.imagen}
-                            alt={categoria.nombre}
-                            onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
-                        />
-                    ) : null}
-                    <div class="placeholder-imagen">
-                        <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                fill="#0ea5e9"
+                <div class="empresa-card">
+                    <div class="imagen-container">
+                        {categoria.imagen ? (
+                            <img
+                                src={categoria.imagen}
+                                alt={categoria.nombre}
+                                onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
                             />
-                        </svg>
+                        ) : null}
+                        <div class="placeholder">
+                            <svg
+                                width="40"
+                                height="40"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
+                                    fill="#0ea5e9"
+                                />
+                            </svg>
+                        </div>
                     </div>
                     <div class="card-content">
-                        <h3>{categoria.nombre}</h3>
-                        <span class="descripcion">Pequeña Descripción</span>
-                        <a
-                            href={`/hospedaje?categoria=${categoria.id}`}
-                            class="ver-mas">
-                            Ver Más
-                        </a>
+                        <span class="badge-categoria">{categoria.nombre}</span>
+                        <h3>Hospedaje disponible</h3>
+                        <p class="descripcion">
+                            Encuentra {categoria.empresasCount}{" "}
+                            {categoria.empresasCount === 1
+                                ? "opción"
+                                : "opciones"}{" "}
+                            de {categoria.nombre.toLowerCase()} disponibles.
+                        </p>
+                        <div class="acciones">
+                            <a
+                                href={`/hospedaje?categoria=${categoria.id}`}
+                                class="btn-ver-detalle">
+                                Ver Opciones
+                            </a>
+                        </div>
                     </div>
                 </div>
             ))
@@ -143,10 +157,10 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
 </section>
 
 <section class="hospedaje-sugerencias">
-  <h2>¿No sabes a donde ir? Click en el botón de abajo</h2>
-  <p class="hospedaje-sugerencias-desc">
-    Aquí tendrás distintas sugerencias sobre<br />
-    Actividades al aire libre, Gastronomía, Bodegas y Espacios Sociales
-  </p>
-  <a href="/" class="hospedaje-btn-principal">Principal</a>
-</section> 
+    <h2>¿No sabes a donde ir? Click en el botón de abajo</h2>
+    <p class="hospedaje-sugerencias-desc">
+        Aquí tendrás distintas sugerencias sobre<br />
+        Actividades al aire libre, Gastronomía, Bodegas y Espacios Sociales
+    </p>
+    <a href="/" class="hospedaje-btn-principal">Principal</a>
+</section>

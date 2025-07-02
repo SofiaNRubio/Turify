@@ -1,102 +1,311 @@
 ---
 // Componente estático de ejemplo para la portada de emergencias
+import "../style/emergencias.css";
 ---
-<link rel="stylesheet" href="/src/style/emergencias.css">
 
-<section class="servicios-emergencia" role="region" aria-labelledby="emergencias-title">
-  <div class="header-emergencia">
-    <h2 id="emergencias-title">Servicios de Emergencia</h2>
-    <a href="/emergencias" class="ver-todos" aria-label="Ver todos los servicios de emergencia disponibles">Ver Todos</a>
-  </div>
-  <div class="grid-emergencias" role="grid" aria-label="Servicios de emergencia destacados">
-    <div class="card-emergencia" role="gridcell" tabindex="0">
-      <div class="card-content">
-        <h3 style="color:#14532d; margin-bottom:0.2rem; font-size:1.1rem;">Policía Local de San Rafael</h3>
-        <div style="color:#222; font-size:0.98rem; margin-bottom:0.7rem; font-weight:500;">Policía</div>
-        <div class="ubicacion" style="margin-bottom:0.5rem;">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#dc2626" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span>Av. Ballofet 544, San Rafael (Distrital de Seguridad Dos)</span>
-        </div>
-        <div class="ubicacion" style="margin-bottom:0.5rem;">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#14532d" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/></svg>
-          <a href="tel:02604439725" aria-label="Llamar a Policía Local de San Rafael">0260 4439725</a>
-        </div>
-        <div class="ubicacion">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#14532d" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
-          <span>Emergencias las 24 horas</span>
-        </div>
-      </div>
+<section
+    class="servicios-emergencia"
+    role="region"
+    aria-labelledby="emergencias-title">
+    <div class="header-emergencia">
+        <h2 id="emergencias-title">Servicios de Emergencia</h2>
+        <a
+            href="/emergencias"
+            class="ver-todos"
+            aria-label="Ver todos los servicios de emergencia disponibles"
+            >Ver Todos</a
+        >
     </div>
-    
-    <div class="card-emergencia" role="gridcell" tabindex="0">
-      <div class="card-content">
-        <h3 style="color:#14532d; margin-bottom:0.2rem; font-size:1.1rem;">Delegación II Bomberos Zona Sur</h3>
-        <div style="color:#222; font-size:0.98rem; margin-bottom:0.7rem; font-weight:500;">Bomberos</div>
-        <div class="ubicacion" style="margin-bottom:0.5rem;">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#dc2626" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span>Independencia 302, M5000 San Rafael, Mendoza</span>
+    <div
+        class="grid-emergencias"
+        role="grid"
+        aria-label="Servicios de emergencia destacados"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+        <div
+            class="card-emergencia"
+            role="gridcell"
+            tabindex="0"
+            style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; cursor: pointer; border: 1px solid #e5e7eb;">
+            <div class="card-content">
+                <h3
+                    style="color:#14532d; margin-bottom:0.5rem; font-size:1.2rem; font-weight: 600;">
+                    Policía Local de San Rafael
+                </h3>
+                <div
+                    style="color:#6b7280; font-size:0.9rem; margin-bottom:1rem; font-weight:500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Policía
+                </div>
+                <div
+                    class="ubicacion"
+                    style="margin-bottom:0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#dc2626"
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                        ></path></svg
+                    >
+                    <span
+                        style="color: #374151; font-size: 0.9rem; line-height: 1.4;"
+                        >Av. Ballofet 544, San Rafael (Distrital de Seguridad
+                        Dos)</span
+                    >
+                </div>
+                <div
+                    class="ubicacion"
+                    style="margin-bottom:0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#14532d"
+                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                        ></path></svg
+                    >
+                    <a
+                        href="tel:02604439725"
+                        aria-label="Llamar a Policía Local de San Rafael"
+                        style="color: #14532d; text-decoration: none; font-weight: 500; font-size: 0.9rem;"
+                        >0260 4439725</a
+                    >
+                </div>
+                <div
+                    class="ubicacion"
+                    style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#14532d"
+                            d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"
+                        ></path></svg
+                    >
+                    <span
+                        style="color: #6b7280; font-size: 0.85rem; font-style: italic;"
+                        >Emergencias las 24 horas</span
+                    >
+                </div>
+            </div>
         </div>
-        <div class="ubicacion" style="margin-bottom:0.5rem;">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#14532d" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/></svg>
-          <a href="tel:02604424417" aria-label="Llamar a Bomberos Zona Sur">0260 442-4417</a>
+
+        <div
+            class="card-emergencia"
+            role="gridcell"
+            tabindex="0"
+            style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; cursor: pointer; border: 1px solid #e5e7eb;">
+            <div class="card-content">
+                <h3
+                    style="color:#14532d; margin-bottom:0.5rem; font-size:1.2rem; font-weight: 600;">
+                    Delegación II Bomberos Zona Sur
+                </h3>
+                <div
+                    style="color:#6b7280; font-size:0.9rem; margin-bottom:1rem; font-weight:500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Bomberos
+                </div>
+                <div
+                    class="ubicacion"
+                    style="margin-bottom:0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#dc2626"
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                        ></path></svg
+                    >
+                    <span
+                        style="color: #374151; font-size: 0.9rem; line-height: 1.4;"
+                        >Independencia 302, M5000 San Rafael, Mendoza</span
+                    >
+                </div>
+                <div
+                    class="ubicacion"
+                    style="margin-bottom:0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#14532d"
+                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                        ></path></svg
+                    >
+                    <a
+                        href="tel:02604424417"
+                        aria-label="Llamar a Bomberos Zona Sur"
+                        style="color: #14532d; text-decoration: none; font-weight: 500; font-size: 0.9rem;"
+                        >0260 442-4417</a
+                    >
+                </div>
+                <div
+                    class="ubicacion"
+                    style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#14532d"
+                            d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"
+                        ></path></svg
+                    >
+                    <span
+                        style="color: #6b7280; font-size: 0.85rem; font-style: italic;"
+                        >Emergencias las 24 horas</span
+                    >
+                </div>
+            </div>
         </div>
-        <div class="ubicacion">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#14532d" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
-          <span>Emergencias las 24 horas</span>
+
+        <div
+            class="card-emergencia"
+            role="gridcell"
+            tabindex="0"
+            style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; cursor: pointer; border: 1px solid #e5e7eb;">
+            <div class="card-content">
+                <h3
+                    style="color:#14532d; margin-bottom:0.5rem; font-size:1.2rem; font-weight: 600;">
+                    Hospital Schestakow
+                </h3>
+                <div
+                    style="color:#6b7280; font-size:0.9rem; margin-bottom:1rem; font-weight:500; text-transform: uppercase; letter-spacing: 0.5px;">
+                    Hospital
+                </div>
+                <div
+                    class="ubicacion"
+                    style="margin-bottom:0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#dc2626"
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                        ></path></svg
+                    >
+                    <span
+                        style="color: #374151; font-size: 0.9rem; line-height: 1.4;"
+                        >Comandante Salas 150, San Rafael</span
+                    >
+                </div>
+                <div
+                    class="ubicacion"
+                    style="margin-bottom:0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#14532d"
+                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                        ></path></svg
+                    >
+                    <a
+                        href="tel:02604240300"
+                        aria-label="Llamar al Hospital Schestakow"
+                        style="color: #14532d; text-decoration: none; font-weight: 500; font-size: 0.9rem;"
+                        >0260 424-0300</a
+                    >
+                </div>
+                <div
+                    class="ubicacion"
+                    style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        style="flex-shrink: 0;"
+                        ><path
+                            fill="#14532d"
+                            d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"
+                        ></path></svg
+                    >
+                    <span
+                        style="color: #6b7280; font-size: 0.85rem; font-style: italic;"
+                        >Emergencias las 24 horas</span
+                    >
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-    
-    <div class="card-emergencia" role="gridcell" tabindex="0">
-      <div class="card-content">
-        <h3 style="color:#14532d; margin-bottom:0.2rem; font-size:1.1rem;">Hospital Schestakow</h3>
-        <div style="color:#222; font-size:0.98rem; margin-bottom:0.7rem; font-weight:500;">Hospital</div>
-        <div class="ubicacion" style="margin-bottom:0.5rem;">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#dc2626" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span>Comandante Salas 150, San Rafael</span>
-        </div>
-        <div class="ubicacion" style="margin-bottom:0.5rem;">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#14532d" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/></svg>
-          <a href="tel:02604240300" aria-label="Llamar al Hospital Schestakow">0260 424-0300</a>
-        </div>
-        <div class="ubicacion">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true"><path fill="#14532d" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
-          <span>Emergencias las 24 horas</span>
-        </div>
-      </div>
-    </div>
-  </div>
 </section>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function () {
         // Mejorar navegación por teclado en las tarjetas de emergencia
-        const emergencyCards = document.querySelectorAll('.card-emergencia');
-        
+        const emergencyCards = document.querySelectorAll(".card-emergencia");
+
         emergencyCards.forEach((card: Element) => {
             const cardElement = card as HTMLElement;
-            
+
+            // Efectos hover
+            cardElement.addEventListener("mouseenter", function () {
+                cardElement.style.transform = "translateY(-4px)";
+                cardElement.style.boxShadow =
+                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
+            });
+
+            cardElement.addEventListener("mouseleave", function () {
+                cardElement.style.transform = "translateY(0)";
+                cardElement.style.boxShadow =
+                    "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+            });
+
             // Permitir activación con Enter o Espacio
-            cardElement.addEventListener('keydown', function(e: KeyboardEvent) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    // Encontrar el primer enlace en la tarjeta
-                    const link = cardElement.querySelector('a');
-                    if (link) {
-                        link.click();
+            cardElement.addEventListener(
+                "keydown",
+                function (e: KeyboardEvent) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        // Encontrar el primer enlace en la tarjeta
+                        const link = cardElement.querySelector("a");
+                        if (link) {
+                            link.click();
+                        }
                     }
                 }
-            });
-            
+            );
+
             // Mejorar el focus visual
-            cardElement.addEventListener('focus', function() {
-                cardElement.style.outline = '2px solid #dc2626';
-                cardElement.style.outlineOffset = '2px';
+            cardElement.addEventListener("focus", function () {
+                cardElement.style.outline = "2px solid #dc2626";
+                cardElement.style.outlineOffset = "2px";
             });
-            
-            cardElement.addEventListener('blur', function() {
-                cardElement.style.outline = '';
-                cardElement.style.outlineOffset = '';
+
+            cardElement.addEventListener("blur", function () {
+                cardElement.style.outline = "";
+                cardElement.style.outlineOffset = "";
             });
         });
     });

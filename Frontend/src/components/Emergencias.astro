@@ -69,7 +69,7 @@ const categoriasEmergencia = [
     "farmacias",
     "ambulancia",
     "centro de salud",
-    "mecánicos"
+    "mecánicos",
 ];
 
 const categoriasFiltradas = categorias.filter((categoria) =>
@@ -86,19 +86,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
             (empresa) => empresa.categoria_id === categoria.id
         );
 
-        // Debug: mostrar información de empresas en esta categoría
-        console.log(`Categoría: ${categoria.nombre} (${categoria.id})`);
-        console.log(`Empresas en categoría: ${empresasDeCategoria.length}`);
-
-        // Mostrar todas las empresas y sus imágenes
-        empresasDeCategoria.forEach((empresa, index) => {
-            console.log(`  Empresa ${index + 1}: ${empresa.nombre}`);
-            console.log(`  img_url: "${empresa.img_url}"`);
-            console.log(
-                `  img_url válida: ${!!(empresa.img_url && empresa.img_url.trim() !== "")}`
-            );
-        });
-
         // Buscar la primera empresa con imagen de esta categoría
         const empresaConImagen = empresasDeCategoria.find((empresa) => {
             const tieneImagen =
@@ -107,20 +94,11 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
                 empresa.img_url !== "null" &&
                 empresa.img_url !== "undefined";
 
-            if (tieneImagen) {
-                console.log(
-                    `  ✓ Empresa con imagen encontrada: ${empresa.nombre} - ${empresa.img_url}`
-                );
-            }
-
             return tieneImagen;
         });
 
         // Usar imagen de empresa o null si no hay
         const imagen = empresaConImagen?.img_url || null;
-
-        console.log(`  Imagen final para categoría: ${imagen}`);
-        console.log(`  ---`);
 
         return {
             id: categoria.id,
@@ -130,54 +108,86 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
         };
     })
     .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
-
-// Debug final
-console.log("=== RESUMEN FINAL EMERGENCIAS ===");
-categoriasConImagen.forEach((cat) => {
-    console.log(
-        `${cat.nombre}: ${cat.imagen ? "CON IMAGEN" : "SIN IMAGEN"} (${cat.empresasCount} empresas)`
-    );
-});
 ---
 
-<link rel="stylesheet" href="/src/style/emergencias.css">
-
 <section class="servicios-emergencia">
-    <div class="header-emergencia">
-        <h2>Servicios de Emergencia</h2>
-    </div>
-    <div class="grid-emergencias">
+    <div class="empresas-grid">
         {
             categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="card-emergencia">
-                    {categoria.imagen ? (
-                        <img
-                            src={categoria.imagen}
-                            alt={categoria.nombre}
-                            onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder-imagen').style.display='flex';`}
-                        />
-                    ) : null}
-                    <div class="placeholder-imagen" style={categoria.imagen ? 'display:none;' : 'display:flex;'}>
-                        <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                fill="#dc2626"
+                <div class="empresa-card">
+                    <div class="imagen-container">
+                        {categoria.imagen ? (
+                            <img
+                                src={categoria.imagen}
+                                alt={categoria.nombre}
+                                onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
                             />
-                        </svg>
+                        ) : null}
+                        <div
+                            class="placeholder"
+                            style={
+                                categoria.imagen
+                                    ? "display:none;"
+                                    : "display:flex;"
+                            }>
+                            <svg
+                                width="60"
+                                height="60"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
+                                    fill="#dc2626"
+                                />
+                            </svg>
+                        </div>
                     </div>
                     <div class="card-content">
-                        <h3>{categoria.nombre.charAt(0).toUpperCase() + categoria.nombre.slice(1)}</h3>
-                        <p class="descripcion">Encuentra {categoria.empresasCount} servicios de emergencia disponibles.</p>
-                        <a
-                            href={`/emergencias?categoria=${categoria.id}`}
-                            class="ver-mas">
-                            Ver Más
-                        </a>
+                        <div class="badge-categoria">Emergencia</div>
+                        <h3>
+                            {categoria.nombre.charAt(0).toUpperCase() +
+                                categoria.nombre.slice(1)}
+                        </h3>
+                        <p class="descripcion">
+                            Encuentra {categoria.empresasCount} servicios de
+                            emergencia disponibles las 24 horas.
+                        </p>
+                        <div class="info-empresa">
+                            <div>
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none">
+                                    <path
+                                        fill="#dc2626"
+                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 14.58c-1.29 1.29-3.05 2.09-5 2.32V18c0-1.66-1.34-3-3-3s-3 1.34-3 3v2.9c-1.95-.23-3.71-1.03-5-2.32.49-1.94 2.19-3.65 4.13-4.12C9.07 14.19 10.48 14 12 14s2.93.19 3.87.46c1.94.47 3.64 2.18 4.13 4.12z"
+                                    />
+                                </svg>
+                                <span>Servicios las 24 horas</span>
+                            </div>
+                            <div>
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none">
+                                    <path
+                                        fill="#dc2626"
+                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                    />
+                                </svg>
+                                <span>Atención inmediata</span>
+                            </div>
+                        </div>
+                        <div class="acciones">
+                            <a
+                                href={`/emergencias?categoria=${categoria.id}`}
+                                class="btn-ver-detalle">
+                                Ver Servicios
+                            </a>
+                        </div>
                     </div>
                 </div>
             ))

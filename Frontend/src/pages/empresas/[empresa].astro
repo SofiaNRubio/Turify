@@ -108,13 +108,21 @@ const distritoFiltro = url.searchParams.get("distrito");
 const distritosSeleccionados = distritoFiltro ? distritoFiltro.split(",") : [];
 
 // Obtener distritos únicos de los atractivos de la empresa
-const distritos = Array.from(new Set(atractivosEmpresa.map(a => a.distrito).filter((d): d is string => !!d)));
+const distritos = Array.from(
+    new Set(
+        atractivosEmpresa.map((a) => a.distrito).filter((d): d is string => !!d)
+    )
+);
 
 // Filtrar atractivos por distrito si se especifica
 let atractivosFiltrados = atractivosEmpresa;
 if (distritosSeleccionados.length > 0) {
     atractivosFiltrados = atractivosEmpresa.filter((atractivo) =>
-        distritosSeleccionados.some((d) => atractivo.distrito && atractivo.distrito.toLowerCase().includes(d.toLowerCase()))
+        distritosSeleccionados.some(
+            (d) =>
+                atractivo.distrito &&
+                atractivo.distrito.toLowerCase().includes(d.toLowerCase())
+        )
     );
 }
 
@@ -277,13 +285,15 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                     Atractivos de {empresa.nombre}
                     <span class="count">({atractivosFiltrados.length})</span>
                 </h2>
-                {distritos.length > 0 && (
-                    <FiltroUbicacion 
-                        distritos={distritos}
-                        distritoSeleccionado={distritosSeleccionados}
-                        placeholder="Filtrar por distrito..."
-                    />
-                )}
+                {
+                    distritos.length > 0 && (
+                        <FiltroUbicacion
+                            distritos={distritos}
+                            distritoSeleccionado={distritosSeleccionados}
+                            placeholder="Filtrar por distrito..."
+                        />
+                    )
+                }
                 {
                     atractivosFiltrados.length === 0 ? (
                         <div class="no-atractivos">
@@ -314,7 +324,9 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                     ) : (
                         <div class="atractivos-grid">
                             {atractivosFiltrados.map((atractivo: Atractivo) => (
-                                <a href={`/atractivos/${atractivo.id}`} class="atractivo-card">
+                                <a
+                                    href={`/atractivos/${atractivo.id}`}
+                                    class="atractivo-card">
                                     <div class="imagen-atractivo">
                                         {atractivo.img_url ? (
                                             <img
@@ -419,6 +431,7 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
         grid-template-columns: 400px 1fr;
         gap: 3rem;
         margin-bottom: 4rem;
+        margin-top: 3rem;
         background: white;
         border-radius: 24px;
         padding: 2rem;

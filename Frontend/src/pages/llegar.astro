@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import LlegarComponent from "../components/Llegar.astro";
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -26,7 +27,7 @@ interface Categoria {
 
 // Obtener parámetros de la URL
 const url = new URL(Astro.request.url);
-const categoriaId = url.searchParams.get('categoria');
+const categoriaId = url.searchParams.get("categoria");
 
 // Si hay un parámetro de categoría, obtener los servicios filtrados
 let serviciosFiltrados: Empresa[] = [];
@@ -45,7 +46,7 @@ if (categoriaId) {
         if (responseEmpresas.ok) {
             const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
             serviciosFiltrados = todasLasEmpresas.filter(
-                empresa => empresa.categoria_id === categoriaId
+                (empresa) => empresa.categoria_id === categoriaId
             );
         }
     } catch (error) {
@@ -55,80 +56,121 @@ if (categoriaId) {
 ---
 
 <MainLayout>
-    {categoriaId && categoriaSeleccionada ? (
-        <div class="servicios-filtrados">
-            <div class="header-llegada">
-                <a href="/llegar" class="volver-btn">
-                    ← Volver a servicios de llegada
-                </a>
-                <h2>Servicios de {categoriaSeleccionada.nombre}</h2>
-            </div>
-            
-            {serviciosFiltrados.length > 0 ? (
-                <div class="grid-servicios">
-                    {serviciosFiltrados.map((servicio: Empresa) => (
-                        <div class="card-servicio">
-                            {servicio.img_url && (
-                                <img 
-                                    src={servicio.img_url} 
-                                    alt={servicio.nombre}
-                                    class="imagen-servicio"
-                                />
-                            )}
-                            <div class="card-content">
-                                <h3>{servicio.nombre}</h3>
-                                {servicio.descripcion && (
-                                    <p class="descripcion">{servicio.descripcion}</p>
-                                )}
-                                <div class="info-contacto">
-                                    {servicio.direccion && (
-                                        <div class="ubicacion">
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                                                <path fill="#059669" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+    {
+        categoriaId && categoriaSeleccionada ? (
+            <div class="servicios-filtrados">
+                {serviciosFiltrados.length > 0 ? (
+                    <div class="empresas-grid">
+                        {serviciosFiltrados.map((servicio: Empresa) => (
+                            <div class="empresa-card">
+                                <div class="imagen-container">
+                                    {servicio.img_url ? (
+                                        <img
+                                            src={servicio.img_url}
+                                            alt={servicio.nombre}
+                                        />
+                                    ) : (
+                                        <div class="placeholder">
+                                            <svg
+                                                width="40"
+                                                height="40"
+                                                fill="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                                             </svg>
-                                            {servicio.direccion}
-                                        </div>
-                                    )}
-                                    {servicio.telefono && (
-                                        <div class="ubicacion">
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                                                <path fill="#059669" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
-                                            </svg>
-                                            {servicio.telefono}
-                                        </div>
-                                    )}
-                                    {servicio.email && (
-                                        <div class="ubicacion">
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                                                <path fill="#059669" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
-                                            </svg>
-                                            {servicio.email}
                                         </div>
                                     )}
                                 </div>
-                                <div class="card-actions">
-                                    {servicio.sitio_web && (
-                                        <a href={servicio.sitio_web} target="_blank" rel="noopener noreferrer" class="sitio-web">
-                                            Visitar sitio web
-                                        </a>
+                                <div class="card-content">
+                                    <span class="badge-categoria">
+                                        {categoriaSeleccionada.nombre}
+                                    </span>
+                                    <h3>{servicio.nombre}</h3>
+                                    {servicio.descripcion && (
+                                        <p class="descripcion">
+                                            {servicio.descripcion}
+                                        </p>
                                     )}
-                                    <a href={`/llegar/${servicio.id}`} class="ver-detalles">
-                                        Ver detalles
-                                    </a>
+                                    <div class="info-empresa">
+                                        {servicio.direccion && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#059669"
+                                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                                    />
+                                                </svg>
+                                                {servicio.direccion}
+                                            </div>
+                                        )}
+                                        {servicio.telefono && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#059669"
+                                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                                    />
+                                                </svg>
+                                                {servicio.telefono}
+                                            </div>
+                                        )}
+                                        {servicio.email && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#059669"
+                                                        d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"
+                                                    />
+                                                </svg>
+                                                {servicio.email}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div class="acciones">
+                                        {servicio.sitio_web && (
+                                            <a
+                                                href={servicio.sitio_web}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="btn-sitio-web">
+                                                Visitar sitio web
+                                            </a>
+                                        )}
+                                        <a
+                                            href={`/llegar/${servicio.id}`}
+                                            class="btn-ver-detalle">
+                                            Ver detalles
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div class="no-servicios">
-                    <p>No se encontraron servicios de {categoriaSeleccionada.nombre} disponibles.</p>
-                </div>
-            )}
-        </div>
-    ) : (
-        <LlegarComponent />
-    )}
+                        ))}
+                    </div>
+                ) : (
+                    <div class="no-servicios">
+                        <p>
+                            No se encontraron servicios de{" "}
+                            {categoriaSeleccionada.nombre} disponibles.
+                        </p>
+                    </div>
+                )}
+            </div>
+        ) : (
+            <LlegarComponent />
+        )
+    }
 </MainLayout>
 
 <style>
@@ -163,95 +205,6 @@ if (categoriaId) {
         margin: 0;
     }
 
-    .grid-servicios {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-    }
-
-    .card-servicio {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card-servicio:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .imagen-servicio {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .card-content {
-        padding: 1.5rem;
-    }
-
-    .card-content h3 {
-        color: #059669;
-        margin: 0 0 0.5rem 0;
-        font-size: 1.25rem;
-    }
-
-    .descripcion {
-        color: #666;
-        margin-bottom: 1rem;
-        line-height: 1.4;
-    }
-
-    .info-contacto {
-        margin-bottom: 1.5rem;
-    }
-
-    .ubicacion {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .card-actions {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .sitio-web,
-    .ver-detalles {
-        padding: 0.5rem 1rem;
-        text-decoration: none;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-    }
-
-    .sitio-web {
-        background: #059669;
-        color: white;
-    }
-
-    .sitio-web:hover {
-        background: #047857;
-    }
-
-    .ver-detalles {
-        background: transparent;
-        color: #059669;
-        border: 1px solid #059669;
-    }
-
-    .ver-detalles:hover {
-        background: #059669;
-        color: white;
-    }
-
     .no-servicios {
         text-align: center;
         padding: 3rem;
@@ -266,13 +219,5 @@ if (categoriaId) {
         .header-llegada h2 {
             font-size: 1.5rem;
         }
-
-        .grid-servicios {
-            grid-template-columns: 1fr;
-        }
-
-        .card-actions {
-            flex-direction: column;
-        }
     }
-</style> 
+</style>
