@@ -109,7 +109,8 @@
 }
 
 .btn-sitio-web,
-.btn-ver-detalle {
+.btn-ver-detalle,
+.btn-llamar {
     flex: 1;
     padding: 0.6rem 1.2rem;
     text-decoration: none;
@@ -141,6 +142,17 @@
     background: #228B22;
     color: white;
     transform: translateY(-2px);
+}
+
+.btn-llamar {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+}
+
+.btn-llamar:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
 }
 
 /* Media queries para cards de empresas */
