@@ -86,14 +86,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
             (empresa) => empresa.categoria_id === categoria.id
         );
 
-        // Debug: mostrar información de empresas en esta categoría
-        // Mostrar todas las empresas y sus imágenes
-        empresasDeCategoria.forEach((empresa, index) => {
-            console.log(
-                `  img_url válida: ${!!(empresa.img_url && empresa.img_url.trim() !== "")}`
-            );
-        });
-
         // Buscar la primera empresa con imagen de esta categoría
         const empresaConImagen = empresasDeCategoria.find((empresa) => {
             const tieneImagen =
@@ -101,12 +93,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
                 empresa.img_url.trim() !== "" &&
                 empresa.img_url !== "null" &&
                 empresa.img_url !== "undefined";
-
-            if (tieneImagen) {
-                console.log(
-                    `  ✓ Empresa con imagen encontrada: ${empresa.nombre} - ${empresa.img_url}`
-                );
-            }
 
             return tieneImagen;
         });
@@ -122,13 +108,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
         };
     })
     .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
-
-// Debug final
-categoriasConImagen.forEach((cat) => {
-    console.log(
-        `${cat.nombre}: ${cat.imagen ? "CON IMAGEN" : "SIN IMAGEN"} (${cat.empresasCount} empresas)`
-    );
-});
 ---
 
 <section class="servicios-emergencia">
