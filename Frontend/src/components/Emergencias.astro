@@ -1,6 +1,7 @@
 ---
 import { apiFetch } from "../utils/api";
 import FiltroUbicacion from "./FiltroUbicacion.astro";
+import "../style/emergencias.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -177,6 +178,11 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     })
     .filter((categoria) => categoria.empresasCount > 0); // Solo mostrar categorías que tienen empresas
 ---
+
+<section class="emergencias-hero">
+    <h1 class="emergencias-title">Emergencias en San Rafael</h1>
+    <div class="emergencias-underline"></div>
+</section>
 
 <section class="servicios-emergencia">
     <div class="emergencias-container">
