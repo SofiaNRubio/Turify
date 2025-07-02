@@ -33,7 +33,9 @@ if (hospedaje) {
         if (responseItem.ok) {
             item = await responseItem.json();
             if (item.categoria_id) {
-                const responseCategoria = await apiFetch(`/categorias/${item.categoria_id}`);
+                const responseCategoria = await apiFetch(
+                    `/categorias/${item.categoria_id}`
+                );
                 if (responseCategoria.ok) {
                     categoria = await responseCategoria.json();
                 }
@@ -51,117 +53,167 @@ if (!item) {
 
 <MainLayout>
     <div class="hospedaje-detalle">
-        <div class="header-detalle">
-            <a href="/hospedaje" class="volver-btn">
-                ← Volver a hospedaje
-            </a>
-            {categoria && (
-                <a href={`/hospedaje?categoria=${categoria.id}`} class="volver-categoria">
-                    ← Volver a {categoria.nombre}
-                </a>
-            )}
-        </div>
         <div class="hospedaje-content">
             <div class="hospedaje-imagen">
-                {item.img_url ? (
-                    <img 
-                        src={item.img_url} 
-                        alt={item.nombre}
-                        class="imagen-principal"
-                    />
-                ) : (
-                    <div class="placeholder-imagen">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z" fill="#0ea5e9"/>
-                        </svg>
-                    </div>
-                )}
+                {
+                    item.img_url ? (
+                        <img
+                            src={item.img_url}
+                            alt={item.nombre}
+                            class="imagen-principal"
+                        />
+                    ) : (
+                        <div class="placeholder-imagen">
+                            <svg
+                                width="60"
+                                height="60"
+                                viewBox="0 0 24 24"
+                                fill="none">
+                                <path
+                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
+                                    fill="#0ea5e9"
+                                />
+                            </svg>
+                        </div>
+                    )
+                }
             </div>
             <div class="hospedaje-info">
                 <div class="hospedaje-header">
-                    {categoria && (
-                        <span class="categoria-tag">{categoria.nombre}</span>
-                    )}
+                    {
+                        categoria && (
+                            <span class="categoria-tag">
+                                {categoria.nombre}
+                            </span>
+                        )
+                    }
                     <h1>{item.nombre}</h1>
-                    {item.descripcion && (
-                        <p class="descripcion">{item.descripcion}</p>
-                    )}
+                    {
+                        item.descripcion && (
+                            <p class="descripcion">{item.descripcion}</p>
+                        )
+                    }
                 </div>
                 <div class="hospedaje-datos">
-                    {item.direccion && (
-                        <div class="dato-item">
-                            <div class="dato-icono">
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                    <path fill="#0ea5e9" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                </svg>
+                    {
+                        item.direccion && (
+                            <div class="dato-item">
+                                <div class="dato-icono">
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            fill="#0ea5e9"
+                                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="dato-contenido">
+                                    <h3>Dirección</h3>
+                                    <p>{item.direccion}</p>
+                                </div>
                             </div>
-                            <div class="dato-contenido">
-                                <h3>Dirección</h3>
-                                <p>{item.direccion}</p>
+                        )
+                    }
+                    {
+                        item.telefono && (
+                            <div class="dato-item">
+                                <div class="dato-icono">
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            fill="#0ea5e9"
+                                            d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="dato-contenido">
+                                    <h3>Teléfono</h3>
+                                    <a
+                                        href={`tel:${item.telefono}`}
+                                        class="contacto-link">
+                                        {item.telefono}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {item.telefono && (
-                        <div class="dato-item">
-                            <div class="dato-icono">
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                    <path fill="#0ea5e9" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
-                                </svg>
+                        )
+                    }
+                    {
+                        item.email && (
+                            <div class="dato-item">
+                                <div class="dato-icono">
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            fill="#0ea5e9"
+                                            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="dato-contenido">
+                                    <h3>Email</h3>
+                                    <a
+                                        href={`mailto:${item.email}`}
+                                        class="contacto-link">
+                                        {item.email}
+                                    </a>
+                                </div>
                             </div>
-                            <div class="dato-contenido">
-                                <h3>Teléfono</h3>
-                                <a href={`tel:${item.telefono}`} class="contacto-link">
-                                    {item.telefono}
-                                </a>
+                        )
+                    }
+                    {
+                        item.sitio_web && (
+                            <div class="dato-item">
+                                <div class="dato-icono">
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            fill="#0ea5e9"
+                                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="dato-contenido">
+                                    <h3>Sitio Web</h3>
+                                    <a
+                                        href={item.sitio_web}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="contacto-link">
+                                        Visitar sitio web
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {item.email && (
-                        <div class="dato-item">
-                            <div class="dato-icono">
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                    <path fill="#0ea5e9" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                                </svg>
-                            </div>
-                            <div class="dato-contenido">
-                                <h3>Email</h3>
-                                <a href={`mailto:${item.email}`} class="contacto-link">
-                                    {item.email}
-                                </a>
-                            </div>
-                        </div>
-                    )}
-                    {item.sitio_web && (
-                        <div class="dato-item">
-                            <div class="dato-icono">
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                    <path fill="#0ea5e9" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                                </svg>
-                            </div>
-                            <div class="dato-contenido">
-                                <h3>Sitio Web</h3>
-                                <a href={item.sitio_web} target="_blank" rel="noopener noreferrer" class="contacto-link">
-                                    Visitar sitio web
-                                </a>
-                            </div>
-                        </div>
-                    )}
+                        )
+                    }
                 </div>
-                {item.latitud && item.longitud && (
-                    <div class="mapa-seccion">
-                        <h3>Ubicación</h3>
-                        <div class="mapa-container">
-                            <iframe
-                                width="100%"
-                                height="300"
-                                frameborder="0"
-                                style="border:0"
-                                src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${item.latitud},${item.longitud}`}
-                                allowfullscreen>
-                            </iframe>
+                {
+                    item.latitud && item.longitud && (
+                        <div class="mapa-seccion">
+                            <h3>Ubicación</h3>
+                            <div class="mapa-container">
+                                <iframe
+                                    width="100%"
+                                    height="300"
+                                    frameborder="0"
+                                    style="border:0"
+                                    src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${item.latitud},${item.longitud}`}
+                                    allowfullscreen></iframe>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
             </div>
         </div>
     </div>
@@ -345,4 +397,5 @@ if (!item) {
             align-self: center;
         }
     }
-</style> 
+</style>
+
