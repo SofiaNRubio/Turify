@@ -91,7 +91,18 @@ const currentPath = Astro.url.pathname;
                 role="complementary"
                 aria-label="Autenticación de usuario">
                 <SignedOut>
-                    <SignInButton mode="modal" />
+                    <SignInButton
+                        mode="modal"
+                        style={{
+                            backgroundColor: "#4baf49",
+                            color: "white",
+                            borderRadius: "10px",
+                            padding: "3px 16px",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: "16px",
+                        }}
+                    />
                 </SignedOut>
                 <SignedIn>
                     <UserButton />
