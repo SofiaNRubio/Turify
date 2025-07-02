@@ -1,19 +1,22 @@
-import { useStore } from "@nanostores/react";
-import { $authStore } from "@clerk/astro/client";
-
-export default function UserProfile() {
-    const { userId } = useStore($authStore);
-
-    if (userId === undefined) {
-        return <div>Loading...</div>;
+// Función utilitaria para obtener el token de autenticación
+export default function getToken(): string | null {
+    // Obtener el token desde localStorage
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('auth-token') || null;
     }
+    return null;
+}
 
-    if (userId === null) {
-        return <div>Please sign in to view your profile.</div>;
+// Función para establecer el token
+export function setToken(token: string): void {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('auth-token', token);
     }
+}
 
-    // Aquí puedes realizar una solicitud al servidor para obtener el token de sesión
-    // fetch('/api/me').then(response => response.json()).then(data => console.log(data));
-
-    return <div>Welcome, {userId}!</div>;
+// Función para eliminar el token
+export function removeToken(): void {
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth-token');
+    }
 }

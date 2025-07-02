@@ -1,0 +1,177 @@
+@import url('./global.css');
+
+/* Footer Component */
+.footer {
+    background: #1b3a2b;
+    color: #fff;
+    text-align: center;
+    padding: 1.5rem 1rem 1rem 1rem;
+    font-size: 0.95rem;
+    margin-top: 2rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 5rem;
+    text-align: left;
+}
+
+.left {
+    flex: 0 1 auto;
+}
+
+.right {
+    flex: 0 1 auto;
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.footer-link {
+    color: #f7c873;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s, text-decoration 0.2s;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.footer-link:hover, .footer-link:focus {
+    color: #fff;
+    text-decoration: underline;
+    background: rgba(247, 200, 115, 0.15);
+}
+
+.footer-link:visited {
+    color: #f7c873;
+}
+
+/* CTA Component */
+.cta-explora {
+    background: linear-gradient(135deg, #eaf7f0, #d2ede0);
+    padding: 3rem 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    margin: 3rem auto;
+    max-width: 800px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.cta-contenido h2 {
+    color: #2e6c4d;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.cta-contenido p {
+    color: #444;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.cta-botones {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-botones > * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.8rem 1.4rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    display: inline-block;
+    border: none;
+}
+
+.btn.primario {
+    background-color: #2e6c4d;
+    color: #fff;
+}
+
+.btn.primario:hover {
+    background-color: #24593d;
+}
+
+.btn.secundario {
+    background-color: #fff;
+    color: #2e6c4d;
+    border: 2px solid #2e6c4d;
+}
+
+.btn.secundario:hover {
+    background-color: #f0f8f4;
+}
+
+/* Historia Component */
+.historia {
+    display: flex;
+    background: #eaf7f0;
+    border-radius: 12px;
+    padding: 2rem 2rem;
+    margin-bottom: 2rem;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.historia-content {
+    flex: 2;
+}
+
+.historia-content h3 {
+    margin-top: 0;
+    color: #2e6c4d;
+}
+
+.historia-mapa {
+    flex: 1;
+    min-width: 180px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+#historia-map {
+    height: 250px !important;
+    width: 100% !important;
+    border-radius: 8px;
+    z-index: 0;
+}
+
+/* Media queries para componentes */
+@media (max-width: 700px) {
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .right, .left {
+        text-align: center;
+    }
+}
+
+@media (max-width: 900px) {
+    .historia {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #historia-map {
+        height: 200px !important;
+    }
+} 

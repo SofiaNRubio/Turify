@@ -1,0 +1,185 @@
+@import url('./global.css');
+@import url('./empresas_cards.css');
+
+/* Llegar Component */
+.servicios-llegada {
+    padding: 2.5rem 1.5rem;
+}
+
+.header-llegada {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.servicios-llegada h2 {
+    color: #059669;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ver-todos {
+    color: #059669;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border: 2px solid #059669;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.ver-todos:hover {
+    background: #059669;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Estilos específicos para las cards de llegada usando el sistema unificado */
+.servicios-llegada .empresas-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.servicios-llegada .badge-categoria {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.servicios-llegada .btn-ver-detalle {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border: none;
+    width: 100%;
+}
+
+.servicios-llegada .btn-ver-detalle:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+}
+
+.servicios-llegada .placeholder {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+}
+
+/* Página de Llegar */
+.llegar-section {
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    min-height: 100vh;
+}
+
+.llegar-section .container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.llegar-section .header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.llegar-section .header h1 {
+    color: #059669;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.llegar-section .subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.llegar-section .no-empresas {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.llegar-section .no-empresas h3 {
+    color: #059669;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.llegar-section .no-empresas p {
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.llegar-section .btn-volver {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.llegar-section .btn-volver:hover {
+    background: #047857;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+@media (max-width: 768px) {
+    .servicios-llegada {
+        padding: 1.5rem 1rem;
+    }
+
+    .header-llegada {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .servicios-llegada h2 {
+        font-size: 1.5rem;
+    }
+
+    .llegar-section {
+        padding: 1rem;
+    }
+
+    .llegar-section .header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .servicios-llegada h2 {
+        font-size: 1.25rem;
+    }
+
+    .llegar-section .header h1 {
+        font-size: 1.75rem;
+    }
+
+    .llegar-section .subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* Funcionalidad de placeholders */
+.empresa-card:has(img) .placeholder {
+    display: none;
+}
+
+.empresa-card:not(:has(img)) .placeholder {
+    display: flex;
+}

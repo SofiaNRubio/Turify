@@ -1,0 +1,176 @@
+@import url('./global.css');
+@import url('./empresas_cards.css');
+
+/* Estilos para la página de hospedaje */
+.hospedaje-hospedaje {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-hospedaje {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header-hospedaje h2 {
+    color: #0ea5e9;
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Estilos específicos para las cards de hospedaje usando el sistema unificado */
+.hospedaje-hospedaje .badge-categoria {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+}
+
+.hospedaje-hospedaje .btn-ver-detalle {
+    background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+    color: white;
+    border: none;
+    width: 100%;
+}
+
+.hospedaje-hospedaje .btn-ver-detalle:hover {
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+}
+
+.hospedaje-hospedaje .placeholder {
+    background: linear-gradient(135deg, #bae6fd, #0ea5e9);
+}
+
+.hospedaje-hospedaje .empresa-card:hover {
+    box-shadow: 0 8px 30px rgba(14, 165, 233, 0.15);
+    border-color: #0ea5e9;
+}
+
+.hospedaje-hospedaje .empresas-grid {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.hospedaje-hospedaje .empresa-card {
+    max-width: 340px;
+    margin: 0 auto;
+}
+
+.hospedaje-hospedaje .card-content {
+    text-align: center;
+}
+
+/* Funcionalidad de placeholders */
+.empresa-card:has(img) .placeholder {
+    display: none;
+}
+
+.empresa-card:not(:has(img)) .placeholder {
+    display: flex;
+}
+
+@media (max-width: 768px) {
+    .hospedaje-hospedaje {
+        padding: 1rem;
+    }
+
+    .header-hospedaje h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-hospedaje h2 {
+        font-size: 1.75rem;
+    }
+}
+
+/* HERO Y TÍTULO PRINCIPAL */
+.hospedaje-hero {
+    text-align: center;
+    margin-top: 5rem;
+    margin-bottom: 1.5rem;
+}
+
+.hospedaje-title {
+    font-size: 2.3rem;
+    color: #25644a;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+}
+
+.hospedaje-underline {
+    width: 60px;
+    height: 4px;
+    background: #25644a;
+    margin: 0 auto 0.5rem auto;
+    border-radius: 2px;
+}
+
+/* SECCIÓN SUGERENCIAS */
+.hospedaje-sugerencias {
+    background: #e7ebee;
+    padding: 2.5rem 1rem 2.5rem 1rem;
+    text-align: center;
+    border-radius: 0 0 12px 12px;
+    margin-top: 2.5rem;
+}
+
+.hospedaje-sugerencias h2 {
+    color: #2d3748;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hospedaje-sugerencias-desc {
+    color: #444;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.hospedaje-btn-principal {
+    background: #3a4c2f;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(60, 60, 60, 0.10);
+    cursor: pointer;
+}
+
+.hospedaje-btn-principal:hover {
+    background: #2d3a23;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .empresa-card {
+        width: 90vw;
+        max-width: 340px;
+    }
+}
+
+@media (max-width: 600px) {
+    .hospedaje-title {
+        font-size: 1.5rem;
+    }
+
+    .hospedaje-underline {
+        width: 36px;
+        height: 3px;
+    }
+
+    .hospedaje-sugerencias {
+        padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+    }
+}

@@ -6,9 +6,13 @@ import dotenv from "dotenv";
 dotenv.config();
 // https://astro.build/config
 export default defineConfig({
-    integrations: [clerk()],
+    integrations: [
+        clerk(),
+    ],
     adapter: node({
         mode: "standalone",
     }),
     output: "server",
 });
+
+

@@ -1,0 +1,223 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import HospedajeComponent from "../components/Hospedaje.astro";
+import { apiFetch } from "../utils/api";
+
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+const url = new URL(Astro.request.url);
+const categoriaId = url.searchParams.get("categoria");
+
+let hospedajesFiltrados: Empresa[] = [];
+let categoriaSeleccionada: Categoria | null = null;
+
+if (categoriaId) {
+    try {
+        const responseCategoria = await apiFetch(`/categorias/${categoriaId}`);
+        if (responseCategoria.ok) {
+            categoriaSeleccionada = await responseCategoria.json();
+        }
+        const responseEmpresas = await apiFetch("/empresas");
+        if (responseEmpresas.ok) {
+            const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
+            hospedajesFiltrados = todasLasEmpresas.filter(
+                (empresa) => empresa.categoria_id === categoriaId
+            );
+        }
+    } catch (error) {
+        console.error("Error al obtener hospedajes filtrados:", error);
+    }
+}
+---
+
+<link rel="stylesheet" href="/src/style/hospedaje.css" />
+<MainLayout>
+    {
+        categoriaId && categoriaSeleccionada ? (
+            <div class="hospedaje-filtrados">
+                <div class="header-hospedaje">
+                    <a href="/hospedaje" class="volver-btn">
+                        ← Volver a hospedaje
+                    </a>
+                    <h2>Hospedaje: {categoriaSeleccionada.nombre}</h2>
+                </div>
+                {hospedajesFiltrados.length > 0 ? (
+                    <div class="empresas-grid">
+                        {hospedajesFiltrados.map((hospedaje: Empresa) => (
+                            <div class="empresa-card">
+                                <div class="imagen-container">
+                                    {hospedaje.img_url ? (
+                                        <img
+                                            src={hospedaje.img_url}
+                                            alt={hospedaje.nombre}
+                                        />
+                                    ) : (
+                                        <div class="placeholder">
+                                            <svg
+                                                width="40"
+                                                height="40"
+                                                fill="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </div>
+                                <div class="card-content">
+                                    <span class="badge-categoria">
+                                        {categoriaSeleccionada.nombre}
+                                    </span>
+                                    <h3>{hospedaje.nombre}</h3>
+                                    {hospedaje.descripcion && (
+                                        <p class="descripcion">
+                                            {hospedaje.descripcion}
+                                        </p>
+                                    )}
+                                    <div class="info-empresa">
+                                        {hospedaje.direccion && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#0ea5e9"
+                                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                                    />
+                                                </svg>
+                                                {hospedaje.direccion}
+                                            </div>
+                                        )}
+                                        {hospedaje.telefono && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#0ea5e9"
+                                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                                    />
+                                                </svg>
+                                                {hospedaje.telefono}
+                                            </div>
+                                        )}
+                                        {hospedaje.email && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#0ea5e9"
+                                                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                                                    />
+                                                </svg>
+                                                {hospedaje.email}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div class="acciones">
+                                        {hospedaje.sitio_web && (
+                                            <a
+                                                href={hospedaje.sitio_web}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="btn-sitio-web">
+                                                Visitar sitio web
+                                            </a>
+                                        )}
+                                        <a
+                                            href={`/hospedaje/${hospedaje.id}`}
+                                            class="btn-ver-detalle">
+                                            Ver detalles
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div class="no-hospedaje">
+                        <p>
+                            No se encontraron hospedajes de{" "}
+                            {categoriaSeleccionada.nombre} disponibles.
+                        </p>
+                    </div>
+                )}
+            </div>
+        ) : (
+            <HospedajeComponent />
+        )
+    }
+</MainLayout>
+
+<style>
+    .hospedaje-filtrados {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .volver-btn {
+        display: inline-flex;
+        align-items: center;
+        color: #0ea5e9;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .volver-btn:hover {
+        color: #0284c7;
+    }
+
+    .header-hospedaje {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-hospedaje h2 {
+        color: #0ea5e9;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .no-hospedaje {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    @media (max-width: 768px) {
+        .hospedaje-filtrados {
+            padding: 1rem;
+        }
+
+        .header-hospedaje h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>

@@ -1,0 +1,44 @@
+---
+const rutasDestacadas = [
+  {
+    id: 1,
+    titulo: "Ruta del Vino",
+    descripcion: "Recorre las mejores bodegas de San Rafael y descubre la historia del vino mendocino.",
+    imagen: "/carrusel/bodega-abeja.jpg"
+  },
+  {
+    id: 2,
+    titulo: "Aventura en el Cañón",
+    descripcion: "Una experiencia única de deportes extremos en el Cañón del Atuel.",
+    imagen: "/carrusel/canon-atuel.jpg"
+  },
+  {
+    id: 3,
+    titulo: "Tour Histórico",
+    descripcion: "Conoce los lugares más emblemáticos del centro histórico de San Rafael.",
+    imagen: "/carrusel/plaza-san-martin.jpg"
+  },
+  {
+    id: 4,
+    titulo: "Naturaleza y Aventura",
+    descripcion: "Explora Valle Grande y sus increíbles paisajes naturales.",
+    imagen: "/carrusel/valle-grande.jpg"
+  }
+];
+---
+
+<link rel="stylesheet" href="/src/style/rutas-destacadas.css">
+
+<section class="rutas-destacadas">
+  <h2>Rutas temáticas destacadas</h2>
+  <div class="grid-rutas">
+    {rutasDestacadas.map((ruta) => (
+      <div class="card-ruta">
+        <img src={ruta.imagen} alt={ruta.titulo} />
+        <h3>{ruta.titulo}</h3>
+        <p>{ruta.descripcion}</p>
+        <a href="#" class="ver-mas">Ver más</a>
+      </div>
+    ))}
+  </div>
+</section>

@@ -1,0 +1,123 @@
+@import url('./global.css');
+@import url('./empresas_cards.css');
+
+/* Personalización específica para Emergencias */
+
+/* Sección de servicios de emergencia */
+.servicios-emergencia {
+    padding: 2.5rem 1.5rem;
+}
+
+.header-emergencia {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.servicios-emergencia h2 {
+    color: #dc2626;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Página de Emergencias */
+.emergencias-section {
+    padding: 2rem 1.5rem;
+    background: #f7f5ed;
+    min-height: 100vh;
+    padding-bottom: 3rem;
+}
+
+.emergencias-section .container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.emergencias-section .header {
+    text-align: center !important;
+    margin-bottom: 1rem;
+    display: block !important;
+    flex-direction: unset !important;
+    align-items: unset !important;
+}
+
+.emergencias-section .header h1 {
+    color: #dc2626;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+.emergencias-section .decorative-underline {
+    width: 80px;
+    height: 5px;
+    background: #dc2626;
+    border-radius: 3px;
+    margin: 0 auto 0.5rem auto;
+}
+
+
+.servicios-emergencia .btn-llamar,
+.emergencias-section .btn-llamar {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    padding: 10px 50px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+    color: #78fa78;
+    text-decoration: none;
+}
+
+.servicios-emergencia .btn-llamar:hover,
+.emergencias-section .btn-llamar:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+}
+
+
+/* Media queries */
+@media (max-width: 768px) {
+    .servicios-emergencia {
+        padding: 1.5rem 1rem;
+    }
+
+    .header-emergencia {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .servicios-emergencia h2 {
+        font-size: 1.6rem;
+    }
+
+    .emergencias-section {
+        padding: 1.5rem 1rem;
+    }
+
+    .emergencias-section .header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .servicios-emergencia h2 {
+        font-size: 1.4rem;
+    }
+
+    .emergencias-section .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .emergencias-section .titulo-categoria {
+        font-size: 1.5rem;
+    }
+}

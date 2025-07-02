@@ -1,0 +1,41 @@
+@import url('./global.css');
+
+/* Estilos específicos para la página de categorías */
+.acciones {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Media queries específicas para categorías */
+@media (max-width: 768px) {
+  .filtro-nombre {
+    max-width: 100%;
+  }
+  
+  .acciones {
+    flex-direction: row;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  .btn-editar, .btn-eliminar {
+    padding: 4px 6px;
+    font-size: 0.8em;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .acciones {
+    flex-direction: row;
+    gap: 3px;
+  }
+  
+  .btn-editar, .btn-eliminar {
+    padding: 3px 5px;
+    font-size: 0.75em;
+  }
+}

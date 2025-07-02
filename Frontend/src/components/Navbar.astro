@@ -1,32 +1,151 @@
-    ---
+---
+import {
+    SignInButton,
+    SignedIn,
+    SignedOut,
+    UserButton,
+} from "@clerk/astro/components";
+const currentPath = Astro.url.pathname;
+---
 
-    ---
+<link rel="stylesheet" href="/src/style/navbar.css">
 
-    <nav>
-        <a href="/">Inicio</a>
-        <a href="/empresas">Empresas</a>
-        <span id="auth-section"></span>
-
-        <script type="module" is:inline>
-            import { Clerk } from "@clerk/clerk-js";
-
-            const clerk = new Clerk(import.meta.env.PUBLIC_CLERK_FRONTEND_API);
-            await clerk.load();
-
-            const authSection = document.getElementById("auth-section");
-
-            const user = await clerk.user;
-
-            if (user) {
-                const logoutBtn = document.createElement("button");
-                logoutBtn.textContent = "Cerrar sesión";
-                logoutBtn.onclick = () => clerk.signOut();
-                authSection.appendChild(logoutBtn);
-            } else {
-                const loginBtn = document.createElement("button");
-                loginBtn.textContent = "Iniciar sesión";
-                loginBtn.onclick = () => clerk.openSignIn();
-                authSection.appendChild(loginBtn);
-            }
-        </script>
+<header class="header" role="banner">
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+        <div class="logo">
+            <a href="/" aria-label="Ir al inicio - Turify">
+                <img src="/logo.png" class="logo-img" alt="Logo de Turify" />
+            </a>
+        </div>
+        <!-- Botón hamburguesa CSS only -->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle" hidden />
+        <label for="menu-toggle" class="hamburger" aria-label="Abrir menú de navegación">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <div class="nav-links" id="main-navigation" role="menubar">
+            <a href="/" class={currentPath === "/" ? "active" : ""} role="menuitem">Inicio</a>
+            <div class="dropdown-btn" role="none">
+                <button
+                    id="indicaciones-menu-button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    class="indicaciones-btn"
+                    role="menuitem"
+                    aria-controls="indicaciones-dropdown">
+                    Indicaciones
+                    <svg
+                        aria-hidden="true"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        class="octicon octicon-triangle-down"
+                        style="vertical-align: middle; margin-left: 4px;">
+                        <path
+                            d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"
+                        ></path>
+                    </svg>
+                </button>
+                <div class="dropdown-content-btn" id="indicaciones-dropdown" role="menu" aria-labelledby="indicaciones-menu-button">
+                    <a href="/moverte" role="menuitem">Moverte en San Rafael</a>
+                    <a href="/llegar" role="menuitem">Llegar a San Rafael</a>
+                </div>
+            </div>
+            <a
+                href="/emergencias"
+                class={currentPath === "/emergencias"
+                    ? "active emergencias"
+                    : "emergencias"}
+                role="menuitem">Emergencias</a
+            >
+            <a
+                href="/servicios"
+                class={currentPath === "/servicios" ? "active" : ""}
+                role="menuitem">Servicios</a
+            >
+            <a
+                href="/hospedaje"
+                class={currentPath === "/hospedaje" ? "active" : ""}
+                role="menuitem">Hospedaje</a
+            >
+            <a href="/info" class={currentPath === "/info" ? "active" : ""}
+                role="menuitem">Información útil</a
+            >
+        </div>
+        <div class="nav-auth" role="complementary" aria-label="Autenticación de usuario">
+            <SignedOut>
+                <SignInButton mode="modal" />
+            </SignedOut>
+            <SignedIn>
+                <UserButton />
+            </SignedIn>
+        </div>
     </nav>
+</header>
+
+<script>
+    // Asegurar que el DOM esté cargado
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuToggle = document.getElementById(
+            "menu-toggle"
+        ) as HTMLInputElement;
+        const hamburger = document.querySelector(".hamburger") as HTMLElement;
+        const navLinks = document.querySelector(".nav-links") as HTMLElement;
+        const indicacionesButton = document.getElementById("indicaciones-menu-button") as HTMLButtonElement;
+        const indicacionesDropdown = document.getElementById("indicaciones-dropdown") as HTMLElement;
+
+        if (hamburger && navLinks) {
+            hamburger.addEventListener("click", function () {
+                navLinks.classList.toggle("open");
+                if (menuToggle) {
+                    menuToggle.checked = !menuToggle.checked;
+                }
+            });
+        }
+
+        // Manejar dropdown de indicaciones
+        if (indicacionesButton && indicacionesDropdown) {
+            indicacionesButton.addEventListener("click", function() {
+                const isExpanded = this.getAttribute("aria-expanded") === "true";
+                this.setAttribute("aria-expanded", (!isExpanded).toString());
+                indicacionesDropdown.style.display = isExpanded ? "none" : "block";
+            });
+
+            // Cerrar dropdown al hacer click fuera
+            document.addEventListener("click", function(e) {
+                const target = e.target as HTMLElement;
+                if (!indicacionesButton.contains(target) && !indicacionesDropdown.contains(target)) {
+                    indicacionesButton.setAttribute("aria-expanded", "false");
+                    indicacionesDropdown.style.display = "none";
+                }
+            });
+        }
+
+        // Cerrar menú al hacer click fuera
+        document.addEventListener("click", function (e) {
+            const target = e.target as HTMLElement;
+            if (
+                hamburger &&
+                navLinks &&
+                target &&
+                !hamburger.contains(target) &&
+                !navLinks.contains(target)
+            ) {
+                navLinks.classList.remove("open");
+                if (menuToggle) menuToggle.checked = false;
+            }
+        });
+
+        // También manejar cuando se hace click en un enlace del menú para cerrarlo
+        if (navLinks) {
+            const navLinkElements = navLinks.querySelectorAll("a");
+            navLinkElements.forEach((link) => {
+                link.addEventListener("click", function () {
+                    navLinks.classList.remove("open");
+                    if (menuToggle) menuToggle.checked = false;
+                });
+            });
+        }
+    });
+</script>

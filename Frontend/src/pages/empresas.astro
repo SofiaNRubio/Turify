@@ -1,7 +1,327 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
+import FiltroDistrito from "../components/FiltroUbicacion.astro";
+import getToken from "../utils/getToken";
+import { apiFetch } from "../utils/api";
+
+// Obtener el token de autenticación
+const token = getToken();
+
+// Definir tipos TypeScript
+interface Empresa {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    email: string | null;
+    telefono: string | null;
+    sitio_web: string | null;
+    direccion: string;
+    latitud: number | null;
+    longitud: number | null;
+    img_url: string | null;
+    categoria_id: string | null;
+    created_at: string;
+    distrito?: string;
+}
+
+interface Categoria {
+    id: string;
+    nombre: string;
+}
+
+// Función para obtener las categorías desde el backend
+async function obtenerCategorias(): Promise<Categoria[]> {
+    try {
+        const response = await apiFetch("/categorias");
+        if (!response.ok) {
+            throw new Error("Error al obtener categorías");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener categorías:", error);
+        return [];
+    }
+}
+
+// Función para obtener las empresas desde el backend
+async function obtenerEmpresas(): Promise<Empresa[]> {
+    try {
+        const response = await apiFetch("/empresas");
+        if (!response.ok) {
+            throw new Error("Error al obtener empresas");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener empresas:", error);
+        return [];
+    }
+}
+
+// Función para obtener los distritos únicos filtrados por categoría
+async function obtenerDistritos(categoriaId?: string): Promise<string[]> {
+    try {
+        let endpoint = "/empresas/distritos";
+        if (categoriaId) {
+            endpoint += `?categoria_id=${categoriaId}`;
+        }
+        const response = await apiFetch(endpoint);
+        if (!response.ok) {
+            throw new Error("Error al obtener distritos");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
+        return [];
+    }
+}
+
+// Obtener datos
+const categorias = await obtenerCategorias();
+const empresas = await obtenerEmpresas();
+
+// Filtrar categorías de emergencia (excluir las mismas que en el componente Categorias)
+const categoriasExcluidas = [
+    "hospitales",
+    "policía",
+    "bomberos",
+    "farmacias",
+];
+
+const categoriasFiltradas = categorias.filter(
+    (categoria) =>
+        !categoriasExcluidas.some((excluida) =>
+            categoria.nombre.toLowerCase().includes(excluida)
+        )
+);
+
+// Filtrar empresas para excluir las de categorías de emergencia
+const empresasFiltradas = empresas.filter((empresa) => {
+    if (!empresa.categoria_id) return true; // Incluir empresas sin categoría
+    
+    const categoria = categorias.find((cat) => cat.id === empresa.categoria_id);
+    if (!categoria) return true; // Incluir empresas con categoría no encontrada
+    
+    return !categoriasExcluidas.some((excluida) =>
+        categoria.nombre.toLowerCase().includes(excluida)
+    );
+});
+
+// Obtener parámetros de la URL
+const url = new URL(Astro.request.url);
+const categoriaId = url.searchParams.get("categoria");
+
+// Obtener distritos filtrados por categoría
+const distritos = await obtenerDistritos(categoriaId || undefined);
+
+// Filtrar empresas por categoría si se especifica
+let empresasFinales = categoriaId
+    ? empresasFiltradas.filter((empresa) => empresa.categoria_id === categoriaId)
+    : empresasFiltradas;
+
+// Filtrar por distrito si se especifica
+const distritoFiltro = url.searchParams.get("distrito");
+const distritosSeleccionados = distritoFiltro
+  ? distritoFiltro.split(",")
+  : [];
+if (distritosSeleccionados.length > 0) {
+    empresasFinales = empresasFinales.filter((empresa) =>
+        distritosSeleccionados.some((d) => empresa.distrito && empresa.distrito.toLowerCase().includes(d.toLowerCase()))
+    );
+}
+
+// Obtener información de la categoría si se filtra
+const categoriaSeleccionada = categoriaId
+    ? categoriasFiltradas.find((cat) => cat.id === categoriaId)
+    : null;
 ---
 
-<MainLayout>
-    <h2>Explorá Empresas Turísticas</h2>
+<link rel="stylesheet" href="/src/style/empresas.css">
+
+<MainLayout title="Empresas - Turify">
+    <section class="empresas-section">
+        <div class="container">
+            <div class="header">
+                <h1>
+                    {categoriaSeleccionada
+                        ? `Empresas de ${categoriaSeleccionada.nombre}`
+                        : "Todas las Empresas"}
+                </h1>
+                <p class="subtitle">
+                    {categoriaSeleccionada
+                        ? `Descubre las mejores empresas de ${categoriaSeleccionada.nombre.toLowerCase()} en San Rafael`
+                        : "Explora todas las empresas y servicios disponibles en San Rafael, Mendoza"}
+                </p>
+                {categoriaSeleccionada && (
+                    <a href="/empresas" class="btn-ver-todas">Ver todas las empresas</a>
+                )}
+            </div>
+
+            {/* Filtro de distrito */}
+            {distritos.length > 0 && (
+                <FiltroDistrito 
+                    distritos={distritos}
+                    distritoSeleccionado={distritosSeleccionados}
+                    placeholder="Filtrar por distrito..."
+                />
+            )}
+
+            {empresasFinales.length === 0 ? (
+                <div class="no-empresas">
+                    <h3>No se encontraron empresas</h3>
+                    <p>
+                        {categoriaSeleccionada
+                            ? `No hay empresas registradas en la categoría "${categoriaSeleccionada.nombre}"`
+                            : distritoFiltro
+                            ? `No hay empresas en el distrito "${distritoFiltro}"`
+                            : "No hay empresas registradas en este momento"}
+                    </p>
+                    <a href="/empresas" class="btn-volver">Volver a todas las empresas</a>
+                </div>
+            ) : (
+                <div class="empresas-grid">
+                    {empresasFinales.map((empresa) => {
+                        const categoria = categoriasFiltradas.find(
+                            (cat) => cat.id === empresa.categoria_id
+                        );
+                        return (
+                            <div 
+                                class="empresa-card"
+                                data-direccion={empresa.direccion}
+                                data-categoria-id={empresa.categoria_id}
+                            >
+                                <div class="imagen-container">
+                                    {empresa.img_url ? (
+                                        <img
+                                            src={empresa.img_url}
+                                            alt={empresa.nombre}
+                                            onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"
+                                        />
+                                    ) : null}
+                                    <div
+                                        class="placeholder"
+                                        style={
+                                            empresa.img_url
+                                                ? "display: none;"
+                                                : "display: flex;"
+                                        }>
+                                        <svg
+                                            width="60"
+                                            height="60"
+                                            viewBox="0 0 60 60"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <rect
+                                                width="60"
+                                                height="60"
+                                                rx="12"
+                                                fill="#e0e0e0"
+                                            />
+                                            <path
+                                                d="M15 45L22.5 30L37.5 45H15Z"
+                                                fill="#bdbdbd"
+                                            />
+                                            <circle
+                                                cx="22.5"
+                                                cy="24"
+                                                r="4.5"
+                                                fill="#bdbdbd"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    {categoria && (
+                                        <span class="badge-categoria">
+                                            {categoria.nombre}
+                                        </span>
+                                    )}
+                                    <h3>{empresa.nombre}</h3>
+                                    {empresa.descripcion && (
+                                        <p class="descripcion">
+                                            {empresa.descripcion}
+                                        </p>
+                                    )}
+                                    <div class="info-empresa">
+                                        {empresa.direccion && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5S14.5 7.62 14.5 9S13.38 11.5 12 11.5Z"
+                                                        fill="currentColor"
+                                                    />
+                                                </svg>
+                                                <span>{empresa.direccion}</span>
+                                            </div>
+                                        )}
+                                        {empresa.telefono && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M6.62 10.79C8.06 12.21 9.77 13.92 11.19 15.35L12.61 13.93C12.83 13.71 13.16 13.65 13.43 13.78C14.08 14.08 14.83 14.25 15.61 14.25C16.16 14.25 16.61 14.7 16.61 15.25V18.75C16.61 19.3 16.16 19.75 15.61 19.75C8.61 19.75 3 14.14 3 7.14C3 6.59 3.45 6.14 4 6.14H7.5C8.05 6.14 8.5 6.59 8.5 7.14C8.5 7.92 8.67 8.67 8.97 9.32C9.1 9.59 9.04 9.92 8.82 10.14L7.4 11.56L6.62 10.79Z"
+                                                        fill="currentColor"
+                                                    />
+                                                </svg>
+                                                <span>{empresa.telefono}</span>
+                                            </div>
+                                        )}
+                                        {empresa.email && (
+                                            <div>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"
+                                                        fill="currentColor"
+                                                    />
+                                                </svg>
+                                                <span>{empresa.email}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div class="acciones">
+                                        {empresa.sitio_web && (
+                                            <a
+                                                href={empresa.sitio_web}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="btn-sitio-web">
+                                                Visitar sitio web
+                                            </a>
+                                        )}
+                                        <a
+                                            href={`/empresas/${empresa.id}`}
+                                            class="btn-ver-detalle">
+                                            Ver detalles
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    </section>
 </MainLayout>
+
+<script>
+  // Inicializar filtro al cargar la página
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM cargado, página lista');
+  });
+  
+  console.log('Script de empresas cargado');
+</script>

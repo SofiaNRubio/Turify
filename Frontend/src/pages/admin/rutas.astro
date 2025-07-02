@@ -1,14 +1,250 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
-// Cuando implementes la API:
-// const res = await fetch('http://localhost:3000/api/rutas');
-// const rutas = await res.json();
+import { apiFetch } from "../../utils/api";
+
+// Obtener parámetros de filtro de la URL
+const { searchParams } = Astro.url;
+const nombreFiltro = searchParams.get('nombre') || '';
+
+// Construir la URL de la API con los filtros
+let apiUrl = '/rutas';
+const filtros = [];
+if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
+if (filtros.length > 0) {
+  apiUrl += `?${filtros.join('&')}`;
+}
+
+// Obtener rutas desde la API
+let rutas = [];
+try {
+  const response = await apiFetch(apiUrl);
+  if (response.ok) {
+    rutas = await response.json();
+    // Si no hay rutas desde la API, usar la ruta existente conocida
+    if (rutas.length === 0) {
+      rutas = [{ id: 'ruta1', nombre: "Ruta del vino familiar" }];
+    }
+  } else {
+    console.error('Error al cargar rutas:', response.statusText);
+    // Usar datos de respaldo en caso de error
+    rutas = [{ id: 'ruta1', nombre: "Ruta del vino familiar" }];
+  }
+} catch (error) {
+  console.error('Error al conectar con la API:', error);
+  // Usar datos de respaldo en caso de error
+  rutas = [{ id: 'ruta1', nombre: "Ruta del vino familiar" }];
+}
 ---
 
-<AdminPanel menu={AdminMenu}>
-    <!-- Aquí va el contenido de rutas cuando lo agregues -->
-    <div class="admin-content">
-      <h1>Rutas (en construcción)</h1>
+<link rel="stylesheet" href="/src/style/atractivos.css">
+<link rel="stylesheet" href="/src/style/modal.css">
+
+<AdminPanel menu={AdminMenu}><div class="admin-content">
+    <div class="header">
+      <h1>Rutas Turísticas</h1>
+      <a href="/admin/rutas-nueva" class="btn-nuevo">+ Nueva Ruta</a>
     </div>
+      <!-- Filtros -->
+    <div class="filtros-container">
+      <form id="filtros-form" method="get" class="filtros">
+        <div class="filtro filtro-nombre">
+          <label for="nombre">Nombre de Ruta:</label>
+          <input type="text" id="nombre" name="nombre" value={nombreFiltro} placeholder="Buscar por nombre...">
+        </div>
+        
+        <div class="filtros-botones">
+          <button type="submit" class="btn-filtrar">Filtrar</button>
+          <a href="/admin/rutas" class="btn-limpiar">Limpiar</a>
+        </div>
+      </form>
+    </div><!-- Tabla de rutas -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rutas.length > 0 ? (
+          rutas.map((ruta: any) => (
+            <tr>              <td>{ruta.id}</td>
+              <td>{ruta.nombre}</td>
+              <td class="acciones">
+                <button class="btn-editar" data-id={ruta.id}>Editar</button>
+                <button class="btn-eliminar" data-id={ruta.id} data-nombre={ruta.nombre}>Eliminar</button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colspan="3" class="sin-resultados">
+              No se encontraron rutas
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+  <!-- Modal de confirmación de eliminación -->
+  <div id="modal-confirmar-eliminar" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Confirmar eliminación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-confirmar-eliminar">¿Estás seguro de que deseas eliminar esta ruta?</p>
+          <div class="modal-actions">
+          <button class="modal-btn modal-btn-danger" id="btn-confirmar-eliminar">Eliminar</button>
+          <button class="modal-btn modal-btn-secondary" id="btn-cancelar-confirmar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de notificación -->
+  <div id="modal-notificacion" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="titulo-notificacion">Notificación</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-notificacion"></p>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-aceptar-notificacion">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </AdminPanel>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Elementos del modal de eliminación
+    const btnEliminar = document.querySelectorAll('.btn-eliminar');
+    const modalConfirmarEliminar = document.getElementById('modal-confirmar-eliminar');
+    const btnCancelarConfirmar = document.getElementById('btn-cancelar-confirmar');
+    const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar');
+    
+    // Botones de editar
+    const btnEditar = document.querySelectorAll('.btn-editar');
+    
+    // Modal de notificación
+    const modalNotificacion = document.getElementById('modal-notificacion');
+    const btnAceptarNotificacion = document.getElementById('btn-aceptar-notificacion');
+    
+    // Variables para almacenar datos del elemento seleccionado
+    let currentId: string | null = null;
+    let currentNombre: string | null = null;
+    
+    // Función para mostrar notificación
+    function mostrarNotificacion(titulo: string, mensaje: string, esExito: boolean = true, recargar: boolean = true) {
+      const tituloNotificacion = document.getElementById('titulo-notificacion');
+      const textoNotificacion = document.getElementById('texto-notificacion');
+      
+      if (tituloNotificacion) {
+        tituloNotificacion.textContent = titulo;
+        tituloNotificacion.style.color = esExito ? '#1A513B' : '#d9534f';
+      }
+      
+      if (textoNotificacion) {
+        textoNotificacion.textContent = mensaje;
+      }
+      
+      if (modalNotificacion) {
+        modalNotificacion.classList.remove('hidden');
+        
+        if (btnAceptarNotificacion) {
+          btnAceptarNotificacion.onclick = () => {
+            if (modalNotificacion) {
+              modalNotificacion.classList.add('hidden');
+            }
+            if (recargar) {
+              window.location.reload();
+            }
+          };
+        }
+      }
+    }
+    
+    // Modal de Eliminar
+    if (btnEliminar && modalConfirmarEliminar) {
+      btnEliminar.forEach((btn: Element) => {
+        btn.addEventListener('click', () => {
+          currentId = btn.getAttribute('data-id');
+          currentNombre = btn.getAttribute('data-nombre');
+          
+          // Configurar texto de confirmación
+          const textoConfirmar = document.getElementById('texto-confirmar-eliminar');
+          if (textoConfirmar) {
+            textoConfirmar.textContent = `¿Estás seguro de que deseas eliminar la ruta "${currentNombre}"?`;
+          }
+          
+          // Mostrar modal de confirmación
+          if (modalConfirmarEliminar) {
+            modalConfirmarEliminar.classList.remove('hidden');
+          }
+        });
+      });
+    }
+    
+    // Botón Cancelar confirmación
+    if (btnCancelarConfirmar && modalConfirmarEliminar) {
+      btnCancelarConfirmar.addEventListener('click', () => {
+        modalConfirmarEliminar.classList.add('hidden');
+      });
+    }
+    
+    // Botón Confirmar eliminación
+    if (btnConfirmarEliminar && modalConfirmarEliminar) {
+      btnConfirmarEliminar.addEventListener('click', async () => {
+        if (modalConfirmarEliminar) {
+          modalConfirmarEliminar.classList.add('hidden');
+        }
+        
+        try {
+          const response = await apiFetch(`/rutas/${currentId}`, {
+            method: 'DELETE'
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            mostrarNotificacion('¡Éxito!', `Ruta "${currentNombre}" eliminada correctamente`, true);
+          } else {
+            mostrarNotificacion('Error', data.error || 'No se pudo eliminar la ruta', false, false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', 'Ha ocurrido un error durante la eliminación', false, false);
+        }
+      });
+    }
+    
+    // Cerrar modales haciendo clic fuera
+    [modalConfirmarEliminar, modalNotificacion].forEach(modal => {
+      if (modal) {
+        modal.addEventListener('click', (e: MouseEvent) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      }
+    });
+    
+    // Manejar los botones de editar
+    if (btnEditar) {
+      btnEditar.forEach((btn: Element) => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-id');
+          if (id) {
+            window.location.href = `/admin/rutas-editar?id=${id}`;
+          }
+        });
+      });
+    }
+  });
+</script>

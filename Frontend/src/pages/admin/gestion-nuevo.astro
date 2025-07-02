@@ -1,0 +1,744 @@
+---
+import AdminPanel from "../../components/AdminPanel.astro";
+import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
+
+// Obtener las empresas existentes
+const empresasResponse = await apiFetch('/empresas');
+let empresas = [];
+
+if (empresasResponse.ok) {
+  empresas = await empresasResponse.json();
+} else {
+  console.error('Error al cargar empresas:', empresasResponse.statusText);
+}
+
+// Obtener las categorías existentes
+const categoriasResponse = await apiFetch('/categorias');
+let categorias = [];
+
+if (categoriasResponse.ok) {
+  categorias = await categoriasResponse.json();
+} else {
+  console.error('Error al cargar categorías:', categoriasResponse.statusText);
+  // En caso de error, usar categorías por defecto solo para la interfaz
+  categorias = [
+    { id: "cat1", nombre: "Naturaleza" },
+    { id: "cat2", nombre: "Monumento" },
+  ];
+}
+
+let mensaje = "";
+let error = "";
+let empresaSeleccionada = null;
+let mostrarFormEmpresa = false;
+
+// Función para obtener el nombre de la categoría
+function obtenerNombreCategoria(categoriaId: string | null): string {
+  if (!categoriaId) return "Sin categoría";
+  const categoria = categorias.find((cat: any) => cat.id === categoriaId);
+  return categoria ? categoria.nombre : "Sin categoría";
+}
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const accion = formData.get('accion');
+      if (accion === 'crear_atractivo') {
+      // Datos del atractivo
+      const atractivoData: any = {
+        nombre: formData.get('nombre'),
+        descripcion: formData.get('descripcion'),
+        categoria_id: formData.get('categoria_id'),
+        img_url: formData.get('img_url'),
+        latitud: parseFloat(formData.get('latitud')?.toString() || '0'),
+        longitud: parseFloat(formData.get('longitud')?.toString() || '0'),
+        direccion: formData.get('direccion'),
+        distrito: formData.get('distrito')
+      };
+      
+      // Obtener la empresa_id del paso anterior
+      atractivoData.empresa_id = formData.get('empresa_id');      // Primero validar los datos
+      console.log("Enviando datos para validación:", atractivoData);
+      
+      const validacionResponse = await apiFetch('/atractivos/validar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(atractivoData)
+      });
+      
+      if (!validacionResponse.ok) {
+        let mensajeError;
+        try {
+          const errorData = await validacionResponse.json();
+          mensajeError = errorData.error || 'Error en la validación de datos';
+        } catch (jsonError) {
+          mensajeError = `Error en la validación de datos (${validacionResponse.status}): ${validacionResponse.statusText}`;
+        }
+        throw new Error(mensajeError);
+      }
+      
+      // Si la validación es exitosa, crear el atractivo
+      console.log("Validación exitosa, creando atractivo:", atractivoData);
+      
+      const atractivoResponse = await apiFetch('/atractivos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(atractivoData)
+      });
+      
+      if (!atractivoResponse.ok) {
+        let mensajeError;
+        try {
+          const errorData = await atractivoResponse.json();
+          mensajeError = errorData.error || 'Error al crear el atractivo';
+        } catch (jsonError) {
+          mensajeError = `Error al crear atractivo (${atractivoResponse.status}): ${atractivoResponse.statusText}`;
+        }
+        throw new Error(mensajeError);
+      }
+      
+      const atractivoCreado = await atractivoResponse.json();
+        // Establecer el mensaje de éxito
+      mensaje = `Atractivo "${atractivoCreado.nombre}" agregado correctamente con ID: ${atractivoCreado.id}`;
+      // Redirigir a la página de administración de gestión después de un breve retraso
+      return Astro.redirect('/admin/gestion');
+    }
+    else if (accion === 'crear_empresa') {
+      // Crear nueva empresa
+      const empresaData = {
+        nombre: formData.get('empresa_nombre'),
+        descripcion: formData.get('empresa_descripcion'),
+        email: formData.get('empresa_email'),
+        telefono: formData.get('empresa_telefono'),
+        sitio_web: formData.get('empresa_sitio_web'),
+        direccion: formData.get('empresa_direccion'),
+        distrito: formData.get('empresa_distrito'),
+        latitud: parseFloat(formData.get('empresa_latitud')?.toString() || '0'),
+        longitud: parseFloat(formData.get('empresa_longitud')?.toString() || '0'),
+        img_url: formData.get('empresa_img_url'),
+        categoria_id: formData.get('empresa_categoria_id')
+      };
+      
+      const empresaResponse = await apiFetch('/empresas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(empresaData)
+      });
+      
+      if (!empresaResponse.ok) {
+        throw new Error('Error al crear la empresa');
+      }
+        const nuevaEmpresa = await empresaResponse.json();
+        // Usar redirección en lugar de setTimeout
+      return Astro.redirect(`/admin/gestion-nuevo?paso=2&empresa_id=${nuevaEmpresa.id}`);
+    }
+  } catch (err: any) {
+    console.error('Error:', err);
+    error = err.message || "Error al procesar la solicitud";
+  }
+}
+
+// Determinar el paso actual
+const paso = Astro.url.searchParams.get('paso') || '1';
+const empresa_id = Astro.url.searchParams.get('empresa_id') || '';
+
+// Si estamos en el paso 2 y tenemos una empresa_id, obtener los datos de la empresa
+let empresaActual = null;
+if (paso === '2' && empresa_id) {
+  try {    const empresaResponse = await apiFetch(`/empresas/${empresa_id}`);
+    if (empresaResponse.ok) {
+      empresaActual = await empresaResponse.json();
+      // Si acabamos de crear la empresa (no hay mensaje de error), mostrar mensaje de éxito
+      if (!error && !mensaje) {
+        // Verificar si la empresa fue recién creada o seleccionada de las existentes
+        const accionPrevia = Astro.url.searchParams.get('accion') || '';
+        const accionMensaje = accionPrevia === 'seleccionada' ? 'cargada' : 'creada';
+        mensaje = `Empresa "${empresaActual.nombre}" ${accionMensaje} correctamente. Ahora complete los datos del atractivo.`;
+      }
+    }
+  } catch (error) {
+    console.error('Error al obtener datos de la empresa:', error);
+  }
+}
+---
+
+<link rel="stylesheet" href="/src/style/atractivos-nuevo.css">
+
+<AdminPanel menu={AdminMenu}>
+    <div class="admin-content">
+      <h1>Agregar nuevo atractivo turístico</h1>
+        {mensaje && <div class="mensaje mensaje-exito">
+        {mensaje}
+        <div class="mensaje-acciones">          <a href="/admin/gestion" class="btn-primario">Ver lista de gestión</a>
+          <a href="/admin/gestion-nuevo" class="btn-secundario">Agregar otro atractivo</a>
+        </div>
+      </div>}
+      {error && <div class="mensaje mensaje-error">{error}</div>}
+      
+      <!-- Indicador de pasos -->
+      <div class="pasos-container">
+        <div class={`paso ${paso === '1' ? 'activo' : ''}`}>
+          <span class="paso-numero">1</span>
+          <span class="paso-texto">Seleccionar o crear empresa</span>
+        </div>
+        <div class="paso-linea"></div>
+        <div class={`paso ${paso === '2' ? 'activo' : ''}`}>
+          <span class="paso-numero">2</span>
+          <span class="paso-texto">Datos del atractivo</span>
+        </div>
+      </div>
+      
+      {paso === '1' && (
+        <div class="paso-contenido">
+          <div class="modo-selector">
+            <h3>¿El atractivo pertenece a una empresa existente?</h3>
+            <div class="modo-botones">
+              <button id="btn-empresa-existente" class="btn-modo active">Seleccionar empresa existente</button>
+              <button id="btn-empresa-nueva" class="btn-modo">Crear nueva empresa</button>
+            </div>
+          </div>
+          
+          <!-- Selector de empresa existente -->
+          <div id="empresa-existente-section">
+            <div class="form-section">
+              <h3>Seleccionar empresa</h3>
+              <div class="empresas-grid">
+                {empresas.map((empresa: any) => (
+                  <div class="empresa-card" data-id={empresa.id} data-nombre={empresa.nombre} 
+                       data-lat={empresa.latitud} data-lng={empresa.longitud} data-dir={empresa.direccion}>
+                    <h4>{empresa.nombre}</h4>
+                    <p class="empresa-categoria">{obtenerNombreCategoria(empresa.categoria_id)}</p>
+                    <p class="empresa-direccion">{empresa.direccion}</p>
+                  </div>
+                ))}
+              </div>
+              <div id="empresa-seleccionada" class="hidden">
+                <h4>Empresa seleccionada:</h4>
+                <p id="empresa-nombre-display"></p>
+              </div>
+                <div class="paso-botones">
+                <button id="btn-siguiente-paso1" class="btn-nuevo disabled">Siguiente</button>
+                <a href="/admin/gestion" class="btn-cancelar">Cancelar</a>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Formulario de nueva empresa -->
+          <div id="empresa-nueva-section" class="hidden">
+            <form method="POST" class="form-empresa">
+              <input type="hidden" name="accion" value="crear_empresa">
+              <div class="form-section">
+                <h3>Datos de la nueva empresa</h3>
+                <div class="form-row">
+                  <label>
+                    Nombre:
+                    <input type="text" name="empresa_nombre" required>
+                  </label>
+                  <label>
+                    Categoría:
+                    <select name="empresa_categoria_id" required>
+                      <option value="">Seleccionar categoría</option>
+                      {categorias.map((categoria: any) => (
+                        <option value={categoria.id}>{categoria.nombre}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Imagen:
+                  <div class="imagen-upload-container">
+                    <input type="file" id="empresa-imagen-file" accept="image/*" style="display: none;">
+                    <input type="url" name="empresa_img_url" id="empresa-img-url-input" placeholder="URL de la imagen" readonly>
+                    <button type="button" id="btn-subir-imagen-empresa" class="btn-upload">Subir Imagen</button>
+                    <div id="upload-status-empresa" class="upload-status"></div>
+                  </div>
+                  <small>Haz clic en "Subir Imagen" para seleccionar y subir una imagen a ImgBB automáticamente</small>
+                </label>
+                <label>
+                  Descripción:
+                  <textarea name="empresa_descripcion" rows="3" required></textarea>
+                </label>
+                <div class="form-row">
+                  <label>
+                    Email:
+                    <input type="email" name="empresa_email" required>
+                  </label>
+                  <label>
+                    Teléfono:
+                    <input type="tel" name="empresa_telefono" required>
+                  </label>
+                </div>
+                <label>
+                  Sitio web:
+                  <input type="url" name="empresa_sitio_web">
+                </label>
+                <label>
+                  Dirección:
+                  <input type="text" name="empresa_direccion" required>
+                </label>
+                <label>
+                  Distrito:
+                  <input type="text" name="empresa_distrito" required placeholder="Distrito">
+                </label>
+                <div class="form-row">
+                  <label>
+                    Latitud:
+                    <input type="number" step="0.000001" name="empresa_latitud" required>
+                  </label>
+                  <label>
+                    Longitud:
+                    <input type="number" step="0.000001" name="empresa_longitud" required>
+                  </label>
+                </div>
+                  <div class="paso-botones">
+                  <button type="submit" class="btn-nuevo">Continuar</button>
+                  <a href="/admin/gestion" class="btn-cancelar">Cancelar</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {paso === '2' && (
+        <div class="paso-contenido">
+          <form method="POST" class="form-atractivo" id="form-atractivo">
+            <input type="hidden" name="accion" value="crear_atractivo">
+            <input type="hidden" name="empresa_id" value={empresa_id}>
+            
+            {empresaActual && (
+              <div class="empresa-seleccionada-info">
+                <h3>Empresa seleccionada</h3>
+                <div class="empresa-info">
+                  <h4>{empresaActual.nombre}</h4>
+                  <p><strong>Categoría:</strong> {obtenerNombreCategoria(empresaActual.categoria_id)}</p>
+                  <p><strong>Dirección:</strong> {empresaActual.direccion}</p>
+                </div>
+              </div>
+            )}
+            
+            <!-- Datos del atractivo -->
+            <div class="form-section">
+              <h3>Datos del atractivo</h3>
+              <label>
+                Nombre:
+                <input type="text" name="nombre" required>
+              </label>
+              <label>
+                Descripción:
+                <textarea name="descripcion" rows="3" required></textarea>
+              </label>
+              <label>
+                Categoría:
+                <select name="categoria_id" required>
+                  <option value="">-- Seleccionar categoría --</option>
+                  {categorias.map((cat: any) => (
+                    <option value={cat.id}>{cat.nombre}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Imagen:
+                <div class="imagen-upload-container">
+                  <input type="file" id="atractivo-imagen-file" accept="image/*" style="display: none;">
+                  <input type="url" name="img_url" id="atractivo-img-url-input" placeholder="URL de la imagen" readonly>
+                  <button type="button" id="btn-subir-imagen-atractivo" class="btn-upload">Subir Imagen</button>
+                  <div id="upload-status-atractivo" class="upload-status"></div>
+                </div>
+                <small>Haz clic en "Subir Imagen" para seleccionar y subir una imagen a ImgBB automáticamente</small>
+              </label>
+              <div class="form-row">
+                <label>
+                  Latitud:
+                  <input type="number" step="0.000001" name="latitud" id="atractivo-latitud" required 
+                         value={empresaActual?.latitud || ''}>
+                </label>
+                <label>
+                  Longitud:
+                  <input type="number" step="0.000001" name="longitud" id="atractivo-longitud" required
+                         value={empresaActual?.longitud || ''}>
+                </label>
+              </div>
+              <label>
+                Dirección:
+                <input type="text" name="direccion" id="atractivo-direccion" required
+                       value={empresaActual?.direccion || ''}>
+              </label>
+              <label>
+                Distrito:
+                <input type="text" name="distrito" id="atractivo-distrito" required placeholder="Distrito" value={empresaActual?.distrito || ''}>
+              </label>
+            </div>
+            
+            <div class="form-atractivo-buttons">
+              <button type="submit" class="btn-nuevo">Guardar</button>
+              <a href="/admin/gestion-nuevo" class="btn-cancelar">Volver</a>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+</AdminPanel>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Solo ejecutar este código en el paso 1
+    if (window.location.href.includes('paso=2')) return;
+    
+    // Referencias a elementos
+    const btnEmpresaExistente = document.getElementById('btn-empresa-existente');
+    const btnEmpresaNueva = document.getElementById('btn-empresa-nueva');
+    const empresaExistenteSection = document.getElementById('empresa-existente-section');
+    const empresaNuevaSection = document.getElementById('empresa-nueva-section');
+    const empresaSeleccionada = document.getElementById('empresa-seleccionada');
+    const empresaNombreDisplay = document.getElementById('empresa-nombre-display');    const empresaCards = document.querySelectorAll('.empresa-card');
+    const btnSiguientePaso1 = document.getElementById('btn-siguiente-paso1');
+    
+    let selectedEmpresaId: string | null = null;
+    
+    // Cambiar entre modos
+    btnEmpresaExistente?.addEventListener('click', () => {
+      btnEmpresaExistente.classList.add('active');
+      btnEmpresaNueva?.classList.remove('active');
+      empresaExistenteSection?.classList.remove('hidden');
+      empresaNuevaSection?.classList.add('hidden');
+    });
+    
+    btnEmpresaNueva?.addEventListener('click', () => {
+      btnEmpresaNueva.classList.add('active');
+      btnEmpresaExistente?.classList.remove('active');
+      empresaNuevaSection?.classList.remove('hidden');
+      empresaExistenteSection?.classList.add('hidden');
+    });
+    
+    // Seleccionar empresa
+    empresaCards.forEach(card => {
+      card.addEventListener('click', () => {
+        // Quitar selección previa
+        empresaCards.forEach(c => c.classList.remove('selected'));
+        
+        // Aplicar nueva selección
+        card.classList.add('selected');
+        
+        // Guardar ID
+        selectedEmpresaId = card.getAttribute('data-id');
+        
+        // Mostrar empresa seleccionada
+        if (empresaNombreDisplay) {
+          empresaNombreDisplay.textContent = card.getAttribute('data-nombre');
+        }
+        empresaSeleccionada?.classList.remove('hidden');
+        
+        // Habilitar botón de siguiente
+        btnSiguientePaso1?.classList.remove('disabled');
+      });
+    });      // Botón para ir al siguiente paso
+    btnSiguientePaso1?.addEventListener('click', () => {
+      if (selectedEmpresaId) {
+        window.location.href = `/admin/gestion-nuevo?paso=2&empresa_id=${selectedEmpresaId}&accion=seleccionada`;
+      } else {
+        alert('Por favor selecciona una empresa');
+      }
+    });
+  });
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    // Elementos del DOM
+    // ...existing code...
+
+    // Prevenir clics múltiples en botones y envíos de formularios
+    const preventMultipleSubmits = () => {
+      // Prevenir clics múltiples en botones tipo submit
+      const submitButtons = document.querySelectorAll('button[type="submit"]');
+      submitButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          if (this.classList.contains('procesando')) {
+            e.preventDefault();
+            return false;
+          }
+          
+          this.classList.add('procesando');
+          const textoOriginal = this.textContent || '';
+          this.dataset.textoOriginal = textoOriginal;
+          this.textContent = 'Procesando...';
+          this.style.opacity = '0.7';
+          
+          // No deshabilitar pointer-events completamente para permitir el envío del formulario
+          // this.style.pointerEvents = 'none';
+          
+          // Timeout de seguridad
+          setTimeout(() => {
+            if (this.classList.contains('procesando')) {
+              this.classList.remove('procesando');
+              this.textContent = textoOriginal;
+              this.style.opacity = '';
+              // this.style.pointerEvents = '';
+            }
+          }, 10000); // Aumentar a 10 segundos
+        });
+      });
+      
+      // Prevenir envíos múltiples de formularios
+      const forms = document.querySelectorAll('form');
+      forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          if (this.classList.contains('enviando')) {
+            e.preventDefault();
+            return false;
+          }
+          
+          this.classList.add('enviando');
+          
+          // No vamos a detener el envío del formulario, solo evitar envíos múltiples
+          // El formulario se procesará normalmente
+          
+          // Timeout de seguridad para resetear el estado en caso de error
+          setTimeout(() => {
+            if (this.classList.contains('enviando')) {
+              this.classList.remove('enviando');
+            }
+          }, 10000); // Aumentar el timeout a 10 segundos para dar más tiempo al servidor
+        });
+      });
+      
+      // Prevenir clics múltiples en botones de navegación importantes
+      const actionButtons = document.querySelectorAll('.btn-siguiente, .btn-guardar, .btn-nuevo');
+      actionButtons.forEach(button => {
+        // No aplicar a botones tipo submit, ya que esos se manejan en el bloque anterior
+        if (button.getAttribute('type') === 'submit') {
+          return;
+        }
+        
+        button.addEventListener('click', function(e) {
+          if (this.classList.contains('procesando') || this.classList.contains('disabled')) {
+            e.preventDefault();
+            return false;
+          }
+          
+          if (!this.getAttribute('href')?.includes('#')) { // No aplicar a anclas dentro de la misma página
+            this.classList.add('procesando');
+            const textoOriginal = this.textContent || '';
+            this.textContent = 'Procesando...';
+            this.style.opacity = '0.7';
+            
+            // Permitir que el clic se procese
+            // this.style.pointerEvents = 'none';
+            
+            // Timeout de seguridad
+            setTimeout(() => {
+              this.classList.remove('procesando');
+              this.textContent = textoOriginal;
+              this.style.opacity = '';
+              // this.style.pointerEvents = '';
+            }, 10000);
+          }
+        });
+      });
+    };
+    
+    // Ejecutar la protección contra clics múltiples
+    preventMultipleSubmits();
+  });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Funcionalidad para subir imágenes de atractivos a ImgBB
+        const API_KEY = 'a0d050547832d68853fc714d2b5b41ba'; // Clave API de ImgBB (debe ser reemplazada por una real)
+        const btnSubirImagenAtractivo = document.getElementById('btn-subir-imagen-atractivo');
+        const atractivoImagenFile = document.getElementById('atractivo-imagen-file');
+        const atractivoImgUrlInput = document.getElementById('atractivo-img-url-input');
+        const uploadStatusAtractivo = document.getElementById('upload-status-atractivo');
+
+        if (btnSubirImagenAtractivo && atractivoImagenFile && atractivoImgUrlInput && uploadStatusAtractivo) {
+            btnSubirImagenAtractivo.addEventListener('click', () => {
+                atractivoImagenFile.click();
+            });
+
+            atractivoImagenFile.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validar tipo de archivo
+                if (!file.type.startsWith('image/')) {
+                    uploadStatusAtractivo.innerHTML = '<span class="error">Por favor selecciona una imagen válida</span>';
+                    return;
+                }
+
+                // Validar tamaño (máximo 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    uploadStatusAtractivo.innerHTML = '<span class="error">La imagen es muy grande. Máximo 5MB</span>';
+                    return;
+                }
+
+                try {
+                    uploadStatusAtractivo.innerHTML = '<span class="loading">Subiendo imagen...</span>';
+                    btnSubirImagenAtractivo.disabled = true;
+                    btnSubirImagenAtractivo.textContent = 'Subiendo...';
+
+                    // Crear FormData para enviar a ImgBB
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    // Subir a ImgBB
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Extraer la URL de la imagen
+                        const imageUrl = result.data.url;
+                        atractivoImgUrlInput.value = imageUrl;
+                        uploadStatusAtractivo.innerHTML = '<span class="success">✓ Imagen subida exitosamente</span>';
+                        
+                        // Marcar el formulario como modificado
+                        const changeEvent = new Event('change', { bubbles: true });
+                        atractivoImgUrlInput.dispatchEvent(changeEvent);
+                    } else {
+                        throw new Error(result.error?.message || 'Error al subir la imagen');
+                    }
+
+                } catch (error) {
+                    console.error('Error al subir imagen:', error);
+                    uploadStatusAtractivo.innerHTML = '<span class="error">Error al subir la imagen. Inténtalo de nuevo.</span>';
+                } finally {
+                    btnSubirImagenAtractivo.disabled = false;
+                    btnSubirImagenAtractivo.textContent = 'Subir Imagen';
+                    // Limpiar el input file para permitir subir la misma imagen nuevamente si es necesario
+                    atractivoImagenFile.value = '';
+                }
+            });
+        }
+
+        // También agregar funcionalidad para empresa si está en el mismo formulario
+        const btnSubirImagenEmpresa = document.getElementById('btn-subir-imagen-empresa');
+        const empresaImagenFile = document.getElementById('empresa-imagen-file');
+        const empresaImgUrlInput = document.getElementById('empresa-img-url-input');
+        const uploadStatusEmpresa = document.getElementById('upload-status-empresa');
+
+        if (btnSubirImagenEmpresa && empresaImagenFile && empresaImgUrlInput && uploadStatusEmpresa) {
+            btnSubirImagenEmpresa.addEventListener('click', () => {
+                empresaImagenFile.click();
+            });
+
+            empresaImagenFile.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validar tipo de archivo
+                if (!file.type.startsWith('image/')) {
+                    uploadStatusEmpresa.innerHTML = '<span class="error">Por favor selecciona una imagen válida</span>';
+                    return;
+                }
+
+                // Validar tamaño (máximo 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    uploadStatusEmpresa.innerHTML = '<span class="error">La imagen es muy grande. Máximo 5MB</span>';
+                    return;
+                }
+
+                try {
+                    uploadStatusEmpresa.innerHTML = '<span class="loading">Subiendo imagen...</span>';
+                    btnSubirImagenEmpresa.disabled = true;
+                    btnSubirImagenEmpresa.textContent = 'Subiendo...';
+
+                    // Crear FormData para enviar a ImgBB
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    // Subir a ImgBB
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Extraer la URL de la imagen
+                        const imageUrl = result.data.url;
+                        empresaImgUrlInput.value = imageUrl;
+                        uploadStatusEmpresa.innerHTML = '<span class="success">✓ Imagen subida exitosamente</span>';
+                        
+                        // Marcar el formulario como modificado
+                        const changeEvent = new Event('change', { bubbles: true });
+                        empresaImgUrlInput.dispatchEvent(changeEvent);
+                    } else {
+                        throw new Error(result.error?.message || 'Error al subir la imagen');
+                    }
+
+                } catch (error) {
+                    console.error('Error al subir imagen:', error);
+                    uploadStatusEmpresa.innerHTML = '<span class="error">Error al subir la imagen. Inténtalo de nuevo.</span>';
+                } finally {
+                    btnSubirImagenEmpresa.disabled = false;
+                    btnSubirImagenEmpresa.textContent = 'Subir Imagen';
+                    // Limpiar el input file para permitir subir la misma imagen nuevamente si es necesario
+                    empresaImagenFile.value = '';
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .imagen-upload-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .imagen-upload-container input[type="url"] {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .btn-upload {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .btn-upload:hover:not(:disabled) {
+        background: #218838;
+    }
+
+    .btn-upload:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .upload-status {
+        width: 100%;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    .upload-status .success {
+        color: #28a745;
+    }
+
+    .upload-status .error {
+        color: #dc3545;
+    }
+
+    .upload-status .loading {
+        color: #007bff;
+    }
+</style>

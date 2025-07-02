@@ -1,191 +1,216 @@
 ---
-const lugares = [
-  {
-    nombre: "Cañón del Atuel",
-    descripcion: "Paisajes únicos y deportes de aventura.",
-    imagen: "/carrusel/canon-atuel.jpg"
-  },
-  {
-    nombre: "Valle Grande",
-    descripcion: "Ideal para rafting y actividades acuáticas.",
-    imagen: "/carrusel/valle-grande.jpg"
-  },
-  {
-    nombre: "Bodega La Abeja",
-    descripcion: "Historia y vinos de excelencia.",
-    imagen: "/carrusel/bodega-abeja.jpg"
-  },
-  {
-    nombre: "Plaza San Martín",
-    descripcion: "El corazón de la ciudad.",
-    imagen: "/carrusel/plaza-san-martin.jpg"
-  }
-];
+// Importar estilos CSS
 ---
 
-<section class="recomendados">
-  <h3>Lugares Recomendados</h3>
-  <div class="carousel-wrapper">
-    <button class="carousel-arrow left" id="prevLugar" aria-label="Anterior">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="carousel-item" id="carouselItem">
-      <img src={lugares[0].imagen} alt={lugares[0].nombre} id="carouselImg" />
-      <h4 id="carouselNombre">{lugares[0].nombre}</h4>
-      <p id="carouselDesc">{lugares[0].descripcion}</p>
+<link rel="stylesheet" href="/src/style/carousel.css">
+
+<section class="recomendados" role="region" aria-labelledby="hero-title">
+    <div class="hero-text">
+        <h1 id="hero-title" class="hero-title">Turify</h1>
+        <div class="hero-divider" aria-hidden="true"></div>
+        <p class="hero-subtitle">Viví San Rafael</p>
     </div>
-    <button class="carousel-arrow right" id="nextLugar" aria-label="Siguiente">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-  </div>
+    <div class="carousel-wrapper" role="region" aria-label="Carrusel de atractivos turísticos">
+        <button
+            class="carousel-arrow left"
+            id="prevLugar"
+            aria-label="Anterior imagen"
+            aria-controls="carouselTrack">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                ><polyline points="15 18 9 12 15 6"></polyline></svg
+            >
+        </button>
+
+        <div class="carousel-track" id="carouselTrack" role="list" aria-live="polite" aria-label="Lista de atractivos turísticos">
+            <!-- Cada tarjeta -->
+            <div class="carousel-card" role="listitem" aria-label="Laberinto Borges">
+                <img
+                    src="/carrusel/LaberintoBorges.jpg"
+                    alt="Laberinto Borges - Atractivo turístico de San Rafael"
+                    loading="lazy"
+                />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="Viñedos Bianchi">
+                <img src="/carrusel/bodega.webp" alt="Viñedos Bianchi - Bodega de San Rafael" loading="lazy" />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="Bodega La Abeja">
+                <img src="/carrusel/naturaleza.jpg" alt="Bodega La Abeja - Paisaje natural de San Rafael" loading="lazy" />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="Los Reyunos">
+                <img src="/carrusel/los_reyunos2.webp" alt="Los Reyunos - Embalse y paisaje natural" loading="lazy" />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="Valle Grande">
+                <img src="/carrusel/Turismo-86.jpg" alt="Valle Grande - Paisaje montañoso de San Rafael" loading="lazy" />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="El Tigre">
+                <img src="/carrusel/el_tigre1.webp" alt="El Tigre - Atractivo turístico de San Rafael" loading="lazy" />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="Vajilla Premium">
+                <img
+                    src="/carrusel/vajilla-premium.webp"
+                    alt="Vajilla Premium - Artesanías de San Rafael"
+                    loading="lazy"
+                />
+            </div>
+            <div class="carousel-card" role="listitem" aria-label="Parque de los Niños">
+                <img
+                    src="/carrusel/ParquedelosNinos.jpg"
+                    alt="Parque de los Niños - Espacio recreativo de San Rafael"
+                    loading="lazy"
+                />
+            </div>
+
+            <button
+                class="carousel-arrow right"
+                id="nextLugar"
+                aria-label="Siguiente imagen"
+                aria-controls="carouselTrack">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    ><polyline points="9 18 15 12 9 6"></polyline></svg
+                >
+            </button>
+        </div>
+    </div>
 </section>
 
 <script type="text/javascript">
-  document.addEventListener('DOMContentLoaded', function () {
-    const lugares = [
-      {
-        nombre: "Cañón del Atuel",
-        descripcion: "Paisajes únicos y deportes de aventura.",
-        imagen: "/carrusel/canon-atuel.jpg"
-      },
-      {
-        nombre: "Valle Grande",
-        descripcion: "Ideal para rafting y actividades acuáticas.",
-        imagen: "/carrusel/valle-grande.jpg"
-      },
-      {
-        nombre: "Bodega La Abeja",
-        descripcion: "Historia y vinos de excelencia.",
-        imagen: "/carrusel/bodega-abeja.jpg"
-      },
-      {
-        nombre: "Plaza San Martín",
-        descripcion: "El corazón de la ciudad.",
-        imagen: "/carrusel/plaza-san-martin.jpg"
-      }
-    ];
-    let current = 0;
-    const img = document.getElementById('carouselImg');
-    const nombre = document.getElementById('carouselNombre');
-    const desc = document.getElementById('carouselDesc');
+    document.addEventListener("DOMContentLoaded", function () {
+        const cards = document.querySelectorAll(".carousel-card");
+        const prevButton = document.getElementById("prevLugar");
+        const nextButton = document.getElementById("nextLugar");
+        let current = 0;
+        let autoSlideInterval;
 
-    const updateSlide = () => {
-      img.classList.remove('fade-in');
-      void img.offsetWidth; // trigger reflow
-      img.classList.add('fade-in');
-      img.src = lugares[current].imagen;
-      img.alt = lugares[current].nombre;
-      nombre.textContent = lugares[current].nombre;
-      desc.textContent = lugares[current].descripcion;
-    };
+        const updateClasses = () => {
+            cards.forEach((card, i) => {
+                // Remover todas las clases primero
+                card.classList.remove("active", "prev", "next");
 
-    document.getElementById('prevLugar').onclick = () => {
-      current = (current - 1 + lugares.length) % lugares.length;
-      updateSlide();
-    };
-    document.getElementById('nextLugar').onclick = () => {
-      current = (current + 1) % lugares.length;
-      updateSlide();
-    };
-  });
+                // Forzar un reflow para asegurar que las clases se apliquen correctamente
+                card.offsetHeight;
+
+                // Aplicar las nuevas clases
+                if (i === current) {
+                    card.classList.add("active");
+                    card.setAttribute("aria-hidden", "false");
+                    // Actualizar aria-label para indicar que es la imagen activa
+                    const img = card.querySelector("img");
+                    if (img) {
+                        const currentAlt = img.alt;
+                        card.setAttribute("aria-label", `${currentAlt} (imagen actual)`);
+                    }
+                } else if (i === (current - 1 + cards.length) % cards.length) {
+                    // Imagen anterior
+                    card.classList.add("prev");
+                    card.setAttribute("aria-hidden", "true");
+                    const img = card.querySelector("img");
+                    if (img) {
+                        card.setAttribute("aria-label", img.alt);
+                    }
+                } else if (i === (current + 1) % cards.length) {
+                    // Imagen siguiente
+                    card.classList.add("next");
+                    card.setAttribute("aria-hidden", "true");
+                    const img = card.querySelector("img");
+                    if (img) {
+                        card.setAttribute("aria-label", img.alt);
+                    }
+                } else {
+                    // Todas las demás imágenes no tienen clase especial
+                    card.setAttribute("aria-hidden", "true");
+                    const img = card.querySelector("img");
+                    if (img) {
+                        card.setAttribute("aria-label", img.alt);
+                    }
+                }
+            });
+        };
+
+        const nextSlide = () => {
+            current = (current + 1) % cards.length;
+            updateClasses();
+        };
+
+        const prevSlide = () => {
+            current = (current - 1 + cards.length) % cards.length;
+            updateClasses();
+        };
+
+        const startAutoSlide = () => {
+            // Limpiar cualquier intervalo existente antes de crear uno nuevo
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+            }
+            autoSlideInterval = setInterval(nextSlide, 15000);
+        };
+
+        const stopAutoSlide = () => {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = null;
+            }
+        };
+
+        // Event listeners para botones
+        prevButton.onclick = () => {
+            stopAutoSlide();
+            prevSlide();
+            startAutoSlide(); // Reiniciar el auto-slide
+        };
+
+        nextButton.onclick = () => {
+            stopAutoSlide();
+            nextSlide();
+            startAutoSlide(); // Reiniciar el auto-slide
+        };
+
+        // Navegación con teclado
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                stopAutoSlide();
+                prevSlide();
+                startAutoSlide();
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                stopAutoSlide();
+                nextSlide();
+                startAutoSlide();
+            }
+        });
+
+        // Pausar auto-slide en hover
+        const carouselWrapper = document.querySelector(".carousel-wrapper");
+        carouselWrapper.addEventListener("mouseenter", stopAutoSlide);
+        carouselWrapper.addEventListener("mouseleave", startAutoSlide);
+
+        // Pausar auto-slide cuando la página no está visible
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                stopAutoSlide();
+            } else {
+                startAutoSlide();
+            }
+        });
+
+        // Inicializar
+        updateClasses();
+        startAutoSlide();
+    });
 </script>
-
-<style>
-.recomendados {
-  margin: 3rem auto;
-  text-align: center;
-}
-.recomendados h3 {
-  color: #2e6c4d;
-  margin-bottom: 1.5rem;
-  font-size: 2.2rem;
-  letter-spacing: 1px;
-  font-weight: 700;
-}
-.carousel-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-.carousel-arrow {
-  background: #97c0a5;
-  color: #2e6c4d;
-  border: none;
-  border-radius: 50%;
-  width: 52px;
-  height: 52px;
-  box-shadow: 0 4px 12px rgba(46,108,77,0.12);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.25s, transform 0.2s;
-}
-.carousel-arrow:hover {
-  background: #2e6c4d;
-  color: #fff;
-  transform: scale(1.1);
-}
-.carousel-arrow svg {
-  stroke: currentColor;
-}
-.carousel-item {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.08);
-  width: 340px;
-  max-width: 95vw;
-  padding: 1.5rem;
-  text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.carousel-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
-}
-.carousel-item img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 1rem;
-  background: #eaf7f0;
-  box-shadow: 0 2px 8px rgba(46, 108, 77, 0.12);
-  transition: opacity 0.3s ease;
-}
-.fade-in {
-  animation: fade 0.4s ease-in-out;
-}
-@keyframes fade {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
-}
-.carousel-item h4 {
-  margin: 0.6rem 0 0.3rem;
-  color: #2e6c4d;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-.carousel-item p {
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-@media (max-width: 600px) {
-  .carousel-wrapper {
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  .carousel-arrow {
-    width: 44px;
-    height: 44px;
-  }
-  .carousel-item {
-    width: 90vw;
-    padding: 1rem;
-  }
-}
-</style>

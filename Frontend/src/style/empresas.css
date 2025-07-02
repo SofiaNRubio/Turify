@@ -1,0 +1,107 @@
+@import url('./global.css');
+@import url('./empresas_cards.css');
+
+/* Página Empresas */
+.empresas-section {
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #f6f3ee 0%, #eef7f3 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header h1 {
+    color: #228B22;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-ver-todas {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #228B22, #32CD32);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-ver-todas:hover {
+    background: linear-gradient(135deg, #006400, #228B22);
+    transform: translateY(-2px);
+}
+
+.no-empresas {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(34, 139, 34, 0.08);
+}
+
+.no-empresas h3 {
+    color: #228B22;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.no-empresas p {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.btn-volver {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #228B22, #32CD32);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-volver:hover {
+    background: linear-gradient(135deg, #006400, #228B22);
+    transform: translateY(-2px);
+}
+
+/* Media queries para empresas */
+@media (max-width: 768px) {
+    .empresas-section {
+        padding: 1.5rem 1rem;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+}
