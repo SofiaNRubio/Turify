@@ -2,6 +2,8 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/modal.css";
+import "../../style/form-atractivo.css";
 
 // Obtener el ID de la ruta a editar
 const { searchParams } = Astro.url;
@@ -42,21 +44,11 @@ try {
     empresas = await response.json();
   } else {
     console.error('Error al cargar empresas:', response.statusText);
-    // Usar datos de respaldo en caso de error
-    empresas = [
-      { id: 'emp1', nombre: "Bodega Los Toneles" },
-      { id: 'emp2', nombre: "Museo Regional" },
-      { id: 'emp3', nombre: "Hotel Sol Andino" },
-    ];
+    empresas = [];
   }
 } catch (error) {
   console.error('Error al conectar con la API de empresas:', error);
-  // Usar datos de respaldo en caso de error
-  empresas = [
-    { id: 'emp1', nombre: "Bodega Los Toneles" },
-    { id: 'emp2', nombre: "Museo Regional" },
-    { id: 'emp3', nombre: "Hotel Sol Andino" },
-  ];
+  empresas = [];
 }
 
 // Obtener todos los atractivos disponibles
@@ -67,30 +59,17 @@ try {
     todosAtractivos = await response.json();
   } else {
     console.error('Error al cargar atractivos:', response.statusText);
-    // Usar datos de respaldo en caso de error
-    todosAtractivos = [
-      { id: 'atr1', nombre: "Viñedos Antiguos", descripcion: "Viñedos con más de 100 años" },
-      { id: 'atr2', nombre: "Mirador de la Montaña", descripcion: "Vista panorámica de la ciudad" },
-      { id: 'atr3', nombre: "Plaza Principal", descripcion: "Centro histórico con arquitectura colonial" },
-    ];
+    todosAtractivos = [];
   }
 } catch (error) {
   console.error('Error al conectar con la API de atractivos:', error);
-  // Usar datos de respaldo en caso de error
-  todosAtractivos = [
-    { id: 'atr1', nombre: "Viñedos Antiguos", descripcion: "Viñedos con más de 100 años" },
-    { id: 'atr2', nombre: "Mirador de la Montaña", descripcion: "Vista panorámica de la ciudad" },
-    { id: 'atr3', nombre: "Plaza Principal", descripcion: "Centro histórico con arquitectura colonial" },
-  ];
+  todosAtractivos = [];
 }
 
 // Separar los atractivos seleccionados y disponibles
 const atractivosSeleccionadosIds = rutaAtractivos.map(a => a.id);
 const atractivosDisponibles = todosAtractivos.filter(a => !atractivosSeleccionadosIds.includes(a.id));
 ---
-
-<link rel="stylesheet" href="/src/style/modal.css">
-<link rel="stylesheet" href="/src/style/form-atractivo.css">
 
 <AdminPanel menu={AdminMenu}>
   <div class="admin-content">

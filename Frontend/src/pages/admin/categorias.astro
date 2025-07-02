@@ -3,6 +3,8 @@ import AdminPanel from "../../components/AdminPanel.astro";
 import TableAdmin from "../../components/TableAdmin.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/categorias.css";
+import "../../style/modal.css";
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
@@ -24,12 +26,7 @@ if (response.ok) {
   categorias = await response.json();
 } else {
   console.error('Error al cargar categorías:', response.statusText);
-  // Usar datos de respaldo en caso de error
-  categorias = [
-    { id: 'cat1', nombre: "Naturaleza" },
-    { id: 'cat2', nombre: "Gastronomía" },
-    { id: 'cat3', nombre: "Cultural" },
-  ];
+  categorias = [];
 }
 
 // Definir columnas para la tabla
@@ -39,14 +36,14 @@ const columnas = [
 ];
 ---
 
-<link rel="stylesheet" href="/src/style/categorias.css">
-<link rel="stylesheet" href="/src/style/modal.css">
-
 <AdminPanel menu={AdminMenu}>
   <div class="admin-content">
     <div class="header">
       <h1>Categorías</h1>
-      <a href="/admin/categorias-nueva" class="btn-nuevo">+ Nueva Categoría</a>
+      <a href="/admin/categorias-nueva" class="btn btn-nuevo">
+        <span class="btn-icon">+</span>
+        <span class="btn-text">Nueva Categoría</span>
+      </a>
     </div>
     
     <!-- Filtros -->
@@ -78,8 +75,14 @@ const columnas = [
             <tr>
               <td>{cat.id}</td>
               <td>{cat.nombre}</td>              <td class="acciones">
-                <button class="btn-editar" data-id={cat.id} data-nombre={cat.nombre}>Editar</button>
-                <button class="btn-eliminar" data-id={cat.id} data-nombre={cat.nombre}>Eliminar</button>
+                <button class="btn btn-editar" data-id={cat.id} data-nombre={cat.nombre} title="Editar esta categoría">
+                  <span class="btn-icon">✏️</span>
+                  <span class="btn-text">Editar</span>
+                </button>
+                <button class="btn btn-eliminar" data-id={cat.id} data-nombre={cat.nombre} title="Eliminar esta categoría">
+                  <span class="btn-icon">🗑️</span>
+                  <span class="btn-text">Eliminar</span>
+                </button>
               </td>
             </tr>
           ))
@@ -172,6 +175,20 @@ const columnas = [
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Función apiFetch para uso en el cliente
+    const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+      const API_URL = window.location.origin.includes('localhost') 
+        ? 'http://localhost:3000' 
+        : 'https://api.turify.com';
+      const url = endpoint.startsWith('http') ? endpoint : `${API_URL}/api${endpoint}`;
+      return fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+    };
     // Modal para nueva categoría
     const btnNuevo = document.querySelector('.btn-nuevo');    const modalNueva = document.getElementById('modal-nueva-categoria');
     const formNueva = document.getElementById('form-nueva-categoria');
@@ -239,7 +256,10 @@ const columnas = [
       const nombre = formData.get('nombre') as string;
       
       try {
-        const response = await apiFetch('POST', 'categorias', { nombre });
+        const response = await apiFetch('/categorias', {
+          method: 'POST',
+          body: JSON.stringify({ nombre })
+        });
         
         if (response.ok) {
           mostrarNotificacion('Éxito', 'Categoría creada correctamente');
@@ -280,7 +300,9 @@ const columnas = [
       if (!currentId) return;
       
       try {
-        const response = await apiFetch(`/categorias/${currentId}`);
+        const response = await apiFetch(`/categorias/${currentId}`, {
+          method: 'DELETE'
+        });
         
         if (response.ok) {
           mostrarNotificacion('Éxito', 'Categoría eliminada correctamente');
@@ -324,7 +346,10 @@ const columnas = [
       const nombre = formData.get('nombre') as string;
       
       try {
-        const response = await apiFetch(`/categorias/${currentId}`, { nombre });
+        const response = await apiFetch(`/categorias/${currentId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ nombre })
+        });
         
         if (response.ok) {
           mostrarNotificacion('Éxito', 'Categoría actualizada correctamente');

@@ -239,73 +239,89 @@ router.put("/:id", async (req, res) => {
 // Eliminar empresa por ID
 router.delete("/:id", async (req, res) => {
     const { id } = req.params;
+    console.log(`Solicitud de eliminación para empresa con ID: ${id}`);
 
     try {
-        // Identificar primero los atractivos relacionados con esta empresa
-        const atractivos = await db.execute({
-            sql: "SELECT id FROM atractivos WHERE empresa_id = ?",
+        // Verificar que la empresa existe
+        const empresaCheck = await db.execute({
+            sql: "SELECT id, nombre FROM empresas WHERE id = ?",
             args: [id],
         });
+        
+        if (empresaCheck.rows.length === 0) {
+            console.log(`Empresa con ID ${id} no encontrada en la base de datos`);
+            return res.status(404).json({ error: "Empresa no encontrada" });
+        }
+        
+        const nombreEmpresa = empresaCheck.rows[0].nombre;
+        console.log(`Eliminando empresa: ${nombreEmpresa} (ID: ${id})`);
+        
+        // Identificar primero los atractivos relacionados con esta empresa
+        const atractivos = await db.execute({
+            sql: "SELECT id, nombre FROM atractivos WHERE empresa_id = ?",
+            args: [id],
+        });
+        
+        console.log(`Encontrados ${atractivos.rows.length} atractivos asociados a esta empresa`);
 
         // Para cada atractivo, eliminar registros relacionados
         for (const atractivo of atractivos.rows) {
             const atractivoId = atractivo.id;
+            const atractivoNombre = atractivo.nombre;
+            console.log(`Procesando atractivo: ${atractivoNombre} (ID: ${atractivoId})`);
 
             // Eliminar referencias en rutas_atractivos
+            console.log(`  - Eliminando referencias en rutas_atractivos...`);
             await db.execute({
                 sql: "DELETE FROM rutas_atractivos WHERE atractivo_id = ?",
                 args: [atractivoId],
             });
 
             // Eliminar reseñas relacionadas
+            console.log(`  - Eliminando reseñas relacionadas...`);
             await db.execute({
                 sql: "DELETE FROM reseñas WHERE atractivo_id = ?",
                 args: [atractivoId],
             });
 
             // Eliminar favoritos relacionados
+            console.log(`  - Eliminando favoritos relacionados...`);
             await db.execute({
                 sql: "DELETE FROM favoritos WHERE atractivo_id = ?",
                 args: [atractivoId],
             });
 
-            // Eliminar imágenes relacionadas con el atractivo
-            // Esta línea se puede comentar ya que no existe tabla imagenes en el esquema
-            // await db.execute({
-            //     sql: "DELETE FROM imagenes WHERE entidad_tipo = 'atractivo' AND entidad_id = ?",
-            //     args: [atractivoId],
-            // });
-
             // Finalmente eliminar el atractivo
+            console.log(`  - Eliminando el atractivo...`);
             await db.execute({
                 sql: "DELETE FROM atractivos WHERE id = ?",
                 args: [atractivoId],
             });
+            console.log(`  - Atractivo eliminado correctamente`);
         }
 
-        // Eliminar imágenes relacionadas con la empresa
-        // Esta línea se puede comentar ya que no existe tabla imagenes en el esquema
-        // await db.execute({
-        //     sql: "DELETE FROM imagenes WHERE entidad_tipo = 'empresa' AND entidad_id = ?",
-        //     args: [id],
-        // });
-
         // Finalmente, eliminar la empresa
+        console.log(`Eliminando la empresa: ${nombreEmpresa}...`);
         const result = await db.execute({
             sql: "DELETE FROM empresas WHERE id = ?",
             args: [id],
         });
 
         if (result.rowsAffected === 0) {
+            console.log(`Error: Empresa con ID ${id} no pudo ser eliminada`);
             return res.status(404).json({ error: "Empresa no encontrada" });
         }
 
+        console.log(`Empresa "${nombreEmpresa}" (ID: ${id}) y sus ${atractivos.rows.length} atractivos eliminados exitosamente`);
         res.json({
-            mensaje: "Empresa y sus atractivos eliminados exitosamente",
+            mensaje: `Empresa "${nombreEmpresa}" y sus ${atractivos.rows.length} atractivos eliminados exitosamente`,
         });
     } catch (err) {
         console.error("Error al eliminar empresa:", err);
-        res.status(500).json({ error: "Error al eliminar empresa" });
+        res.status(500).json({ 
+            error: "Error al eliminar empresa",
+            detalle: err.message || "Error desconocido"
+        });
     }
 });
 /**

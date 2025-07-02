@@ -1,6 +1,9 @@
 ---
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
+import { apiFetch } from "../../utils/api";
+import "../../style/form-editar.css";
+import "../../style/modal.css";
 
 // Obtener el ID de la categoría de la URL
 const { searchParams } = Astro.url;
@@ -24,9 +27,6 @@ if (id) {
   }
 }
 ---
-
-<link rel="stylesheet" href="/src/style/form-editar.css">
-<link rel="stylesheet" href="/src/style/modal.css">
 
 <AdminPanel menu={AdminMenu}>
   <div class="admin-content">

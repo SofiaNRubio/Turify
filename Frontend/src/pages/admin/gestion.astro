@@ -2,6 +2,8 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/gestion.css";
+import "../../style/modal.css";
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
@@ -9,8 +11,8 @@ const nombreFiltro = searchParams.get("nombre") || "";
 const categoriaFiltro = searchParams.get("categoria_id") || "";
 const empresaFiltro = searchParams.get("empresa_id") || "";
 
-// Construir la URL de la API con los filtros
-let apiUrl = '/atractivos';
+// Construir la URL de la API con los filtros usando el nuevo endpoint de gestión
+let apiUrl = '/atractivos/gestion';
 const filtros = [];
 if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
 if (categoriaFiltro)
@@ -21,9 +23,7 @@ if (filtros.length > 0) {
     apiUrl += `?${filtros.join("&")}`;
 }
 
-// Obtener atractivos desde la API
-const response = await apiFetch(apiUrl);
-let atractivos = [];
+// Configuración de filtros aplicados
 
 // Obtener categorías para el filtro
 const categoriasResponse = await apiFetch("/categorias");
@@ -31,7 +31,7 @@ let categorias = [];
 if (categoriasResponse.ok) {
     categorias = await categoriasResponse.json();
 } else {
-    console.error("Error al cargar categorías:", categoriasResponse.statusText);
+    console.error("Error al cargar categorías:", categoriasResponse.status);
 }
 
 // Obtener empresas para el filtro
@@ -40,99 +40,52 @@ let empresas = [];
 if (empresasResponse.ok) {
     empresas = await empresasResponse.json();
 } else {
-    console.error("Error al cargar empresas:", empresasResponse.statusText);
+    console.error("Error al cargar empresas:", empresasResponse.status);
 }
+
+// Obtener elementos desde la API (atractivos y empresas)
+const response = await apiFetch(apiUrl);
+let elementos = [];
 
 if (response.ok) {
-    atractivos = await response.json();
+    const elementosRaw = await response.json();
+    
+    // Mapear los elementos con nombres de empresa y categoría
+    elementos = elementosRaw.map((elemento: any) => {
+        const empresa = empresas.find((emp: any) => emp.id === elemento.empresa_id);
+        const categoria = categorias.find((cat: any) => cat.id === elemento.categoria_id);
+        
+        return {
+            ...elemento,
+            empresa_nombre: empresa ? empresa.nombre : "-",
+            categoria_nombre: categoria ? categoria.nombre : "Sin categoría"
+        };
+    });
 } else {
-    console.error("Error al cargar atractivos:", response.statusText);
-    // Usar datos de respaldo en caso de error
-    atractivos = [
-        {
-            id: 1,
-            nombre: "Cataratas del Iguazú",
-            direccion: "Misiones",
-            categoria_nombre: "Naturaleza",
-        },
-        {
-            id: 2,
-            nombre: "Glaciar Perito Moreno",
-            direccion: "Santa Cruz",
-            categoria_nombre: "Naturaleza",
-        },
-        {
-            id: 3,
-            nombre: "Obelisco",
-            direccion: "Buenos Aires",
-            categoria_nombre: "Monumento",
-        },
-    ];
+    console.error("Error al cargar elementos:", response.status);
+    elementos = [];
 }
 
-// Crear un conjunto con los IDs de empresas que tienen atractivos
-const empresasConAtractivos = new Set();
-atractivos.forEach((a: any) => {
-    if (a.empresa_id) {
-        empresasConAtractivos.add(a.empresa_id);
-    }
-});
+// Los elementos ya vienen procesados desde el backend con toda la lógica de filtrado
+let elementosParaMostrar = [...elementos];
 
-// Filtrar empresas sin atractivos
-const empresasSinAtractivos = empresas.filter(
-    (empresa: any) => !empresasConAtractivos.has(empresa.id)
-);
-
-// Combinar atractivos con empresas sin atractivos para mostrar en la tabla
-let elementosParaMostrar = [...atractivos];
-
-// Agregar empresas sin atractivos según los filtros seleccionados
-if (!nombreFiltro && !categoriaFiltro) {
-    // Si hay filtro por empresa, solo agregar esa empresa si no tiene atractivos
-    if (empresaFiltro) {
-        const empresaFiltrada = empresasSinAtractivos.find(
-            (e: any) => e.id.toString() === empresaFiltro
-        );
-        if (empresaFiltrada) {
-            elementosParaMostrar.push({
-                id: null,
-                nombre: "-",
-                direccion: empresaFiltrada.direccion || "-",
-                categoria_nombre: "-",
-                empresa_id: empresaFiltrada.id,
-                empresa_nombre: empresaFiltrada.nombre,
-            });
-        }
-    } else {
-        // Si no hay filtro por empresa, agregar todas las empresas sin atractivos
-        empresasSinAtractivos.forEach((empresa: any) => {
-            elementosParaMostrar.push({
-                id: null,
-                nombre: "-",
-                direccion: empresa.direccion || "-",
-                categoria_nombre: "-",
-                empresa_id: empresa.id,
-                empresa_nombre: empresa.nombre,
-            });
-        });
-    }
+if (elementosParaMostrar.length === 0) {
+    console.warn("No hay elementos para mostrar en la tabla");
 }
 ---
-
-<link rel="stylesheet" href="/src/style/atractivos.css" />
-<link rel="stylesheet" href="/src/style/modal.css" />
 
 <AdminPanel menu={AdminMenu}>
     <div class="admin-content">
         <div class="header">
             <h1>Empresas y Atractivos</h1>
-            <a href="/admin/gestion-nuevo" class="btn-nuevo"
-                >+ Nuevo Atractivo</a
+            <a href="/admin/gestion-nuevo" class="btn btn-nuevo"
+                ><span class="btn-icon">+</span>
+                <span class="btn-text">Nuevo Atractivo</span></a
             >
         </div>
         <!-- Filtros -->
         <div class="filtros-container">
-            <form id="filtros-form" method="get" class="filtros">
+            <form id="filtros-form" method="get" action="/admin/gestion" class="filtros">
                 <div class="filtro filtro-nombre">
                     <label for="nombre">Nombre de Atractivo:</label>
                     <input
@@ -163,6 +116,11 @@ if (!nombreFiltro && !categoriaFiltro) {
                     <label for="empresa_id">Empresa:</label>
                     <select id="empresa_id" name="empresa_id">
                         <option value="">Todas las empresas</option>
+                        <option 
+                            value="sin-empresa"
+                            selected={empresaFiltro === "sin-empresa"}>
+                            Sin empresa asignada
+                        </option>
                         {
                             empresas.map((emp: any) => (
                                 <option
@@ -194,64 +152,106 @@ if (!nombreFiltro && !categoriaFiltro) {
             <tbody>
                 {
                     elementosParaMostrar.map((a: any) => (
-                        <tr>
-                            <td>{a.empresa_nombre || "-"}</td>
-                            <td>{a.nombre || "-"}</td>
-                            <td>{a.direccion || "-"}</td>
-                            <td>{a.categoria_nombre || "-"}</td>
+                        <tr data-sin-empresa={!a.empresa_id || a.empresa_id === '' || a.empresa_id === 'null' ? 'true' : 'false'}>
+                            <td>
+                                <div class="cell-content">
+                                    <span class="cell-label">Empresa:</span>
+                                    <span class={`cell-value ${!a.empresa_id || a.empresa_id === '' || a.empresa_id === 'null' ? 'sin-empresa' : ''}`}>
+                                        {!a.empresa_id || a.empresa_id === '' || a.empresa_id === 'null' ? 
+                                            "-" : 
+                                            a.empresa_nombre
+                                        }
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="cell-content">
+                                    <span class="cell-label">Atractivo:</span>
+                                    <span class="cell-value">{a.nombre || "-"}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="cell-content">
+                                    <span class="cell-label">Ubicación:</span>
+                                    <span class="cell-value">{a.direccion || "-"}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="cell-content">
+                                    <span class="cell-label">Categoría:</span>
+                                    <span class="cell-value">{a.categoria_nombre || "Sin categoría"}</span>
+                                </div>
+                            </td>
                             <td class="acciones">
                                 {a.id ? (
                                     <>
-                                        <a
-                                            href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada`}
-                                            class="btn-agregar">
-                                            Agregar
-                                        </a>
+                                        {/* Si el atractivo tiene empresa asignada */}
+                                        {a.empresa_id && a.empresa_id !== '' && a.empresa_id !== 'null' ? (
+                                            <a
+                                                href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada&categoria_empresa=${a.categoria_id || ''}`}
+                                                class="btn btn-agregar"
+                                                title="Agregar nuevo atractivo a esta empresa">
+                                                <span class="btn-icon">+</span>
+                                                <span class="btn-text">Agregar</span>
+                                            </a>
+                                        ) : (
+                                            <a
+                                                href="/admin/gestion-nuevo"
+                                                class="btn btn-agregar"
+                                                title="Agregar nuevo atractivo">
+                                                <span class="btn-icon">+</span>
+                                                <span class="btn-text">Agregar</span>
+                                            </a>
+                                        )}
                                         <button
-                                            class="btn-editar"
+                                            class="btn btn-editar"
                                             data-id={a.id}
-                                            data-empresa-id={a.empresa_id}
+                                            data-empresa-id={a.empresa_id || ''}
                                             data-atractivo-nombre={a.nombre}
-                                            data-empresa-nombre={
-                                                a.empresa_nombre
-                                            }>
-                                            Editar
+                                            data-empresa-nombre={a.empresa_nombre || '-'}
+                                            data-sin-empresa={!a.empresa_id || a.empresa_id === '' || a.empresa_id === 'null' ? 'true' : 'false'}
+                                            title={a.empresa_id && a.empresa_id !== '' && a.empresa_id !== 'null' ? "Editar este atractivo o empresa" : "Editar este atractivo (sin empresa)"}>
+                                            <span class="btn-icon">✏️</span>
+                                            <span class="btn-text">Editar</span>
                                         </button>
                                         <button
-                                            class="btn-eliminar"
+                                            class="btn btn-eliminar"
                                             data-id={a.id}
-                                            data-empresa-id={a.empresa_id}
+                                            data-empresa-id={a.empresa_id || ''}
                                             data-atractivo-nombre={a.nombre}
-                                            data-empresa-nombre={
-                                                a.empresa_nombre
-                                            }>
-                                            Eliminar
+                                            data-empresa-nombre={a.empresa_nombre || '-'}
+                                            data-sin-empresa={!a.empresa_id || a.empresa_id === '' || a.empresa_id === 'null' ? 'true' : 'false'}
+                                            title="Eliminar este atractivo">
+                                            <span class="btn-icon">🗑️</span>
+                                            <span class="btn-text">Eliminar</span>
                                         </button>
                                     </>
                                 ) : (
                                     <>
                                         <a
-                                            href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada`}
-                                            class="btn-agregar">
-                                            Agregar
+                                            href={`/admin/gestion-nuevo?paso=2&empresa_id=${a.empresa_id}&accion=seleccionada&categoria_empresa=${a.categoria_id || ''}`}
+                                            class="btn btn-agregar"
+                                            title="Agregar atractivo a esta empresa">
+                                            <span class="btn-icon">+</span>
+                                            <span class="btn-text">Agregar</span>
                                         </a>
                                         <button
-                                            class="btn-editar"
+                                            class="btn btn-editar"
                                             data-empresa-id={a.empresa_id}
-                                            data-empresa-nombre={
-                                                a.empresa_nombre
-                                            }
-                                            data-sin-atractivo="true">
-                                            Editar
+                                            data-empresa-nombre={a.empresa_nombre}
+                                            data-sin-atractivo="true"
+                                            title="Editar esta empresa">
+                                            <span class="btn-icon">✏️</span>
+                                            <span class="btn-text">Editar</span>
                                         </button>
                                         <button
-                                            class="btn-eliminar"
+                                            class="btn btn-eliminar"
                                             data-empresa-id={a.empresa_id}
-                                            data-empresa-nombre={
-                                                a.empresa_nombre
-                                            }
-                                            data-sin-atractivo="true">
-                                            Eliminar
+                                            data-empresa-nombre={a.empresa_nombre}
+                                            data-sin-atractivo="true"
+                                            title="Eliminar esta empresa">
+                                            <span class="btn-icon">🗑️</span>
+                                            <span class="btn-text">Eliminar</span>
                                         </button>
                                     </>
                                 )}
@@ -641,6 +641,15 @@ if (!nombreFiltro && !categoriaFiltro) {
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Función apiFetch para uso en el cliente
+        const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+            const API_URL = window.location.origin.includes('localhost') 
+                ? 'http://localhost:3000' 
+                : 'https://api.turify.com'; // Ajustar según configuración
+            const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
+            return fetch(url, options);
+        };
+
         // Referencias a los modales
         const modalEditar = document.getElementById("modal-editar");
         const modalEliminar = document.getElementById("modal-eliminar");
@@ -711,13 +720,14 @@ if (!nombreFiltro && !categoriaFiltro) {
                 if (btnAceptarNotificacion) {
                     btnAceptarNotificacion.onclick = () => {
                         modalNotificacion.classList.add("hidden");
-                        if (recargar) {
+                        if (recargar && esExito) {
+                            console.log("Recargando página después de operación exitosa...");
                             window.location.reload();
                         }
                     };
                 }
             }
-        } // Modal de Editar
+        }        // Modal de Editar
         if (btnEditar) {
             btnEditar.forEach((btn) => {
                 btn.addEventListener("click", () => {
@@ -731,14 +741,8 @@ if (!nombreFiltro && !categoriaFiltro) {
                     );
                     const sinAtractivo =
                         btn.getAttribute("data-sin-atractivo") === "true";
-
-                    console.log("Edit button clicked:", {
-                        atractivoId: currentAtractivoId,
-                        empresaId: currentEmpresaId,
-                        atractivoNombre: currentAtractivoNombre,
-                        empresaNombre: currentEmpresaNombre,
-                        sinAtractivo,
-                    });
+                    const sinEmpresa =
+                        btn.getAttribute("data-sin-empresa") === "true";
 
                     // Restablecer selección
                     document
@@ -748,6 +752,7 @@ if (!nombreFiltro && !categoriaFiltro) {
                             opt.classList.remove("disabled");
                         });
                     selectedOption = null;
+                    
                     // Si es una empresa sin atractivos, deshabilitar la opción de editar atractivo
                     if (sinAtractivo) {
                         const opcionAtractivo = document.querySelector(
@@ -765,8 +770,26 @@ if (!nombreFiltro && !categoriaFiltro) {
                                     "No hay atractivos disponibles para editar";
                             }
                         }
-                    } else {
-                        // Restaurar el texto original para empresas con atractivos
+                    } 
+                    // Si es un atractivo sin empresa, deshabilitar la opción de editar empresa
+                    else if (sinEmpresa) {
+                        const opcionEmpresa = document.querySelector(
+                            '#modal-editar .modal-option[data-option="empresa"]'
+                        );
+                        if (opcionEmpresa) {
+                            opcionEmpresa.classList.add("disabled");
+
+                            // Agregar descripción indicando que no hay empresa
+                            const descripcion = opcionEmpresa.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "Este atractivo no tiene empresa asignada";
+                            }
+                        }
+                        
+                        // Restaurar el texto original para atractivos
                         const opcionAtractivo = document.querySelector(
                             '#modal-editar .modal-option[data-option="atractivo"]'
                         );
@@ -777,6 +800,34 @@ if (!nombreFiltro && !categoriaFiltro) {
                             if (descripcion) {
                                 descripcion.textContent =
                                     "Modificar la información del atractivo turístico";
+                            }
+                        }
+                    } 
+                    else {
+                        // Restaurar el texto original para ambas opciones
+                        const opcionAtractivo = document.querySelector(
+                            '#modal-editar .modal-option[data-option="atractivo"]'
+                        );
+                        if (opcionAtractivo) {
+                            const descripcion = opcionAtractivo.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "Modificar la información del atractivo turístico";
+                            }
+                        }
+                        
+                        const opcionEmpresa = document.querySelector(
+                            '#modal-editar .modal-option[data-option="empresa"]'
+                        );
+                        if (opcionEmpresa) {
+                            const descripcion = opcionEmpresa.querySelector(
+                                ".modal-option-description"
+                            );
+                            if (descripcion) {
+                                descripcion.textContent =
+                                    "Modificar la información de la empresa asociada";
                             }
                         }
                     }
@@ -808,7 +859,6 @@ if (!nombreFiltro && !categoriaFiltro) {
                     // Aplicar selección al actual
                     option.classList.add("selected");
                     selectedOption = option.getAttribute("data-option");
-                    console.log("Opción seleccionada:", selectedOption);
                 });
             });
 
@@ -837,17 +887,9 @@ if (!nombreFiltro && !categoriaFiltro) {
 
                 if (selectedOption === "atractivo" && currentAtractivoId) {
                     // Redirigir a página de edición de atractivo
-                    console.log(
-                        "Redirigiendo a editar atractivo:",
-                        currentAtractivoId
-                    );
                     window.location.href = `/admin/gestion-editar?id=${currentAtractivoId}`;
                 } else if (selectedOption === "empresa" && currentEmpresaId) {
                     // Redirigir a página de edición de empresa
-                    console.log(
-                        "Redirigiendo a editar empresa:",
-                        currentEmpresaId
-                    );
                     window.location.href = `/admin/empresas-editar?id=${currentEmpresaId}`;
                 } else if (
                     selectedOption === "atractivo" &&
@@ -883,6 +925,14 @@ if (!nombreFiltro && !categoriaFiltro) {
                     );
                     const sinAtractivo =
                         btn.getAttribute("data-sin-atractivo") === "true";
+                        
+                    console.log("Botón eliminar clickeado:", {
+                        currentAtractivoId,
+                        currentEmpresaId,
+                        currentAtractivoNombre,
+                        currentEmpresaNombre,
+                        sinAtractivo
+                    });
 
                     // Restablecer selección
                     document
@@ -893,6 +943,7 @@ if (!nombreFiltro && !categoriaFiltro) {
                         });
                     selectedOption = null;
                     // Si es una empresa sin atractivos, deshabilitar la opción de eliminar atractivo
+                    // y seleccionar automáticamente la opción de eliminar empresa
                     if (sinAtractivo) {
                         const opcionAtractivo = document.querySelector(
                             '#modal-eliminar .modal-option[data-option="atractivo"]'
@@ -908,6 +959,15 @@ if (!nombreFiltro && !categoriaFiltro) {
                                 descripcion.textContent =
                                     "No hay atractivos disponibles para eliminar";
                             }
+                        }
+                        
+                        // Seleccionar automáticamente la opción de eliminar empresa
+                        const opcionEmpresa = document.querySelector(
+                            '#modal-eliminar .modal-option[data-option="empresa"]'
+                        );
+                        if (opcionEmpresa) {
+                            opcionEmpresa.classList.add("selected");
+                            selectedOption = "empresa";
                         }
                     } else {
                         // Restaurar el texto original para empresas con atractivos
@@ -1012,23 +1072,54 @@ if (!nombreFiltro && !categoriaFiltro) {
 
                     if (selectedOption === "atractivo" && currentAtractivoId) {
                         // Eliminar atractivo
-                        response = await apiFetch(
-                            `/atractivos/${currentAtractivoId}`,
-                            {
-                                method: "DELETE",
-                            }
-                        );
-
-                        if (response.ok) {
-                            mostrarNotificacion(
-                                "¡Éxito!",
-                                `El atractivo "${currentAtractivoNombre}" ha sido eliminado correctamente`,
-                                true
+                        console.log("Intentando eliminar atractivo con ID:", currentAtractivoId);
+                        
+                        try {
+                            response = await apiFetch(
+                                `/api/atractivos/${currentAtractivoId}`,
+                                {
+                                    method: "DELETE",
+                                }
                             );
-                        } else {
+                            
+                            console.log("Respuesta del servidor:", response.status, response.statusText);
+                            
+                            if (response.ok) {
+                                let mensaje = `El atractivo "${currentAtractivoNombre}" ha sido eliminado correctamente`;
+                                try {
+                                    const responseData = await response.json();
+                                    mensaje = responseData.mensaje || mensaje;
+                                } catch (e) {
+                                    console.log("No se pudo obtener mensaje del servidor");
+                                }
+                                
+                                mostrarNotificacion(
+                                    "¡Éxito!",
+                                    mensaje,
+                                    true,
+                                    true // Recargar la página después de aceptar
+                                );
+                            } else {
+                                let errorMsg = "No se pudo eliminar el atractivo";
+                                try {
+                                    const errorData = await response.json();
+                                    errorMsg = errorData.error || errorMsg;
+                                } catch (e) {
+                                    console.error("Error al procesar la respuesta:", e);
+                                }
+                                
+                                mostrarNotificacion(
+                                    "Error",
+                                    `${errorMsg} (${response.status}: ${response.statusText})`,
+                                    false,
+                                    false
+                                );
+                            }
+                        } catch (error) {
+                            console.error("Error al eliminar atractivo:", error);
                             mostrarNotificacion(
                                 "Error",
-                                "No se pudo eliminar el atractivo",
+                                `Error de conexión: ${error instanceof Error ? error.message : "Error desconocido"}`,
                                 false,
                                 false
                             );
@@ -1037,49 +1128,55 @@ if (!nombreFiltro && !categoriaFiltro) {
                         selectedOption === "empresa" &&
                         currentEmpresaId
                     ) {
-                        // Primero eliminamos todos los atractivos asociados a la empresa
-                        const atractivosDeEmpresa = await apiFetch(
-                            `/atractivos?empresa_id=${currentEmpresaId}`
-                        );
-                        if (atractivosDeEmpresa.ok) {
-                            const atractivos = await atractivosDeEmpresa.json();
-
-                            // Eliminar atractivos uno por uno
-                            for (const atractivo of atractivos) {
-                                await apiFetch(
-                                    `/atractivos/${atractivo.id}`,
-                                    {
-                                        method: "DELETE",
-                                    }
-                                );
-                            }
-
-                            // Luego eliminamos la empresa
+                        // Eliminar la empresa directamente (el backend se encargará de eliminar los atractivos asociados)
+                        console.log("Intentando eliminar empresa con ID:", currentEmpresaId);
+                        
+                        try {
                             response = await apiFetch(
-                                `/empresas/${currentEmpresaId}`,
+                                `/api/empresas/${currentEmpresaId}`,
                                 {
                                     method: "DELETE",
                                 }
                             );
-
+                            
+                            console.log("Respuesta del servidor:", response.status, response.statusText);
+                            
                             if (response.ok) {
+                                let mensaje = `La empresa "${currentEmpresaNombre}" y sus atractivos asociados han sido eliminados correctamente`;
+                                try {
+                                    const responseData = await response.json();
+                                    mensaje = responseData.mensaje || mensaje;
+                                } catch (e) {
+                                    console.log("No se pudo obtener mensaje del servidor");
+                                }
+                                
                                 mostrarNotificacion(
                                     "¡Éxito!",
-                                    `La empresa "${currentEmpresaNombre}" y sus ${atractivos.length} atractivos asociados han sido eliminados correctamente`,
-                                    true
+                                    mensaje,
+                                    true,
+                                    true // Recargar la página después de aceptar
                                 );
                             } else {
+                                let errorMsg = "No se pudo eliminar la empresa";
+                                try {
+                                    const errorData = await response.json();
+                                    errorMsg = errorData.error || errorMsg;
+                                } catch (e) {
+                                    console.error("Error al procesar la respuesta:", e);
+                                }
+                                
                                 mostrarNotificacion(
                                     "Error",
-                                    "No se pudo eliminar la empresa",
+                                    `${errorMsg} (${response.status}: ${response.statusText})`,
                                     false,
                                     false
                                 );
                             }
-                        } else {
+                        } catch (error) {
+                            console.error("Error al eliminar empresa:", error);
                             mostrarNotificacion(
                                 "Error",
-                                "No se pudieron obtener los atractivos de la empresa",
+                                `Error de conexión: ${error instanceof Error ? error.message : "Error desconocido"}`,
                                 false,
                                 false
                             );
@@ -1101,6 +1198,11 @@ if (!nombreFiltro && !categoriaFiltro) {
         const forms = document.querySelectorAll("form");
         forms.forEach((form) => {
             form.addEventListener("submit", function (e: Event) {
+                // Solo aplicar prevención a formularios de modales, no al formulario de filtros
+                if (this.id === "filtros-form") {
+                    return; // Permitir el envío normal del formulario de filtros
+                }
+                
                 // Verificar si el formulario ya está enviando
                 if (this.classList.contains("enviando")) {
                     e.preventDefault();
@@ -1156,5 +1258,56 @@ if (!nombreFiltro && !categoriaFiltro) {
                 });
             }
         });
+    });
+
+    // Mejorar funcionalidad de filtros
+    document.addEventListener("DOMContentLoaded", () => {
+        const filtrosForm = document.getElementById("filtros-form") as HTMLFormElement;
+        
+        // Los filtros solo se aplicarán cuando se presione el botón "Filtrar"
+        // El formulario se envía normalmente sin interferencia de JavaScript
+        
+        // Mejorar accesibilidad: añadir tooltips dinámicos
+        const updateTooltips = () => {
+            const botones = document.querySelectorAll(".acciones .btn") as NodeListOf<HTMLElement>;
+            botones.forEach(btn => {
+                const empresaNombre = btn.getAttribute("data-empresa-nombre");
+                const atractivoNombre = btn.getAttribute("data-atractivo-nombre");
+                const sinAtractivo = btn.getAttribute("data-sin-atractivo");
+                const sinEmpresa = btn.getAttribute("data-sin-empresa");
+                
+                let tooltip = "";
+                
+                if (btn.classList.contains("btn-agregar")) {
+                    if (empresaNombre && empresaNombre !== "-") {
+                        tooltip = `Agregar nuevo atractivo a ${empresaNombre}`;
+                    } else {
+                        tooltip = "Agregar nuevo atractivo";
+                    }
+                } else if (btn.classList.contains("btn-editar")) {
+                    if (sinAtractivo) {
+                        tooltip = `Editar empresa: ${empresaNombre}`;
+                    } else if (sinEmpresa === "true") {
+                        tooltip = `Editar atractivo: ${atractivoNombre} (sin empresa asignada)`;
+                    } else {
+                        tooltip = `Editar atractivo: ${atractivoNombre}`;
+                    }
+                } else if (btn.classList.contains("btn-eliminar")) {
+                    if (sinAtractivo) {
+                        tooltip = `Eliminar empresa: ${empresaNombre}`;
+                    } else if (sinEmpresa === "true") {
+                        tooltip = `Eliminar atractivo: ${atractivoNombre} (sin empresa asignada)`;
+                    } else {
+                        tooltip = `Eliminar atractivo: ${atractivoNombre}`;
+                    }
+                }
+                
+                if (tooltip) {
+                    btn.setAttribute("title", tooltip);
+                }
+            });
+        };
+        
+        updateTooltips();
     });
 </script>
