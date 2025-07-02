@@ -22,7 +22,7 @@
             ]
         },
         {
-            "source": "/(.*\\.(css|js|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
+            "source": "/(.*)\\.(css|js|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$",
             "headers": [
                 {
                     "key": "Cache-Control",
