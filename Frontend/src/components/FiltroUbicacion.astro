@@ -1,157 +1,180 @@
 ---
 export interface Props {
-  distritos: string[];
-  distritoSeleccionado?: string | string[];
-  placeholder?: string;
-  mostrarLimpiar?: boolean;
-  id?: string;
+    distritos: string[];
+    distritoSeleccionado?: string | string[];
+    placeholder?: string;
+    mostrarLimpiar?: boolean;
+    id?: string;
 }
 
 const {
-  distritos = [],
-  distritoSeleccionado = [],
-  placeholder = "Seleccionar distrito",
-  mostrarLimpiar = true,
-  id = "filtro-distrito"
+    distritos = [],
+    distritoSeleccionado = [],
+    placeholder = "Seleccionar distrito",
+    mostrarLimpiar = true,
+    id = "filtro-distrito",
 } = Astro.props;
 
 // Normalizar seleccionados a array
 const seleccionados = Array.isArray(distritoSeleccionado)
-  ? distritoSeleccionado
-  : typeof distritoSeleccionado === 'string' && distritoSeleccionado
-    ? distritoSeleccionado.split(',')
-    : [];
+    ? distritoSeleccionado
+    : typeof distritoSeleccionado === "string" && distritoSeleccionado
+      ? distritoSeleccionado.split(",")
+      : [];
 ---
 
-<div class="filtro-distrito-multiple" data-distrito-seleccionado={seleccionados.join(',')}>
-  <div class="filtro-multiple-container">
-    <div class="filtro-multiple-title">Distrito</div>
-    <div class="filtro-multiple-list">
-      {distritos.length > 0 ? (
-        distritos.map((distrito) => (
-          <label class="filtro-multiple-item">
-            <input
-              type="checkbox"
-              value={distrito}
-              checked={seleccionados.includes(distrito)}
-              class="filtro-multiple-checkbox"
-            />
-            <span>{distrito}</span>
-          </label>
-        ))
-      ) : (
-        <div class="filtro-sin-distritos">
-          <p>No hay distritos disponibles para esta categoría</p>
+<div
+    class="filtro-distrito-multiple"
+    data-distrito-seleccionado={seleccionados.join(",")}>
+    <div class="filtro-multiple-container">
+        <div class="filtro-multiple-title">Distrito</div>
+        <div class="filtro-multiple-list">
+            {
+                distritos.length > 0 ? (
+                    distritos.map((distrito) => (
+                        <label class="filtro-multiple-item">
+                            <input
+                                type="checkbox"
+                                value={distrito}
+                                checked={seleccionados.includes(distrito)}
+                                class="filtro-multiple-checkbox"
+                            />
+                            <span>{distrito}</span>
+                        </label>
+                    ))
+                ) : (
+                    <div class="filtro-sin-distritos">
+                        <p>No hay distritos disponibles para esta categoría</p>
+                    </div>
+                )
+            }
         </div>
-      )}
+        {
+            mostrarLimpiar && seleccionados.length > 0 && (
+                <button type="button" class="btn-limpiar-filtro-multiple">
+                    Limpiar filtro
+                </button>
+            )
+        }
     </div>
-    {mostrarLimpiar && seleccionados.length > 0 && (
-      <button type="button" class="btn-limpiar-filtro-multiple">Limpiar filtro</button>
-    )}
-  </div>
 </div>
 
 <style>
-.filtro-distrito-multiple {
-  margin-bottom: 1.5rem;
-}
-.filtro-multiple-container {
-  background: #d7f3df;
-  border-radius: 14px;
-  padding: 1.2rem 1.2rem 1rem 1.2rem;
-  box-shadow: 0 2px 8px rgba(46, 108, 77, 0.08);
-  border: 1px solid #b6e2c6;
-  min-width: 200px;
-  max-width: 260px;
-}
-.filtro-multiple-title {
-  font-weight: bold;
-  color: #205c37;
-  font-size: 1.1rem;
-  margin-bottom: 0.7rem;
-}
-.filtro-multiple-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-.filtro-multiple-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  color: #205c37;
-  cursor: pointer;
-  padding: 0.1rem 0.2rem;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-.filtro-multiple-item:hover {
-  background: #c2e9d6;
-}
-.filtro-multiple-checkbox {
-  accent-color: #2e6c4d;
-  width: 1.1em;
-  height: 1.1em;
-}
-.btn-limpiar-filtro-multiple {
-  margin-top: 0.8rem;
-  background: #fff;
-  border: 1px solid #2e6c4d;
-  color: #2e6c4d;
-  border-radius: 8px;
-  padding: 0.4rem 1.2rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.2s, color 0.2s;
-}
-.btn-limpiar-filtro-multiple:hover {
-  background: #2e6c4d;
-  color: #fff;
-}
-.filtro-sin-distritos {
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  text-align: center;
-}
-.filtro-sin-distritos p {
-  margin: 0;
-  color: #6c757d;
-  font-size: 0.9rem;
-}
+    .filtro-distrito-multiple {
+        position: relative;
+    }
+    .filtro-multiple-container {
+        background: #d7f3df;
+        border-radius: 14px;
+        padding: 1.2rem 1.2rem 1rem 1.2rem;
+        box-shadow: 0 4px 12px rgba(46, 108, 77, 0.12);
+        border: 1px solid #b6e2c6;
+        min-width: 220px;
+        max-width: 280px;
+        backdrop-filter: blur(10px);
+    }
+    .filtro-multiple-title {
+        font-weight: bold;
+        color: #205c37;
+        font-size: 1.1rem;
+        margin-bottom: 0.7rem;
+    }
+    .filtro-multiple-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    .filtro-multiple-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        color: #205c37;
+        cursor: pointer;
+        padding: 0.1rem 0.2rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    .filtro-multiple-item:hover {
+        background: #c2e9d6;
+    }
+    .filtro-multiple-checkbox {
+        accent-color: #2e6c4d;
+        width: 1.1em;
+        height: 1.1em;
+    }
+    .btn-limpiar-filtro-multiple {
+        margin-top: 0.8rem;
+        background: #fff;
+        border: 1px solid #2e6c4d;
+        color: #2e6c4d;
+        border-radius: 8px;
+        padding: 0.4rem 1.2rem;
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition:
+            background 0.2s,
+            color 0.2s;
+    }
+    .btn-limpiar-filtro-multiple:hover {
+        background: #2e6c4d;
+        color: #fff;
+    }
+    .filtro-sin-distritos {
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .filtro-sin-distritos p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
 </style>
 
 <script>
-function getSelectedDistritos() {
-  return Array.from(document.querySelectorAll('.filtro-multiple-checkbox:checked')).map((el) => (el as HTMLInputElement).value);
-}
+    function getSelectedDistritos() {
+        return Array.from(
+            document.querySelectorAll(".filtro-multiple-checkbox:checked")
+        ).map((el) => (el as HTMLInputElement).value);
+    }
 
-function actualizarFiltroDistritoMultiple() {
-  const seleccionados = getSelectedDistritos();
-  const url = new URL(window.location.href);
-  if (seleccionados.length > 0) {
-    url.searchParams.set('distrito', seleccionados.join(','));
-  } else {
-    url.searchParams.delete('distrito');
-  }
-  window.location.href = url.toString();
-}
+    function actualizarFiltroDistritoMultiple() {
+        const seleccionados = getSelectedDistritos();
+        const url = new URL(window.location.href);
+        if (seleccionados.length > 0) {
+            url.searchParams.set("distrito", seleccionados.join(","));
+        } else {
+            url.searchParams.delete("distrito");
+        }
+        window.location.href = url.toString();
+    }
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.filtro-multiple-checkbox').forEach((checkbox) => {
-    checkbox.addEventListener('change', actualizarFiltroDistritoMultiple);
-  });
-  const btnLimpiar = document.querySelector('.btn-limpiar-filtro-multiple');
-  if (btnLimpiar) {
-    btnLimpiar.addEventListener('click', function () {
-      document.querySelectorAll('.filtro-multiple-checkbox').forEach((cb) => {
-        (cb as HTMLInputElement).checked = false;
-      });
-      actualizarFiltroDistritoMultiple();
+    document.addEventListener("DOMContentLoaded", function () {
+        document
+            .querySelectorAll(".filtro-multiple-checkbox")
+            .forEach((checkbox) => {
+                checkbox.addEventListener(
+                    "change",
+                    actualizarFiltroDistritoMultiple
+                );
+            });
+        const btnLimpiar = document.querySelector(
+            ".btn-limpiar-filtro-multiple"
+        );
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener("click", function () {
+                document
+                    .querySelectorAll(".filtro-multiple-checkbox")
+                    .forEach((cb) => {
+                        (cb as HTMLInputElement).checked = false;
+                    });
+                actualizarFiltroDistritoMultiple();
+            });
+        }
     });
-  }
-});
-</script> 
+</script>
+
