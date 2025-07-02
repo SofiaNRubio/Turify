@@ -15,7 +15,7 @@
     max-width: unset;
     backdrop-filter: blur(6px);
     box-shadow: 0 2px 8px var(--color-shadow-light);
-    z-index: 1000;
+    z-index: 9997;
     gap: 2rem;
 }
 
@@ -85,7 +85,7 @@
     width: 40px;
     height: 40px;
     cursor: pointer;
-    z-index: 1100;
+    z-index: 9999;
     margin-left: 1rem;
     padding: 5px;
     border: none;
@@ -211,7 +211,7 @@
         box-shadow: -2px 0 8px var(--color-shadow);
         transform: translateX(100%);
         transition: transform var(--transition-normal);
-        z-index: 1050;
+        z-index: 9998;
         display: flex;
     }
 
