@@ -5,8 +5,21 @@ import {
     SignedOut,
     UserButton,
 } from "@clerk/astro/components";
+import { clerkClient } from "@clerk/clerk-sdk-node";
 import "../style/navbar.css";
+
 const currentPath = Astro.url.pathname;
+let isAdmin = false;
+
+const userId = Astro.locals.auth().userId;
+if (userId) {
+    try {
+        const user = await clerkClient.users.getUser(userId);
+        isAdmin = user.privateMetadata?.permission === 'admin';
+    } catch (error) {
+        console.error('Error al verificar admin:', error);
+    }
+}
 ---
 
 <header class="header" role="banner">
@@ -86,6 +99,13 @@ const currentPath = Astro.url.pathname;
                 class={currentPath === "/info" ? "active" : ""}
                 role="menuitem">Información útil</a
             >
+            {isAdmin && (
+                <a
+                    href="/admin"
+                    class={currentPath.startsWith("/admin") ? "active" : ""}
+                    role="menuitem">Admin</a
+                >
+            )}
             <div
                 class="nav-auth"
                 role="complementary"
