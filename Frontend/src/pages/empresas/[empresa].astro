@@ -314,7 +314,7 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                     ) : (
                         <div class="atractivos-grid">
                             {atractivosFiltrados.map((atractivo: Atractivo) => (
-                                <div class="atractivo-card">
+                                <a href={`/atractivos/${atractivo.id}`} class="atractivo-card">
                                     <div class="imagen-atractivo">
                                         {atractivo.img_url ? (
                                             <img
@@ -376,7 +376,7 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
                                             <span>{atractivo.direccion}</span>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             ))}
                         </div>
                     )
@@ -579,6 +579,9 @@ function obtenerNombreCategoria(categoriaId: string | null): string {
         box-shadow: 0 4px 20px rgba(46, 108, 77, 0.08);
         overflow: hidden;
         transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
 
     .atractivo-card:hover {

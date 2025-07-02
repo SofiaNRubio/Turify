@@ -214,7 +214,7 @@ if (!empresa) {
                     <h2>Atractivos relacionados</h2>
                     <div class="atractivos-grid">
                         {atractivos.map((atractivo) => (
-                            <div class="atractivo-card">
+                            <a href={`/atractivos/${atractivo.id}`} class="atractivo-card">
                                 {atractivo.img_url && (
                                     <img
                                         src={atractivo.img_url}
@@ -236,7 +236,7 @@ if (!empresa) {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </a>
                         ))}
                     </div>
                 </div>
@@ -431,6 +431,9 @@ if (!empresa) {
         border-radius: 12px;
         overflow: hidden;
         transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
 
     .atractivo-card:hover {
