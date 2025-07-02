@@ -60,13 +60,6 @@ if (categoriaId) {
     {
         categoriaId && categoriaSeleccionada ? (
             <div class="servicios-filtrados">
-                <div class="header-llegada">
-                    <a href="/llegar" class="volver-btn">
-                        ← Volver a servicios de llegada
-                    </a>
-                    <h2>Servicios de {categoriaSeleccionada.nombre}</h2>
-                </div>
-
                 {serviciosFiltrados.length > 0 ? (
                     <div class="empresas-grid">
                         {serviciosFiltrados.map((servicio: Empresa) => (

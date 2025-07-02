@@ -53,12 +53,6 @@ if (categoriaId) {
     {
         categoriaId && categoriaSeleccionada ? (
             <div class="hospedaje-filtrados">
-                <div class="header-hospedaje">
-                    <a href="/hospedaje" class="volver-btn">
-                        ← Volver a hospedaje
-                    </a>
-                    <h2>Hospedaje: {categoriaSeleccionada.nombre}</h2>
-                </div>
                 {hospedajesFiltrados.length > 0 ? (
                     <div class="empresas-grid">
                         {hospedajesFiltrados.map((hospedaje: Empresa) => (

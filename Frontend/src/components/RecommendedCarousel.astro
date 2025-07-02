@@ -2,7 +2,7 @@
 // Importar estilos CSS
 ---
 
-<link rel="stylesheet" href="/src/style/carousel.css">
+<link rel="stylesheet" href="/src/style/carousel.css" />
 
 <section class="recomendados" role="region" aria-labelledby="hero-title">
     <div class="hero-text">
@@ -10,7 +10,10 @@
         <div class="hero-divider" aria-hidden="true"></div>
         <p class="hero-subtitle">Viví San Rafael</p>
     </div>
-    <div class="carousel-wrapper" role="region" aria-label="Carrusel de atractivos turísticos">
+    <div
+        class="carousel-wrapper"
+        role="region"
+        aria-label="Carrusel de atractivos turísticos">
         <button
             class="carousel-arrow left"
             id="prevLugar"
@@ -29,38 +32,81 @@
             >
         </button>
 
-        <div class="carousel-track" id="carouselTrack" role="list" aria-live="polite" aria-label="Lista de atractivos turísticos">
+        <div
+            class="carousel-track"
+            id="carouselTrack"
+            role="list"
+            aria-live="polite"
+            aria-label="Lista de atractivos turísticos">
             <!-- Cada tarjeta -->
-            <div class="carousel-card" role="listitem" aria-label="Laberinto Borges">
+            <div
+                class="carousel-card"
+                role="listitem"
+                aria-label="Laberinto Borges">
                 <img
                     src="/carrusel/LaberintoBorges.jpg"
                     alt="Laberinto Borges - Atractivo turístico de San Rafael"
                     loading="lazy"
                 />
             </div>
-            <div class="carousel-card" role="listitem" aria-label="Viñedos Bianchi">
-                <img src="/carrusel/bodega.webp" alt="Viñedos Bianchi - Bodega de San Rafael" loading="lazy" />
+            <div
+                class="carousel-card"
+                role="listitem"
+                aria-label="Viñedos Bianchi">
+                <img
+                    src="/carrusel/bodega.webp"
+                    alt="Viñedos Bianchi - Bodega de San Rafael"
+                    loading="lazy"
+                />
             </div>
-            <div class="carousel-card" role="listitem" aria-label="Bodega La Abeja">
-                <img src="/carrusel/naturaleza.jpg" alt="Bodega La Abeja - Paisaje natural de San Rafael" loading="lazy" />
+            <div
+                class="carousel-card"
+                role="listitem"
+                aria-label="Bodega La Abeja">
+                <img
+                    src="/carrusel/naturaleza.jpg"
+                    alt="Bodega La Abeja - Paisaje natural de San Rafael"
+                    loading="lazy"
+                />
             </div>
             <div class="carousel-card" role="listitem" aria-label="Los Reyunos">
-                <img src="/carrusel/los_reyunos2.webp" alt="Los Reyunos - Embalse y paisaje natural" loading="lazy" />
+                <img
+                    src="/carrusel/los_reyunos2.webp"
+                    alt="Los Reyunos - Embalse y paisaje natural"
+                    loading="lazy"
+                />
             </div>
-            <div class="carousel-card" role="listitem" aria-label="Valle Grande">
-                <img src="/carrusel/Turismo-86.jpg" alt="Valle Grande - Paisaje montañoso de San Rafael" loading="lazy" />
+            <div
+                class="carousel-card"
+                role="listitem"
+                aria-label="Valle Grande">
+                <img
+                    src="/carrusel/Turismo-86.jpg"
+                    alt="Valle Grande - Paisaje montañoso de San Rafael"
+                    loading="lazy"
+                />
             </div>
             <div class="carousel-card" role="listitem" aria-label="El Tigre">
-                <img src="/carrusel/el_tigre1.webp" alt="El Tigre - Atractivo turístico de San Rafael" loading="lazy" />
+                <img
+                    src="/carrusel/el_tigre1.webp"
+                    alt="El Tigre - Atractivo turístico de San Rafael"
+                    loading="lazy"
+                />
             </div>
-            <div class="carousel-card" role="listitem" aria-label="Vajilla Premium">
+            <div
+                class="carousel-card"
+                role="listitem"
+                aria-label="Vajilla Premium">
                 <img
                     src="/carrusel/vajilla-premium.webp"
                     alt="Vajilla Premium - Artesanías de San Rafael"
                     loading="lazy"
                 />
             </div>
-            <div class="carousel-card" role="listitem" aria-label="Parque de los Niños">
+            <div
+                class="carousel-card"
+                role="listitem"
+                aria-label="Parque de los Niños">
                 <img
                     src="/carrusel/ParquedelosNinos.jpg"
                     alt="Parque de los Niños - Espacio recreativo de San Rafael"
@@ -113,7 +159,10 @@
                     const img = card.querySelector("img");
                     if (img) {
                         const currentAlt = img.alt;
-                        card.setAttribute("aria-label", `${currentAlt} (imagen actual)`);
+                        card.setAttribute(
+                            "aria-label",
+                            `${currentAlt} (imagen actual)`
+                        );
                     }
                 } else if (i === (current - 1 + cards.length) % cards.length) {
                     // Imagen anterior
