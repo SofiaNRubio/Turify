@@ -1,20 +1,22 @@
 {
-  "name": "",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@astrojs/node": "^9.2.2",
-    "@clerk/astro": "^2.8.0",
-    "@clerk/clerk-js": "^5.67.3",
-    "@clerk/clerk-sdk-node": "^4.13.23",
-    "astro": "^5.8.2",
-    "dotenv": "^16.6.1",
-    "leaflet": "^1.9.4"
-  }
+    "name": "turify-frontend",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@astrojs/node": "^9.2.2",
+        "@astrojs/vercel": "^8.2.0",
+        "@clerk/astro": "^2.8.0",
+        "@clerk/clerk-js": "^5.67.3",
+        "@clerk/clerk-sdk-node": "^4.13.23",
+        "astro": "^5.8.2",
+        "dotenv": "^16.6.1",
+        "leaflet": "^1.9.4"
+    }
 }
