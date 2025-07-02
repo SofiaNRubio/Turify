@@ -2,6 +2,8 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/atractivos-nuevo.css";
+import "../../style/form-editar.css";
 
 // Obtener el ID del atractivo a editar
 const id = Astro.url.searchParams.get("id");
@@ -45,11 +47,7 @@ try {
             "Error al cargar categorías:",
             categoriasResponse.statusText
         );
-        // Categorías de respaldo en caso de error
-        categorias = [
-            { id: "cat1", nombre: "Naturaleza" },
-            { id: "cat2", nombre: "Monumento" },
-        ];
+        categorias = [];
     }
 
     // Procesar el formulario de actualización
@@ -103,9 +101,6 @@ if (!atractivo) {
     error = "No se pudo cargar la información del atractivo";
 }
 ---
-
-<link rel="stylesheet" href="/src/style/atractivos-nuevo.css" />
-<link rel="stylesheet" href="/src/style/form-editar.css" />
 
 <AdminPanel menu={AdminMenu}>
     <div class="admin-content">

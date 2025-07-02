@@ -1,0 +1,327 @@
+@import url('./global.css');
+
+/* Estilos específicos para la página de gestión */
+
+/* Mejoras para celdas de tabla con labels responsivos */
+.cell-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.cell-label {
+  display: none;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: var(--font-size-small);
+}
+
+/* Estilos para casos especiales */
+.cell-value {
+  font-size: var(--font-size-normal);
+}
+
+/* Estilo especial para empresas sin asignar */
+.cell-value.sin-empresa {
+  color: #f39c12;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Indicador visual para atractivos sin empresa */
+tr[data-sin-empresa="true"] {
+  border-left: 3px solid #f39c12;
+  background-color: rgba(243, 156, 18, 0.05);
+}
+
+/* Eliminar el emoji - ya no es necesario */
+tr[data-sin-empresa="true"] .cell-value:first-child {
+  position: relative;
+}
+
+/* Estilos unificados para todos los botones */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+  border: none;
+  text-decoration: none;
+  font-family: var(--font-primary);
+  min-width: 85px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.btn-text {
+  font-size: var(--font-size-small);
+}
+
+/* Estilos específicos para el botón nuevo en el header */
+.header .btn-nuevo {
+  background: var(--color-primary);
+  color: #fff;
+  max-width: 160px;
+  min-width: 130px;
+}
+
+.header .btn-nuevo:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+/* Estilos mejorados para botones de acción en tabla */
+.acciones .btn {
+  min-width: 85px;
+}
+
+/* Colores específicos para cada tipo de botón de acción */
+.acciones .btn-agregar {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.acciones .btn-agregar:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-success);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.acciones .btn-editar {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.acciones .btn-editar:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.acciones .btn-eliminar {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.acciones .btn-eliminar:hover {
+  background: #ffd3d3;
+  color: var(--color-danger);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+/* Estilos para filtros mejorados */
+.filtros-container {
+  background: var(--color-bg-input);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: 0 2px 8px var(--color-shadow-light);
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: var(--spacing-lg);
+  align-items: end;
+}
+
+.filtro label {
+  display: block;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-small);
+}
+
+.filtro input,
+.filtro select {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-normal);
+  background: white;
+}
+
+.filtros-botones {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  /* Mostrar labels en móviles para mayor claridad */
+  .cell-label {
+    display: block;
+  }
+  
+  .cell-content {
+    gap: var(--spacing-xs);
+  }
+  
+  /* Hacer la tabla más compacta en móviles */
+  table {
+    font-size: var(--font-size-small);
+  }
+  
+  th, td {
+    padding: var(--spacing-sm) var(--spacing-xs);
+  }
+  
+  /* Hacer el header responsive */
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    align-items: stretch;
+  }
+  
+  .header .btn-nuevo {
+    max-width: 100%;
+    min-width: unset;
+    align-self: center;
+    width: fit-content;
+    padding: var(--spacing-md) var(--spacing-xl);
+  }
+  
+  /* Apilar botones verticalmente en móviles */
+  .acciones {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    width: 100%;
+    min-width: 100px;
+  }
+  
+  .acciones .btn {
+    width: 100%;
+    min-width: unset;
+    padding: var(--spacing-sm) var(--spacing-xs);
+    font-size: 0.8em;
+    justify-content: center;
+  }
+  
+  .acciones .btn-icon {
+    font-size: 12px;
+  }
+  
+  .acciones .btn-text {
+    font-size: 0.8em;
+  }
+  
+  /* Hacer filtros responsive */
+  .filtros {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .filtros-botones {
+    flex-direction: column;
+  }
+  
+  .filtros-botones .btn-filtrar,
+  .filtros-botones .btn-limpiar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  /* En pantallas muy pequeñas, hacer los botones aún más compactos */
+  .header .btn-nuevo {
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+  
+  .header .btn-nuevo .btn-text {
+    font-size: 0.9em;
+  }
+  
+  .acciones .btn {
+    padding: 6px 8px;
+    font-size: 0.75em;
+    gap: 4px;
+  }
+  
+  .acciones .btn-icon {
+    font-size: 10px;
+  }
+  
+  .acciones .btn-text {
+    font-size: 0.7em;
+  }
+  
+  /* Ocultar headers de tabla en móviles muy pequeños y usar diseño de tarjetas */
+  thead {
+    display: none;
+  }
+  
+  table, tbody, tr, td {
+    display: block;
+  }
+  
+  tr {
+    background: var(--color-bg-input);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 2px 4px var(--color-shadow-light);
+  }
+  
+  tr:nth-child(even),
+  tr:nth-child(odd) {
+    background: var(--color-bg-input);
+  }
+  
+  td {
+    border: none;
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .acciones {
+    margin-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-sm);
+  }
+}
+
+/* Estilos para mensaje de sin resultados */
+.no-resultados {
+  text-align: center;
+  padding: var(--spacing-xxxl) var(--spacing-xl);
+  color: var(--color-text);
+  font-style: italic;
+  background: var(--color-light);
+}
+
+/* Animaciones sutiles */
+.acciones .btn {
+  transition: all var(--transition-fast);
+}
+
+tr:hover {
+  background-color: var(--color-primary-hover) !important;
+  transition: background-color var(--transition-fast);
+}
+
+/* Mejoras en la accesibilidad */
+.acciones .btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.acciones .btn:active {
+  transform: translateY(0);
+}

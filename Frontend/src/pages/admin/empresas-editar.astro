@@ -2,6 +2,8 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/atractivos-nuevo.css";
+import "../../style/form-editar.css";
 
 // Obtener el ID de la empresa a editar
 const id = Astro.url.searchParams.get("id");
@@ -85,9 +87,6 @@ if (!empresa) {
     error = "No se pudo cargar la información de la empresa";
 }
 ---
-
-<link rel="stylesheet" href="/src/style/atractivos-nuevo.css" />
-<link rel="stylesheet" href="/src/style/form-editar.css" />
 
 <AdminPanel menu={AdminMenu}>
     <div class="admin-content">
