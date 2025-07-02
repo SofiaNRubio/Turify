@@ -4,12 +4,82 @@ import RecommendedCarousel from "../components/RecommendedCarousel.astro";
 import Categorias from "../components/Categorias.astro";
 import Historia from "../components/Historia.astro";
 import Emergencias from "../components/Emergencias_index.astro";
-const { title } = Astro.props;
+
+// SEO y accesibilidad para la página principal
+const title = "Turify - Viví San Rafael, Mendoza | Turismo y Atractivos";
+const description = "Descubrí los mejores atractivos turísticos de San Rafael, Mendoza. Bodegas, actividades al aire libre, gastronomía, hospedaje y más. Planificá tu viaje perfecto.";
 ---
 
-<MainLayout title={title}>
-    <RecommendedCarousel />
-    <Categorias />
-    <Historia />
-    <Emergencias />
+<MainLayout title={title} description={description}>
+    
+    <!-- Hero Section con landmark semántico -->
+    <section aria-labelledby="hero-title" role="banner">
+        <RecommendedCarousel />
+    </section>
+    
+    <!-- Contenido principal con landmark -->
+    <main id="main-content" role="main">
+        <!-- Sección de categorías -->
+        <section aria-labelledby="categorias-title">
+            <Categorias />
+        </section>
+        
+        <!-- Sección de historia -->
+        <section aria-labelledby="historia-title">
+            <Historia />
+        </section>
+        
+        <!-- Sección de emergencias -->
+        <section aria-labelledby="emergencias-title">
+            <Emergencias />
+        </section>
+    </main>
 </MainLayout>
+
+<style>
+    /* Estilos para skip links - solo visibles con teclado */
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 6px;
+        background: #000;
+        color: white;
+        padding: 8px;
+        text-decoration: none;
+        border-radius: 4px;
+        z-index: 1000;
+        transition: top 0.3s;
+    }
+    
+    .skip-link:focus {
+        top: 6px;
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+    }
+    
+    /* Asegurar contraste adecuado y focus visible */
+    *:focus {
+        outline: 2px solid #007bff;
+        outline-offset: 2px;
+    }
+    
+    /* Mejorar legibilidad del texto */
+    body {
+        line-height: 1.6;
+    }
+    
+    /* Asegurar que los elementos interactivos sean accesibles */
+    button, a, input, select, textarea {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Mejorar contraste para texto */
+    h1, h2, h3, h4, h5, h6 {
+        color: #1a1a1a;
+    }
+    
+    p {
+        color: #333;
+    }
+</style>

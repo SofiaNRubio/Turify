@@ -24,7 +24,7 @@ interface Categoria {
 }
 
 const url = new URL(Astro.request.url);
-const categoriaId = url.searchParams.get('categoria');
+const categoriaId = url.searchParams.get("categoria");
 
 let hospedajesFiltrados: Empresa[] = [];
 let categoriaSeleccionada: Categoria | null = null;
@@ -39,7 +39,7 @@ if (categoriaId) {
         if (responseEmpresas.ok) {
             const todasLasEmpresas: Empresa[] = await responseEmpresas.json();
             hospedajesFiltrados = todasLasEmpresas.filter(
-                empresa => empresa.categoria_id === categoriaId
+                (empresa) => empresa.categoria_id === categoriaId
             );
         }
     } catch (error) {
@@ -49,79 +49,113 @@ if (categoriaId) {
 ---
 
 <MainLayout>
-    {categoriaId && categoriaSeleccionada ? (
-        <div class="hospedaje-filtrados">
-            <div class="header-hospedaje">
-                <a href="/hospedaje" class="volver-btn">
-                    ← Volver a hospedaje
-                </a>
-                <h2>Hospedaje: {categoriaSeleccionada.nombre}</h2>
-            </div>
-            {hospedajesFiltrados.length > 0 ? (
-                <div class="grid-hospedaje">
-                    {hospedajesFiltrados.map((hospedaje: Empresa) => (
-                        <div class="card-hospedaje">
-                            {hospedaje.img_url && (
-                                <img 
-                                    src={hospedaje.img_url} 
-                                    alt={hospedaje.nombre}
-                                    class="imagen-hospedaje"
-                                />
-                            )}
-                            <div class="card-content">
-                                <h3>{hospedaje.nombre}</h3>
-                                {hospedaje.descripcion && (
-                                    <p class="descripcion">{hospedaje.descripcion}</p>
+    {
+        categoriaId && categoriaSeleccionada ? (
+            <div class="hospedaje-filtrados">
+                <div class="header-hospedaje">
+                    <a href="/hospedaje" class="volver-btn">
+                        ← Volver a hospedaje
+                    </a>
+                    <h2>Hospedaje: {categoriaSeleccionada.nombre}</h2>
+                </div>
+                {hospedajesFiltrados.length > 0 ? (
+                    <div class="grid-hospedaje">
+                        {hospedajesFiltrados.map((hospedaje: Empresa) => (
+                            <div class="card-hospedaje">
+                                {hospedaje.img_url && (
+                                    <img
+                                        src={hospedaje.img_url}
+                                        alt={hospedaje.nombre}
+                                        class="imagen-hospedaje"
+                                    />
                                 )}
-                                <div class="info-contacto">
-                                    {hospedaje.direccion && (
-                                        <div class="ubicacion">
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                                                <path fill="#0ea5e9" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                            </svg>
-                                            {hospedaje.direccion}
-                                        </div>
+                                <div class="card-content">
+                                    <h3>{hospedaje.nombre}</h3>
+                                    {hospedaje.descripcion && (
+                                        <p class="descripcion">
+                                            {hospedaje.descripcion}
+                                        </p>
                                     )}
-                                    {hospedaje.telefono && (
-                                        <div class="ubicacion">
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                                                <path fill="#0ea5e9" d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"/>
-                                            </svg>
-                                            {hospedaje.telefono}
-                                        </div>
-                                    )}
-                                    {hospedaje.email && (
-                                        <div class="ubicacion">
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                                                <path fill="#0ea5e9" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 10c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
-                                            </svg>
-                                            {hospedaje.email}
-                                        </div>
-                                    )}
-                                </div>
-                                <div class="card-actions">
-                                    {hospedaje.sitio_web && (
-                                        <a href={hospedaje.sitio_web} target="_blank" rel="noopener noreferrer" class="sitio-web">
-                                            Visitar sitio web
+                                    <div class="info-contacto">
+                                        {hospedaje.direccion && (
+                                            <div class="ubicacion">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#228B22"
+                                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                                                    />
+                                                </svg>
+                                                {hospedaje.direccion}
+                                            </div>
+                                        )}
+                                        {hospedaje.telefono && (
+                                            <div class="ubicacion">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#228B22"
+                                                        d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C7.61 21 3 16.39 3 11a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z"
+                                                    />
+                                                </svg>
+                                                {hospedaje.telefono}
+                                            </div>
+                                        )}
+                                        {hospedaje.email && (
+                                            <div class="ubicacion">
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        fill="#228B22"
+                                                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                                                    />
+                                                </svg>
+                                                {hospedaje.email}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div class="card-actions">
+                                        {hospedaje.sitio_web && (
+                                            <a
+                                                href={hospedaje.sitio_web}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="sitio-web">
+                                                Visitar sitio web
+                                            </a>
+                                        )}
+                                        <a
+                                            href={`/hospedaje/${hospedaje.id}`}
+                                            class="ver-detalles">
+                                            Ver detalles
                                         </a>
-                                    )}
-                                    <a href={`/hospedaje/${hospedaje.id}`} class="ver-detalles">
-                                        Ver detalles
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div class="no-hospedaje">
-                    <p>No se encontraron hospedajes de {categoriaSeleccionada.nombre} disponibles.</p>
-                </div>
-            )}
-        </div>
-    ) : (
-        <HospedajeComponent />
-    )}
+                        ))}
+                    </div>
+                ) : (
+                    <div class="no-hospedaje">
+                        <p>
+                            No se encontraron hospedajes de{" "}
+                            {categoriaSeleccionada.nombre} disponibles.
+                        </p>
+                    </div>
+                )}
+            </div>
+        ) : (
+            <HospedajeComponent />
+        )
+    }
 </MainLayout>
 
 <style>
@@ -130,118 +164,170 @@ if (categoriaId) {
         max-width: 1200px;
         margin: 0 auto;
     }
+
     .volver-btn {
         display: inline-flex;
         align-items: center;
-        color: #0ea5e9;
+        color: #228b22;
         text-decoration: none;
         font-weight: 500;
         margin-bottom: 1rem;
         transition: color 0.3s ease;
     }
+
     .volver-btn:hover {
-        color: #0369a1;
+        color: #006400;
     }
+
     .header-hospedaje {
         text-align: center;
         margin-bottom: 2rem;
     }
+
     .header-hospedaje h2 {
-        color: #0ea5e9;
+        color: #228b22;
         font-size: 2rem;
         margin: 0;
     }
+
     .grid-hospedaje {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
+        gap: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
     }
+
     .card-hospedaje {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(34, 139, 34, 0.08);
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.3s ease;
+        position: relative;
+        border: 2px solid transparent;
     }
+
     .card-hospedaje:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+        box-shadow: 0 8px 30px rgba(34, 139, 34, 0.15);
+        border-color: #228b22;
     }
+
     .imagen-hospedaje {
         width: 100%;
-        height: 200px;
+        height: 140px;
         object-fit: cover;
+        transition: transform 0.3s ease;
     }
+
+    .card-hospedaje:hover .imagen-hospedaje {
+        transform: scale(1.03);
+    }
+
     .card-content {
-        padding: 1.5rem;
+        padding: 1.2rem;
+        position: relative;
     }
+
     .card-content h3 {
-        color: #0ea5e9;
-        margin: 0 0 0.5rem 0;
-        font-size: 1.25rem;
+        color: #228b22;
+        margin: 0 0 0.8rem 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.3;
     }
+
     .descripcion {
         color: #666;
         margin-bottom: 1rem;
         line-height: 1.4;
+        font-size: 0.9rem;
     }
+
     .info-contacto {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.2rem;
     }
+
     .ubicacion {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
         margin-bottom: 0.5rem;
-        color: #666;
-        font-size: 0.9rem;
+        color: #888;
+        font-size: 0.85rem;
     }
+
+    .ubicacion svg {
+        color: #228b22;
+        flex-shrink: 0;
+        width: 14px;
+        height: 14px;
+    }
+
     .card-actions {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         flex-wrap: wrap;
     }
+
     .sitio-web,
     .ver-detalles {
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.2rem;
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 0.9rem;
+        font-weight: 500;
         transition: all 0.3s ease;
+        text-align: center;
+        flex: 1;
     }
+
     .sitio-web {
-        background: #0ea5e9;
+        background: linear-gradient(135deg, #228b22, #32cd32);
         color: white;
     }
+
     .sitio-web:hover {
-        background: #0369a1;
+        background: linear-gradient(135deg, #006400, #228b22);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 139, 34, 0.3);
     }
+
     .ver-detalles {
-        background: transparent;
-        color: #0ea5e9;
-        border: 1px solid #0ea5e9;
+        background: white;
+        color: #228b22;
+        border: 2px solid #228b22;
     }
+
     .ver-detalles:hover {
-        background: #0ea5e9;
+        background: #228b22;
         color: white;
+        transform: translateY(-2px);
     }
+
     .no-hospedaje {
         text-align: center;
         padding: 3rem;
         color: #666;
     }
+
     @media (max-width: 768px) {
         .hospedaje-filtrados {
             padding: 1rem;
         }
+
         .header-hospedaje h2 {
             font-size: 1.5rem;
         }
+
         .grid-hospedaje {
             grid-template-columns: 1fr;
         }
+
         .card-actions {
             flex-direction: column;
         }
     }
-</style> 
+</style>
+

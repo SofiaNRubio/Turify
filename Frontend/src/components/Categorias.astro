@@ -58,8 +58,10 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
 }
 
 // Obtener datos
-const categorias = await obtenerCategorias();
-const empresas = await obtenerEmpresas();
+const [categorias, empresas] = await Promise.all([
+    obtenerCategorias(),
+    obtenerEmpresas()
+]);
 
 // Filtrar categorías de emergencia
 const categoriasExcluidas = [
@@ -147,16 +149,17 @@ categoriasConImagen.forEach((cat) => {
 
 <link rel="stylesheet" href="/src/style/categorias-component.css">
 
-<section class="cat-actividades-empresas">
+<section class="cat-actividades-empresas" role="region" aria-labelledby="titulo-categorias">
     <h2 id="titulo-categorias">Explora lo mejor de San Rafael</h2>
-    <div class="cat-grid-actividades">
+    <div class="cat-grid-actividades" role="grid" aria-label="Categorías de atractivos turísticos">
         {
-            categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="cat-card-actividad">
+            categoriasConImagen.map((categoria: CategoriaConImagen, index: number) => (
+                <div class="cat-card-actividad" role="gridcell" tabindex="0" aria-label={`${categoria.nombre}, ${categoria.empresasCount} ${categoria.empresasCount === 1 ? 'empresa' : 'empresas'}`}>
                     {categoria.imagen ? (
                         <img
                             src={categoria.imagen}
-                            alt={categoria.nombre}
+                            alt={`Imagen representativa de ${categoria.nombre}`}
+                            loading="lazy"
                             onerror={`console.error('Error cargando imagen para ${categoria.nombre}:', '${categoria.imagen}'); this.style.display='none'; this.parentElement.querySelector('.cat-placeholder-imagen').style.display='flex';`}
                             onload={`console.log('✓ Imagen cargada correctamente para ${categoria.nombre}:', '${categoria.imagen}');`}
                         />
@@ -167,13 +170,15 @@ categoriasConImagen.forEach((cat) => {
                             categoria.imagen
                                 ? "display: none;"
                                 : "display: flex;"
-                        }>
+                        }
+                        aria-hidden="true">
                         <svg
                             width="60"
                             height="60"
                             viewBox="0 0 60 60"
                             fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
                             <rect
                                 width="60"
                                 height="60"
@@ -199,9 +204,11 @@ categoriasConImagen.forEach((cat) => {
                                 : "empresas"}{" "}
                             en esta categoría.
                         </p>
-                        <a
+                        <a 
                             href={`/empresas?categoria=${categoria.id}`}
-                            class="cat-ver-mas">
+                            class="cat-ver-mas"
+                            aria-label={`Ver todas las empresas de ${categoria.nombre}`}
+                            tabindex="0">
                             Ver empresas
                         </a>
                     </div>
@@ -222,5 +229,36 @@ categoriasConImagen.forEach((cat) => {
             // Reemplazar solo la primera palabra manteniendo el resto del texto
             titulo.textContent = titulo.textContent.replace(/^(Explora|Encuentra)/, palabraAleatoria);
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mejorar navegación por teclado en las tarjetas de categorías
+        const categoryCards = document.querySelectorAll('.cat-card-actividad');
+        
+        categoryCards.forEach((card: Element) => {
+            const cardElement = card as HTMLElement;
+            
+            // Permitir activación con Enter o Espacio
+            cardElement.addEventListener('keydown', function(e: KeyboardEvent) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const link = cardElement.querySelector('a');
+                    if (link) {
+                        link.click();
+                    }
+                }
+            });
+            
+            // Mejorar el focus visual
+            cardElement.addEventListener('focus', function() {
+                cardElement.style.outline = '2px solid #007bff';
+                cardElement.style.outlineOffset = '2px';
+            });
+            
+            cardElement.addEventListener('blur', function() {
+                cardElement.style.outline = '';
+                cardElement.style.outlineOffset = '';
+            });
+        });
     });
 </script>

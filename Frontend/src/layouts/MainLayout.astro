@@ -2,16 +2,119 @@
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import ChatModal from "../components/ChatModal.astro";
+
+// Props para SEO dinámico
+export interface Props {
+    title?: string;
+    description?: string;
+    image?: string;
+    canonical?: string;
+    noindex?: boolean;
+}
+
+const {
+    title = "Turify - Viví San Rafael, Mendoza | Turismo y Atractivos",
+    description = "Descubrí los mejores atractivos turísticos de San Rafael, Mendoza. Bodegas, actividades al aire libre, gastronomía, hospedaje y más. Planificá tu viaje perfecto.",
+    image = "/carrusel/LaberintoBorges.jpg",
+    canonical,
+    noindex = false
+} = Astro.props;
+
+const canonicalURL = canonical || Astro.url.href;
 ---
 
 <html lang="es">
     <head>
+        <!-- Favicon -->
         <link rel="icon" href="/logo-turify.png" />
+        <link rel="apple-touch-icon" href="/logo-turify.png" />
+        
+        <!-- Meta tags básicos -->
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content={description} />
+        <meta name="keywords" content="San Rafael, Mendoza, turismo, bodegas, viñedos, actividades al aire libre, gastronomía, hospedaje, atractivos turísticos, Argentina" />
+        <meta name="author" content="Turify" />
+        <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href={canonicalURL} />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalURL} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={new URL(image, Astro.url)} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:locale" content="es_AR" />
+        <meta property="og:site_name" content="Turify" />
+        
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalURL} />
+        <meta property="twitter:title" content={title} />
+        <meta property="twitter:description" content={description} />
+        <meta property="twitter:image" content={new URL(image, Astro.url)} />
+        
+        <!-- Título dinámico -->
+        <title>{title}</title>
+        
+        <!-- Preconnect para fuentes -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-        <title>Turify</title>
+        
+        <!-- Structured Data / JSON-LD -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TouristDestination",
+            "name": "San Rafael, Mendoza",
+            "description": "San Rafael es una ciudad turística en Mendoza, Argentina, conocida por sus bodegas, actividades al aire libre y atractivos naturales.",
+            "url": "https://turify.com.ar",
+            "image": [
+                "https://turify.com.ar/carrusel/LaberintoBorges.jpg",
+                "https://turify.com.ar/carrusel/bodega.webp",
+                "https://turify.com.ar/carrusel/naturaleza.jpg"
+            ],
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": -34.617,
+                "longitude": -68.33
+            },
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "San Rafael",
+                "addressRegion": "Mendoza",
+                "addressCountry": "AR"
+            },
+            "touristType": [
+                "Wine Tourism",
+                "Adventure Tourism",
+                "Cultural Tourism",
+                "Nature Tourism"
+            ],
+            "amenityFeature": [
+                {
+                    "@type": "LocationFeatureSpecification",
+                    "name": "Bodegas y Viñedos",
+                    "value": true
+                },
+                {
+                    "@type": "LocationFeatureSpecification", 
+                    "name": "Actividades al Aire Libre",
+                    "value": true
+                },
+                {
+                    "@type": "LocationFeatureSpecification",
+                    "name": "Gastronomía Local",
+                    "value": true
+                }
+            ]
+        }
+        </script>
     </head>
     <body>
         <Navbar />

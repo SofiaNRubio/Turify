@@ -4,9 +4,9 @@
 
 <link rel="stylesheet" href="/src/style/components.css">
 
-<section class="historia">
+<section class="historia" role="region" aria-labelledby="historia-title">
     <div class="historia-content">
-        <h3>Historia de Nuestra Ciudad</h3>
+        <h3 id="historia-title">Historia de Nuestra Ciudad</h3>
         <p>
             San Rafael, en Mendoza, nació en 1805 como un fuerte en la
             confluencia de los ríos Atuel y Diamante, un refugio en medio de la
@@ -25,8 +25,15 @@
     <div class="historia-mapa">
         <div
             id="historia-map"
-            style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;">
+            style="height: 250px; width: 100%; border-radius: 8px; z-index: 0;"
+            role="application"
+            aria-label="Mapa interactivo de San Rafael, Mendoza"
+            tabindex="0">
         </div>
+        <p class="sr-only">
+            Mapa interactivo mostrando la ubicación de San Rafael, Mendoza, Argentina. 
+            Coordenadas: -34.617° de latitud sur, -68.33° de longitud oeste.
+        </p>
     </div>
 </section>
 
@@ -69,6 +76,9 @@
                 .bindPopup("San Rafael, Mendoza")
                 .openPopup();
 
+            // Mejorar accesibilidad del mapa
+            mapElement.setAttribute('aria-label', 'Mapa de San Rafael, Mendoza. Ubicación: -34.617° sur, -68.33° oeste');
+
             // Asegurar que el mapa se redimensione correctamente
             setTimeout(function () {
                 map.invalidateSize();
@@ -82,6 +92,33 @@
             });
         } catch (error) {
             console.error("Error al inicializar el mapa:", error);
+            mapElement.setAttribute('aria-label', 'Error al cargar el mapa de San Rafael');
         }
     });
 </script>
+
+<style>
+    /* Screen reader only text */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    
+    /* Mejorar contraste del mapa */
+    #historia-map {
+        border: 2px solid #e0e0e0;
+    }
+    
+    /* Asegurar que el mapa sea accesible con teclado */
+    #historia-map:focus {
+        outline: 2px solid #007bff;
+        outline-offset: 2px;
+    }
+</style>

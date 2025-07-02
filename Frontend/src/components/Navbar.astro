@@ -10,26 +10,30 @@ const currentPath = Astro.url.pathname;
 
 <link rel="stylesheet" href="/src/style/navbar.css">
 
-<header class="header">
-    <nav class="navbar">
+<header class="header" role="banner">
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
         <div class="logo">
-            <a href="/"><img src="/logo.png" class="logo-img" /></a>
+            <a href="/" aria-label="Ir al inicio - Turify">
+                <img src="/logo.png" class="logo-img" alt="Logo de Turify" />
+            </a>
         </div>
         <!-- Botón hamburguesa CSS only -->
         <input type="checkbox" id="menu-toggle" class="menu-toggle" hidden />
-        <label for="menu-toggle" class="hamburger" aria-label="Abrir menú">
+        <label for="menu-toggle" class="hamburger" aria-label="Abrir menú de navegación">
             <span></span>
             <span></span>
             <span></span>
         </label>
-        <div class="nav-links">
-            <a href="/" class={currentPath === "/" ? "active" : ""}>Inicio</a>
-            <div class="dropdown-btn">
+        <div class="nav-links" id="main-navigation" role="menubar">
+            <a href="/" class={currentPath === "/" ? "active" : ""} role="menuitem">Inicio</a>
+            <div class="dropdown-btn" role="none">
                 <button
                     id="indicaciones-menu-button"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    class="indicaciones-btn">
+                    class="indicaciones-btn"
+                    role="menuitem"
+                    aria-controls="indicaciones-dropdown">
                     Indicaciones
                     <svg
                         aria-hidden="true"
@@ -43,32 +47,33 @@ const currentPath = Astro.url.pathname;
                         ></path>
                     </svg>
                 </button>
-                <div class="dropdown-content-btn">
-                    <a href="/moverte">Moverte en San Rafael</a>
-                    <a href="/llegar">Llegar a San Rafael</a>
+                <div class="dropdown-content-btn" id="indicaciones-dropdown" role="menu" aria-labelledby="indicaciones-menu-button">
+                    <a href="/moverte" role="menuitem">Moverte en San Rafael</a>
+                    <a href="/llegar" role="menuitem">Llegar a San Rafael</a>
                 </div>
             </div>
             <a
                 href="/emergencias"
                 class={currentPath === "/emergencias"
                     ? "active emergencias"
-                    : "emergencias"}>Emergencias</a
+                    : "emergencias"}
+                role="menuitem">Emergencias</a
             >
             <a
                 href="/servicios"
                 class={currentPath === "/servicios" ? "active" : ""}
-                >Servicios</a
+                role="menuitem">Servicios</a
             >
             <a
                 href="/hospedaje"
                 class={currentPath === "/hospedaje" ? "active" : ""}
-                >Hospedaje</a
+                role="menuitem">Hospedaje</a
             >
             <a href="/info" class={currentPath === "/info" ? "active" : ""}
-                >Informacion util</a
+                role="menuitem">Información útil</a
             >
         </div>
-        <div class="nav-auth">
+        <div class="nav-auth" role="complementary" aria-label="Autenticación de usuario">
             <SignedOut>
                 <SignInButton mode="modal" />
             </SignedOut>
@@ -87,12 +92,32 @@ const currentPath = Astro.url.pathname;
         ) as HTMLInputElement;
         const hamburger = document.querySelector(".hamburger") as HTMLElement;
         const navLinks = document.querySelector(".nav-links") as HTMLElement;
+        const indicacionesButton = document.getElementById("indicaciones-menu-button") as HTMLButtonElement;
+        const indicacionesDropdown = document.getElementById("indicaciones-dropdown") as HTMLElement;
 
         if (hamburger && navLinks) {
             hamburger.addEventListener("click", function () {
                 navLinks.classList.toggle("open");
                 if (menuToggle) {
                     menuToggle.checked = !menuToggle.checked;
+                }
+            });
+        }
+
+        // Manejar dropdown de indicaciones
+        if (indicacionesButton && indicacionesDropdown) {
+            indicacionesButton.addEventListener("click", function() {
+                const isExpanded = this.getAttribute("aria-expanded") === "true";
+                this.setAttribute("aria-expanded", (!isExpanded).toString());
+                indicacionesDropdown.style.display = isExpanded ? "none" : "block";
+            });
+
+            // Cerrar dropdown al hacer click fuera
+            document.addEventListener("click", function(e) {
+                const target = e.target as HTMLElement;
+                if (!indicacionesButton.contains(target) && !indicacionesDropdown.contains(target)) {
+                    indicacionesButton.setAttribute("aria-expanded", "false");
+                    indicacionesDropdown.style.display = "none";
                 }
             });
         }
