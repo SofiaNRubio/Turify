@@ -49,6 +49,7 @@
     gap: 1.5rem;
     flex: 1;
     justify-content: right;
+    align-items: center;
 }
 
 .nav-links a {

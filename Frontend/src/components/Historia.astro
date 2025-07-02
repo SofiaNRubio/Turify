@@ -37,70 +37,87 @@ import "../style/components.css";
     </div>
 </section>
 
+<!-- Cargar Leaflet CSS y JS solo en el cliente -->
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" is:inline
+></script>
+
 <script>
-    // @ts-ignore - Leaflet se carga globalmente
-    document.addEventListener("DOMContentLoaded", function () {
-        // @ts-ignore - L es la variable global de Leaflet
-        if (typeof L === "undefined") {
-            console.error("Leaflet no está cargado");
-            return;
-        }
+    // Función para inicializar el mapa (se ejecuta en el cliente)
+    function initMap() {
+        // Verificar si estamos en el cliente y Leaflet está disponible
+        if (typeof window !== "undefined" && (window as any).L) {
+            // Verificar si el elemento del mapa existe
+            const mapElement = document.getElementById("historia-map");
+            if (!mapElement) {
+                console.error("Elemento del mapa no encontrado");
+                return;
+            }
 
-        // Verificar si el elemento del mapa existe
-        const mapElement = document.getElementById("historia-map");
-        if (!mapElement) {
-            console.error("Elemento del mapa no encontrado");
-            return;
-        }
+            try {
+                const L = (window as any).L;
 
-        try {
-            // @ts-ignore - L es la variable global de Leaflet
-            var map = L.map("historia-map").setView([-34.617, -68.33], 13);
+                // Crear el mapa
+                const map = L.map("historia-map").setView(
+                    [-34.617, -68.33],
+                    13
+                );
 
-            // Agregar la capa de tiles
-            // @ts-ignore - L es la variable global de Leaflet
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: "© OpenStreetMap contributors",
-                maxZoom: 19,
-            }).addTo(map);
+                // Agregar la capa de tiles
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution: "© OpenStreetMap contributors",
+                        maxZoom: 19,
+                    }
+                ).addTo(map);
 
-            // Agregar marcador
-            // @ts-ignore - L es la variable global de Leaflet
-            L.marker([-34.617, -68.33])
-                .addTo(map)
-                .bindPopup("San Rafael, Mendoza")
-                .openPopup();
+                // Agregar marcador
+                L.marker([-34.617, -68.33])
+                    .addTo(map)
+                    .bindPopup("San Rafael, Mendoza")
+                    .openPopup();
 
-            // Mejorar accesibilidad del mapa
-            mapElement.setAttribute(
-                "aria-label",
-                "Mapa de San Rafael, Mendoza. Ubicación: -34.617° sur, -68.33° oeste"
-            );
+                // Mejorar accesibilidad del mapa
+                mapElement.setAttribute(
+                    "aria-label",
+                    "Mapa de San Rafael, Mendoza. Ubicación: -34.617° sur, -68.33° oeste"
+                );
 
-            // Asegurar que el mapa se redimensione correctamente
-            setTimeout(function () {
-                map.invalidateSize();
-            }, 500);
-
-            // Redimensionar cuando la ventana cambie de tamaño
-            window.addEventListener("resize", function () {
-                setTimeout(function () {
+                // Asegurar que el mapa se redimensione correctamente
+                setTimeout(() => {
                     map.invalidateSize();
-                }, 100);
-            });
-        } catch (error) {
-            console.error("Error al inicializar el mapa:", error);
-            mapElement.setAttribute(
-                "aria-label",
-                "Error al cargar el mapa de San Rafael"
-            );
+                }, 500);
+
+                // Redimensionar cuando la ventana cambie de tamaño
+                window.addEventListener("resize", () => {
+                    setTimeout(() => {
+                        map.invalidateSize();
+                    }, 100);
+                });
+            } catch (error) {
+                console.error("Error al inicializar el mapa:", error);
+                mapElement.setAttribute(
+                    "aria-label",
+                    "Error al cargar el mapa de San Rafael"
+                );
+            }
+        } else {
+            // Si Leaflet no está cargado, intentar de nuevo en un momento
+            setTimeout(initMap, 100);
         }
-    });
+    }
+
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initMap);
+    } else {
+        initMap();
+    }
 </script>
 
 <style>

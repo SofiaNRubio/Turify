@@ -1,5 +1,6 @@
 ---
 import { apiFetch } from "../utils/api";
+import FiltroUbicacion from "./FiltroUbicacion.astro";
 import "../style/hospedaje.css";
 
 interface Empresa {
@@ -15,6 +16,7 @@ interface Empresa {
     img_url: string | null;
     categoria_id: string | null;
     created_at: string;
+    distrito?: string;
 }
 
 interface Categoria {
@@ -27,6 +29,60 @@ interface CategoriaConImagen {
     nombre: string;
     imagen: string | null;
     empresasCount: number;
+}
+
+// Función para obtener distritos únicos donde hay empresas de hospedaje
+async function obtenerDistritos(): Promise<string[]> {
+    try {
+        const categorias = await obtenerCategorias();
+
+        const categoriasHospedaje = [
+            "hoteles",
+            "albergues",
+            "cabañas",
+            "camping",
+            "complejos",
+            "departamentos",
+            "motel",
+            "viviendas",
+            "hotel",
+            "albergue",
+            "cabaña",
+            "complejo",
+            "departamento",
+            "vivienda",
+        ];
+
+        const categoriasFiltradas = categorias.filter((categoria) =>
+            categoriasHospedaje.some((hospedaje) =>
+                categoria.nombre.toLowerCase().includes(hospedaje)
+            )
+        );
+
+        const todosLosDistritos: string[] = [];
+
+        for (const categoria of categoriasFiltradas) {
+            try {
+                const response = await apiFetch(
+                    `/empresas/distritos?categoria_id=${categoria.id}`
+                );
+                if (response.ok) {
+                    const distritos = await response.json();
+                    todosLosDistritos.push(...distritos);
+                }
+            } catch (error) {
+                console.error(
+                    `Error al obtener distritos para categoría ${categoria.nombre}:`,
+                    error
+                );
+            }
+        }
+
+        return [...new Set(todosLosDistritos)].sort();
+    } catch (error) {
+        console.error("Error al obtener distritos:", error);
+        return [];
+    }
 }
 
 async function obtenerCategorias(): Promise<Categoria[]> {
@@ -53,6 +109,22 @@ async function obtenerEmpresas(): Promise<Empresa[]> {
 
 const categorias = await obtenerCategorias();
 const empresas = await obtenerEmpresas();
+const distritos = await obtenerDistritos();
+
+// Obtener parámetros de consulta
+const url = new URL(Astro.request.url);
+const distritoSeleccionado = url.searchParams.get("distrito") || "";
+
+// Filtrar empresas por distrito si se seleccionó uno
+const empresasFiltradas = distritoSeleccionado
+    ? empresas.filter(
+          (empresa) =>
+              empresa.distrito &&
+              empresa.distrito
+                  .toLowerCase()
+                  .includes(distritoSeleccionado.toLowerCase())
+      )
+    : empresas;
 
 const categoriasHospedaje = [
     "hoteles",
@@ -79,7 +151,8 @@ const categoriasFiltradas = categorias.filter((categoria) =>
 
 const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .map((categoria) => {
-        const empresasDeCategoria = empresas.filter(
+        // Buscar empresas de esta categoría (usando empresas filtradas por distrito)
+        const empresasDeCategoria = empresasFiltradas.filter(
             (empresa) => empresa.categoria_id === categoria.id
         );
         const empresaConImagen = empresasDeCategoria.find(
@@ -106,53 +179,66 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
 </section>
 
 <section class="hospedaje-hospedaje">
-    <div class="empresas-grid">
-        {
-            categoriasConImagen.map((categoria: CategoriaConImagen) => (
-                <div class="empresa-card">
-                    <div class="imagen-container">
-                        {categoria.imagen ? (
-                            <img
-                                src={categoria.imagen}
-                                alt={categoria.nombre}
-                                onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
-                            />
-                        ) : null}
-                        <div class="placeholder">
-                            <svg
-                                width="40"
-                                height="40"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
-                                    fill="#0ea5e9"
-                                />
-                            </svg>
+    <div class="hospedaje-container">
+        <div class="filtro-ubicacion-container">
+            <FiltroUbicacion
+                distritos={distritos}
+                distritoSeleccionado={distritoSeleccionado}
+            />
+        </div>
+        <div class="contenido-hospedajes">
+            <div class="empresas-grid">
+                {
+                    categoriasConImagen.map((categoria: CategoriaConImagen) => (
+                        <div class="empresa-card">
+                            <div class="imagen-container">
+                                {categoria.imagen ? (
+                                    <img
+                                        src={categoria.imagen}
+                                        alt={categoria.nombre}
+                                        onerror={`this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';`}
+                                    />
+                                ) : null}
+                                <div class="placeholder">
+                                    <svg
+                                        width="40"
+                                        height="40"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4H5V21H19V9ZM12 8V10L8 14L12 18V16L16 12L12 8Z"
+                                            fill="#0ea5e9"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <span class="badge-categoria">
+                                    {categoria.nombre}
+                                </span>
+                                <h3>Hospedaje disponible</h3>
+                                <p class="descripcion">
+                                    Encuentra {categoria.empresasCount}{" "}
+                                    {categoria.empresasCount === 1
+                                        ? "opción"
+                                        : "opciones"}{" "}
+                                    de {categoria.nombre.toLowerCase()}{" "}
+                                    disponibles.
+                                </p>
+                                <div class="acciones">
+                                    <a
+                                        href={`/hospedaje?categoria=${categoria.id}`}
+                                        class="btn-ver-detalle">
+                                        Ver Opciones
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-content">
-                        <span class="badge-categoria">{categoria.nombre}</span>
-                        <h3>Hospedaje disponible</h3>
-                        <p class="descripcion">
-                            Encuentra {categoria.empresasCount}{" "}
-                            {categoria.empresasCount === 1
-                                ? "opción"
-                                : "opciones"}{" "}
-                            de {categoria.nombre.toLowerCase()} disponibles.
-                        </p>
-                        <div class="acciones">
-                            <a
-                                href={`/hospedaje?categoria=${categoria.id}`}
-                                class="btn-ver-detalle">
-                                Ver Opciones
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            ))
-        }
+                    ))
+                }
+            </div>
+        </div>
     </div>
 </section>
 
@@ -164,3 +250,57 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     </p>
     <a href="/" class="hospedaje-btn-principal">Principal</a>
 </section>
+
+<style>
+    .hospedaje-container {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        margin-top: 2rem;
+    }
+
+    .filtro-ubicacion-container {
+        flex-shrink: 0;
+        width: 300px;
+        position: sticky;
+        top: 100px;
+    }
+
+    .contenido-hospedajes {
+        flex: 1;
+    }
+
+    .empresas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .hospedaje-container {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .filtro-ubicacion-container {
+            width: 100%;
+            position: relative;
+            top: auto;
+            order: -1;
+        }
+
+        .empresas-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .empresas-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+</style>
