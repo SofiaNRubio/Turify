@@ -2,6 +2,7 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/atractivos-nuevo.css";
 
 // Obtener las empresas existentes
 const empresasResponse = await apiFetch('/empresas');
@@ -21,11 +22,7 @@ if (categoriasResponse.ok) {
   categorias = await categoriasResponse.json();
 } else {
   console.error('Error al cargar categorías:', categoriasResponse.statusText);
-  // En caso de error, usar categorías por defecto solo para la interfaz
-  categorias = [
-    { id: "cat1", nombre: "Naturaleza" },
-    { id: "cat2", nombre: "Monumento" },
-  ];
+  categorias = [];
 }
 
 let mensaje = "";
@@ -50,38 +47,25 @@ if (Astro.request.method === "POST") {
         nombre: formData.get('nombre'),
         descripcion: formData.get('descripcion'),
         categoria_id: formData.get('categoria_id'),
-        img_url: formData.get('img_url'),
+        img_url: formData.get('img_url') || '',
         latitud: parseFloat(formData.get('latitud')?.toString() || '0'),
         longitud: parseFloat(formData.get('longitud')?.toString() || '0'),
-        direccion: formData.get('direccion'),
-        distrito: formData.get('distrito')
+        direccion: formData.get('direccion') || '',
+        distrito: formData.get('distrito') || ''
       };
       
       // Obtener la empresa_id del paso anterior
-      atractivoData.empresa_id = formData.get('empresa_id');      // Primero validar los datos
-      console.log("Enviando datos para validación:", atractivoData);
+      atractivoData.empresa_id = formData.get('empresa_id');
       
-      const validacionResponse = await apiFetch('/atractivos/validar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(atractivoData)
-      });
+      // Validar que todos los campos requeridos tengan valores
+      const camposRequeridos = ['nombre', 'descripcion', 'empresa_id', 'categoria_id', 'latitud', 'longitud', 'distrito'];
+      const camposFaltantes = camposRequeridos.filter(campo => !atractivoData[campo]);
       
-      if (!validacionResponse.ok) {
-        let mensajeError;
-        try {
-          const errorData = await validacionResponse.json();
-          mensajeError = errorData.error || 'Error en la validación de datos';
-        } catch (jsonError) {
-          mensajeError = `Error en la validación de datos (${validacionResponse.status}): ${validacionResponse.statusText}`;
-        }
-        throw new Error(mensajeError);
+      if (camposFaltantes.length > 0) {
+        throw new Error(`Faltan campos requeridos: ${camposFaltantes.join(', ')}`);
       }
       
-      // Si la validación es exitosa, crear el atractivo
-      console.log("Validación exitosa, creando atractivo:", atractivoData);
+      console.log("Creando atractivo:", atractivoData);
       
       const atractivoResponse = await apiFetch('/atractivos', {
         method: 'POST',
@@ -136,8 +120,8 @@ if (Astro.request.method === "POST") {
         throw new Error('Error al crear la empresa');
       }
         const nuevaEmpresa = await empresaResponse.json();
-        // Usar redirección en lugar de setTimeout
-      return Astro.redirect(`/admin/gestion-nuevo?paso=2&empresa_id=${nuevaEmpresa.id}`);
+        // Usar redirección en lugar de setTimeout, pasando también la categoría de la empresa
+      return Astro.redirect(`/admin/gestion-nuevo?paso=2&empresa_id=${nuevaEmpresa.id}&categoria_empresa=${nuevaEmpresa.categoria_id}`);
     }
   } catch (err: any) {
     console.error('Error:', err);
@@ -148,6 +132,7 @@ if (Astro.request.method === "POST") {
 // Determinar el paso actual
 const paso = Astro.url.searchParams.get('paso') || '1';
 const empresa_id = Astro.url.searchParams.get('empresa_id') || '';
+const categoria_empresa = Astro.url.searchParams.get('categoria_empresa') || '';
 
 // Si estamos en el paso 2 y tenemos una empresa_id, obtener los datos de la empresa
 let empresaActual = null;
@@ -168,8 +153,6 @@ if (paso === '2' && empresa_id) {
   }
 }
 ---
-
-<link rel="stylesheet" href="/src/style/atractivos-nuevo.css">
 
 <AdminPanel menu={AdminMenu}>
     <div class="admin-content">
@@ -212,7 +195,8 @@ if (paso === '2' && empresa_id) {
               <div class="empresas-grid">
                 {empresas.map((empresa: any) => (
                   <div class="empresa-card" data-id={empresa.id} data-nombre={empresa.nombre} 
-                       data-lat={empresa.latitud} data-lng={empresa.longitud} data-dir={empresa.direccion}>
+                       data-lat={empresa.latitud} data-lng={empresa.longitud} data-dir={empresa.direccion}
+                       data-categoria={empresa.categoria_id}>
                     <h4>{empresa.nombre}</h4>
                     <p class="empresa-categoria">{obtenerNombreCategoria(empresa.categoria_id)}</p>
                     <p class="empresa-direccion">{empresa.direccion}</p>
@@ -340,7 +324,9 @@ if (paso === '2' && empresa_id) {
                 <select name="categoria_id" required>
                   <option value="">-- Seleccionar categoría --</option>
                   {categorias.map((cat: any) => (
-                    <option value={cat.id}>{cat.nombre}</option>
+                    <option value={cat.id} selected={cat.id === categoria_empresa}>
+                      {cat.nombre}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -427,8 +413,9 @@ if (paso === '2' && empresa_id) {
         // Aplicar nueva selección
         card.classList.add('selected');
         
-        // Guardar ID
+        // Guardar ID y categoría de la empresa
         selectedEmpresaId = card.getAttribute('data-id');
+        const selectedEmpresaCategoria = card.getAttribute('data-categoria');
         
         // Mostrar empresa seleccionada
         if (empresaNombreDisplay) {
@@ -436,13 +423,21 @@ if (paso === '2' && empresa_id) {
         }
         empresaSeleccionada?.classList.remove('hidden');
         
-        // Habilitar botón de siguiente
+        // Habilitar botón de siguiente y guardar la categoría
         btnSiguientePaso1?.classList.remove('disabled');
+        if (btnSiguientePaso1) {
+          btnSiguientePaso1.setAttribute('data-categoria', selectedEmpresaCategoria || '');
+        }
       });
     });      // Botón para ir al siguiente paso
     btnSiguientePaso1?.addEventListener('click', () => {
       if (selectedEmpresaId) {
-        window.location.href = `/admin/gestion-nuevo?paso=2&empresa_id=${selectedEmpresaId}&accion=seleccionada`;
+        const categoriaEmpresa = btnSiguientePaso1.getAttribute('data-categoria') || '';
+        let url = `/admin/gestion-nuevo?paso=2&empresa_id=${selectedEmpresaId}&accion=seleccionada`;
+        if (categoriaEmpresa) {
+          url += `&categoria_empresa=${categoriaEmpresa}`;
+        }
+        window.location.href = url;
       } else {
         alert('Por favor selecciona una empresa');
       }
@@ -742,3 +737,52 @@ if (paso === '2' && empresa_id) {
         color: #007bff;
     }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  // Validación de formulario de atractivo
+  const formAtractivo = document.getElementById('form-atractivo');
+  if (formAtractivo) {
+    formAtractivo.addEventListener('submit', function(e) {
+      // Obtener campos requeridos
+      const nombre = document.querySelector('input[name="nombre"]')?.value.trim();
+      const descripcion = document.querySelector('textarea[name="descripcion"]')?.value.trim();
+      const categoria_id = document.querySelector('select[name="categoria_id"]')?.value;
+      const latitud = document.querySelector('input[name="latitud"]')?.value.trim();
+      const longitud = document.querySelector('input[name="longitud"]')?.value.trim();
+      const distrito = document.querySelector('input[name="distrito"]')?.value.trim();
+      const empresa_id = document.querySelector('input[name="empresa_id"]')?.value;
+      
+      // Lista para almacenar mensajes de error
+      const errores = [];
+      
+      // Validar campos
+      if (!nombre) errores.push('El nombre es obligatorio');
+      if (!descripcion) errores.push('La descripción es obligatoria');
+      if (!categoria_id) errores.push('Debe seleccionar una categoría');
+      if (!latitud) errores.push('La latitud es obligatoria');
+      if (!longitud) errores.push('La longitud es obligatoria');
+      if (!distrito) errores.push('El distrito es obligatorio');
+      if (!empresa_id) errores.push('La empresa es obligatoria');
+      
+      // Si hay errores, prevenir envío y mostrar mensaje
+      if (errores.length > 0) {
+        e.preventDefault();
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'mensaje mensaje-error';
+        errorMsg.innerHTML = `<p>Por favor, corrija los siguientes errores:</p><ul>${errores.map(err => `<li>${err}</li>`).join('')}</ul>`;
+        
+        // Eliminar mensajes de error previos
+        const prevError = formAtractivo.querySelector('.mensaje-error');
+        if (prevError) prevError.remove();
+        
+        // Agregar nuevo mensaje de error al inicio del formulario
+        formAtractivo.insertBefore(errorMsg, formAtractivo.firstChild);
+        
+        // Scroll al inicio del formulario
+        window.scrollTo(0, formAtractivo.offsetTop - 100);
+      }
+    });
+    }
+  });
+</script>

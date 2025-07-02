@@ -2,6 +2,8 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/atractivos.css";
+import "../../style/modal.css";
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
@@ -21,29 +23,23 @@ try {
   const response = await apiFetch(apiUrl);
   if (response.ok) {
     rutas = await response.json();
-    // Si no hay rutas desde la API, usar la ruta existente conocida
-    if (rutas.length === 0) {
-      rutas = [{ id: 'ruta1', nombre: "Ruta del vino familiar" }];
-    }
   } else {
     console.error('Error al cargar rutas:', response.statusText);
-    // Usar datos de respaldo en caso de error
-    rutas = [{ id: 'ruta1', nombre: "Ruta del vino familiar" }];
+    rutas = [];
   }
 } catch (error) {
   console.error('Error al conectar con la API:', error);
-  // Usar datos de respaldo en caso de error
-  rutas = [{ id: 'ruta1', nombre: "Ruta del vino familiar" }];
+  rutas = [];
 }
 ---
-
-<link rel="stylesheet" href="/src/style/atractivos.css">
-<link rel="stylesheet" href="/src/style/modal.css">
 
 <AdminPanel menu={AdminMenu}><div class="admin-content">
     <div class="header">
       <h1>Rutas Turísticas</h1>
-      <a href="/admin/rutas-nueva" class="btn-nuevo">+ Nueva Ruta</a>
+      <a href="/admin/rutas-nueva" class="btn btn-nuevo">
+        <span class="btn-icon">+</span>
+        <span class="btn-text">Nueva Ruta</span>
+      </a>
     </div>
       <!-- Filtros -->
     <div class="filtros-container">
@@ -73,8 +69,14 @@ try {
             <tr>              <td>{ruta.id}</td>
               <td>{ruta.nombre}</td>
               <td class="acciones">
-                <button class="btn-editar" data-id={ruta.id}>Editar</button>
-                <button class="btn-eliminar" data-id={ruta.id} data-nombre={ruta.nombre}>Eliminar</button>
+                <button class="btn btn-editar" data-id={ruta.id} title="Editar esta ruta">
+                  <span class="btn-icon">✏️</span>
+                  <span class="btn-text">Editar</span>
+                </button>
+                <button class="btn btn-eliminar" data-id={ruta.id} data-nombre={ruta.nombre} title="Eliminar esta ruta">
+                  <span class="btn-icon">🗑️</span>
+                  <span class="btn-text">Eliminar</span>
+                </button>
               </td>
             </tr>
           ))
@@ -123,6 +125,21 @@ try {
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Función apiFetch para uso en el cliente
+    const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+      const API_URL = window.location.origin.includes('localhost') 
+        ? 'http://localhost:3000' 
+        : 'https://api.turify.com';
+      const url = endpoint.startsWith('http') ? endpoint : `${API_URL}/api${endpoint}`;
+      return fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+    };
+    
     // Elementos del modal de eliminación
     const btnEliminar = document.querySelectorAll('.btn-eliminar');
     const modalConfirmarEliminar = document.getElementById('modal-confirmar-eliminar');

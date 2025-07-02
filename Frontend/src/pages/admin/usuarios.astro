@@ -2,46 +2,74 @@
 import AdminPanel from "../../components/AdminPanel.astro";
 import { AdminMenu } from "../../components/AdminMenu";
 import { apiFetch } from "../../utils/api";
+import "../../style/atractivos.css";
+import "../../style/modal.css";
+import { clerkClient } from '@clerk/clerk-sdk-node';
 
 // Obtener parámetros de filtro de la URL
 const { searchParams } = Astro.url;
 const nombreFiltro = searchParams.get('nombre') || '';
 
-// Construir la URL de la API con los filtros
-// Usamos el endpoint específico para usuarios_locales
-let apiUrl = '/usuarios/locales';
-const filtros = [];
-if (nombreFiltro) filtros.push(`nombre=${encodeURIComponent(nombreFiltro)}`);
-if (filtros.length > 0) {
-  apiUrl += `?${filtros.join('&')}`;
-}
-
-// Obtener usuarios desde la API
+// Obtener usuarios desde Clerk en lugar de la API local
 let usuarios = [];
+let errorMessage = '';
+let isLoading = true;
+
 try {
-  const response = await apiFetch(apiUrl);  
-  if (response.ok) {
-    usuarios = await response.json();
-    console.log("Usuarios recibidos:", usuarios);
-  } else {
-    console.error('Error al cargar usuarios:', response.statusText);
-    // No mostrar datos de respaldo, dejar el array vacío
-    usuarios = [];
+  // Obtenemos todos los usuarios de Clerk
+  const clerkUsers = await clerkClient.users.getUserList({
+    limit: 100,
+  });
+  
+  // Mapeamos los usuarios de Clerk a un formato más simple para usar en la tabla
+  usuarios = clerkUsers.map(user => ({
+    id: user.id,
+    nombre: user.firstName && user.lastName 
+      ? `${user.firstName} ${user.lastName}` 
+      : user.emailAddresses[0]?.emailAddress || "Sin nombre",
+    email: user.emailAddresses[0]?.emailAddress || "Sin email",
+    rol: user.publicMetadata?.rol || "Usuario",
+    createdAt: new Date(user.createdAt).toLocaleDateString(),
+    lastSignIn: user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleDateString() : "Nunca"
+  }));
+  
+  // Filtrar por nombre si se ha proporcionado un filtro
+  if (nombreFiltro) {
+    usuarios = usuarios.filter(user => 
+      user.nombre.toLowerCase().includes(nombreFiltro.toLowerCase()) ||
+      user.email.toLowerCase().includes(nombreFiltro.toLowerCase())
+    );
   }
+
+  console.log("Usuarios recibidos de Clerk:", usuarios);
+  isLoading = false;
 } catch (error) {
-  console.error('Error al conectar con la API:', error);
-  // No mostrar datos de respaldo, dejar el array vacío
+  console.error('Error al obtener usuarios de Clerk:', error);
+  errorMessage = 'No se pudieron cargar los usuarios de Clerk. ' + (error instanceof Error ? error.message : String(error));
   usuarios = [];
+  
+  // Intentar obtener usuarios locales como fallback
+  try {
+    const response = await apiFetch('/usuarios/locales');
+    if (response.ok) {
+      const localUsers = await response.json();
+      if (localUsers && localUsers.length > 0) {
+        usuarios = localUsers;
+        errorMessage = 'Mostrando usuarios locales como fallback.';
+      }
+    }
+  } catch (fallbackError) {
+    console.error('Error al obtener usuarios locales:', fallbackError);
+  }
+  isLoading = false;
 }
 ---
-
-<link rel="stylesheet" href="/src/style/atractivos.css">
-<link rel="stylesheet" href="/src/style/modal.css">
 
 <AdminPanel menu={AdminMenu}>
   <div class="admin-content">
     <div class="header">
       <h1>Usuarios</h1>
+      {errorMessage && <div class="error-message">{errorMessage}</div>}
     </div>
     
     <!-- Filtros -->
@@ -61,22 +89,36 @@ try {
     <!-- Tabla de usuarios -->
     <table>      <thead>
         <tr>
-          <th>ID</th>
           <th>Nombre</th>
+          <th>Email</th>
           <th>Rol</th>
           <th>Acciones</th>
         </tr>
       </thead>      <tbody>
-        {usuarios.length > 0 ? (
+        {isLoading ? (
+          <tr>
+            <td colspan="4" class="loading">
+              <div class="loader"></div>
+              Cargando usuarios...
+            </td>
+          </tr>
+        ) : usuarios.length > 0 ? (
           usuarios.map((usuario: any) => {
             console.log("Procesando usuario:", usuario);
             return (
               <tr>
-                <td>{usuario.id}</td>
                 <td>{usuario.nombre || "Sin nombre"}</td>
-                <td>{usuario.rol || "Sin rol"}</td>
+                <td>{usuario.email || "Sin email"}</td>
+                <td>{usuario.rol || "Usuario"}</td>
                 <td class="acciones">
-                  <button class="btn-eliminar" data-id={usuario.id} data-nombre={usuario.nombre || "Usuario"}>Eliminar</button>
+                  <button class="btn btn-editar" data-id={usuario.id} data-nombre={usuario.nombre || "Usuario"} title="Editar rol de usuario">
+                    <span class="btn-icon">✏️</span>
+                    <span class="btn-text">Editar</span>
+                  </button>
+                  <button class="btn btn-eliminar" data-id={usuario.id} data-nombre={usuario.nombre || "Usuario"} title="Eliminar este usuario">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-text">Eliminar</span>
+                  </button>
                 </td>
               </tr>
             );
@@ -84,7 +126,7 @@ try {
         ) : (
           <tr>
             <td colspan="4" class="sin-resultados">
-              No hay usuarios locales registrados en el sistema
+              No hay usuarios registrados en el sistema
             </td>
           </tr>
         )}
@@ -109,6 +151,31 @@ try {
     </div>
   </div>
 
+  <!-- Modal de edición de rol -->
+  <div id="modal-editar-rol" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar rol de usuario</h3>
+      </div>
+      <div class="modal-body">
+        <p id="texto-editar-rol">Selecciona el nuevo rol para el usuario:</p>
+        
+        <div class="form-group">
+          <select id="select-rol" class="form-control">
+            <option value="Usuario">Usuario</option>
+            <option value="Admin">Administrador</option>
+            <option value="Editor">Editor</option>
+          </select>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-primary" id="btn-guardar-rol">Guardar</button>
+          <button class="modal-btn modal-btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de notificación -->
   <div id="modal-notificacion" class="modal-overlay hidden">
     <div class="modal">
@@ -126,13 +193,81 @@ try {
   </div>
 </AdminPanel>
 
+<style>
+  .error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    border-left: 4px solid #c62828;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+  }
+  
+  .loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+  }
+  
+  .btn-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Función apiFetch para uso en el cliente
+    const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+      const API_URL = window.location.origin.includes('localhost') 
+        ? 'http://localhost:3000' 
+        : 'https://api.turify.com';
+      const url = endpoint.startsWith('http') ? endpoint : `${API_URL}/api${endpoint}`;
+      return fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+    };
+    
     // Elementos del modal de eliminación
     const btnEliminar = document.querySelectorAll('.btn-eliminar');
     const modalConfirmarEliminar = document.getElementById('modal-confirmar-eliminar');
     const btnCancelarConfirmar = document.getElementById('btn-cancelar-confirmar');
     const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar');
+    
+    // Elementos del modal de edición de rol
+    const btnEditar = document.querySelectorAll('.btn-editar');
+    const modalEditarRol = document.getElementById('modal-editar-rol');
+    const selectRol = document.getElementById('select-rol') as HTMLSelectElement;
+    const btnGuardarRol = document.getElementById('btn-guardar-rol');
+    const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
     
     // Modal de notificación
     const modalNotificacion = document.getElementById('modal-notificacion');
@@ -141,6 +276,8 @@ try {
     // Variables para almacenar datos del elemento seleccionado
     let currentId: string | null = null;
     let currentNombre: string | null = null;
+    let currentRol: string | null = null;
+    let isActionInProgress = false;
     
     // Función para mostrar notificación
     function mostrarNotificacion(titulo: string, mensaje: string, esExito: boolean = true, recargar: boolean = true) {
@@ -193,6 +330,38 @@ try {
       });
     }
     
+    // Modal de Editar Rol
+    if (btnEditar && modalEditarRol) {
+      btnEditar.forEach((btn: Element) => {
+        btn.addEventListener('click', () => {
+          currentId = btn.getAttribute('data-id');
+          currentNombre = btn.getAttribute('data-nombre');
+          currentRol = btn.closest('tr')?.querySelector('td:nth-child(3)')?.textContent || 'Usuario';
+          
+          // Configurar texto de edición
+          const textoEditarRol = document.getElementById('texto-editar-rol');
+          if (textoEditarRol) {
+            textoEditarRol.textContent = `Selecciona el nuevo rol para "${currentNombre}":`;
+          }
+          
+          // Seleccionar el rol actual en el dropdown
+          if (selectRol) {
+            for (let i = 0; i < selectRol.options.length; i++) {
+              if (selectRol.options[i].value === currentRol) {
+                selectRol.selectedIndex = i;
+                break;
+              }
+            }
+          }
+          
+          // Mostrar modal de edición
+          if (modalEditarRol) {
+            modalEditarRol.classList.remove('hidden');
+          }
+        });
+      });
+    }
+    
     // Botón Cancelar confirmación
     if (btnCancelarConfirmar && modalConfirmarEliminar) {
       btnCancelarConfirmar.addEventListener('click', () => {
@@ -200,33 +369,100 @@ try {
       });
     }
     
+    // Botón Cancelar edición
+    if (btnCancelarEditar && modalEditarRol) {
+      btnCancelarEditar.addEventListener('click', () => {
+        modalEditarRol.classList.add('hidden');
+      });
+    }
+    
+    // Botón Guardar rol
+    if (btnGuardarRol && modalEditarRol && selectRol) {
+      btnGuardarRol.addEventListener('click', async () => {
+        if (isActionInProgress) return;
+        isActionInProgress = true;
+        
+        // Cambiar el texto del botón a "Guardando..."
+        const originalText = btnGuardarRol.innerHTML;
+        btnGuardarRol.innerHTML = '<span class="btn-spinner"></span> Guardando...';
+        (btnGuardarRol as HTMLButtonElement).disabled = true;
+        
+        if (modalEditarRol) {
+          modalEditarRol.classList.add('hidden');
+        }
+        
+        const nuevoRol = selectRol.value;
+        
+        try {
+          // Llamada a la API para actualizar el rol del usuario en Clerk
+          const response = await apiFetch(`/usuarios/rol`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              userId: currentId,
+              rol: nuevoRol
+            })
+          });
+          
+          if (response.ok) {
+            mostrarNotificacion('¡Éxito!', `Rol del usuario "${currentNombre}" actualizado a ${nuevoRol}`, true);
+          } else {
+            const data = await response.json();
+            mostrarNotificacion('Error', data.error || 'No se pudo actualizar el rol del usuario', false, false);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarNotificacion('Error', 'Ha ocurrido un error durante la actualización del rol', false, false);
+        } finally {
+          // Restaurar el botón
+          btnGuardarRol.innerHTML = originalText;
+          (btnGuardarRol as HTMLButtonElement).disabled = false;
+          isActionInProgress = false;
+        }
+      });
+    }
+    
     // Botón Confirmar eliminación
     if (btnConfirmarEliminar && modalConfirmarEliminar) {
       btnConfirmarEliminar.addEventListener('click', async () => {
+        if (isActionInProgress) return;
+        isActionInProgress = true;
+        
+        // Cambiar el texto del botón a "Eliminando..."
+        const originalText = btnConfirmarEliminar.innerHTML;
+        btnConfirmarEliminar.innerHTML = '<span class="btn-spinner"></span> Eliminando...';
+        (btnConfirmarEliminar as HTMLButtonElement).disabled = true;
+        
         if (modalConfirmarEliminar) {
           modalConfirmarEliminar.classList.add('hidden');
         }
-          try {
+        
+        try {
+          // Llamada a la API para eliminar el usuario en Clerk
           const response = await apiFetch(`/usuarios/${currentId}`, {
             method: 'DELETE'
           });
           
-          const data = await response.json();
-          
           if (response.ok) {
+            const data = await response.json();
             mostrarNotificacion('¡Éxito!', `Usuario "${currentNombre}" eliminado correctamente`, true);
           } else {
+            const data = await response.json();
             mostrarNotificacion('Error', data.error || 'No se pudo eliminar el usuario', false, false);
           }
         } catch (error) {
           console.error('Error:', error);
           mostrarNotificacion('Error', 'Ha ocurrido un error durante la eliminación', false, false);
+        } finally {
+          // Restaurar el botón
+          btnConfirmarEliminar.innerHTML = originalText;
+          (btnConfirmarEliminar as HTMLButtonElement).disabled = false;
+          isActionInProgress = false;
         }
       });
     }
     
     // Cerrar modales haciendo clic fuera
-    [modalConfirmarEliminar, modalNotificacion].forEach(modal => {
+    [modalConfirmarEliminar, modalEditarRol, modalNotificacion].forEach(modal => {
       if (modal) {
         modal.addEventListener('click', (e: MouseEvent) => {
           if (e.target === modal) {
