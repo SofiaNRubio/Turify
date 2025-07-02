@@ -63,17 +63,66 @@
 }
 
 
+
+.emergencias-section .breadcrumb a {
+    color: #dc2626;
+    text-decoration: none;
+}
+
+.emergencias-section .breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* Botón volver */
+.btn-volver {
+    padding: 0.5rem 1rem;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+.btn-volver:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+}
+
+/* Título de categoría */
+.emergencias-section .titulo-categoria {
+    color: #dc2626;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Personalización de colores para Emergencias - Cards */
+.servicios-emergencia .badge-categoria,
+.emergencias-section .badge-categoria {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+.servicios-emergencia .empresa-card h3,
+.emergencias-section .empresa-card h3 {
+    color: #dc2626;
+}
+
+.servicios-emergencia .info-empresa svg,
+.emergencias-section .info-empresa svg {
+    color: #dc2626;
+}
+
+.servicios-emergencia .info-empresa a,
+.emergencias-section .info-empresa a {
+    color: #dc2626;
+}
+
 .servicios-emergencia .btn-llamar,
 .emergencias-section .btn-llamar {
     background: linear-gradient(135deg, #dc2626, #ef4444);
-    padding: 10px 50px;
-    border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    -ms-border-radius: 10px;
-    -o-border-radius: 10px;
-    color: #78fa78;
-    text-decoration: none;
 }
 
 .servicios-emergencia .btn-llamar:hover,
@@ -81,6 +130,28 @@
     background: linear-gradient(135deg, #b91c1c, #dc2626);
 }
 
+.servicios-emergencia .btn-ver-detalle,
+.emergencias-section .btn-ver-detalle {
+    background: linear-gradient(135deg, #374151, #4b5563);
+    color: white;
+    border: none;
+}
+
+.servicios-emergencia .btn-ver-detalle:hover,
+.emergencias-section .btn-ver-detalle:hover {
+    background: linear-gradient(135deg, #1f2937, #374151);
+}
+
+.servicios-emergencia .empresa-card:hover,
+.emergencias-section .empresa-card:hover {
+    border-color: #dc2626;
+    box-shadow: 0 16px 48px rgba(220, 38, 38, 0.15);
+}
+
+.servicios-emergencia .placeholder,
+.emergencias-section .placeholder {
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
 
 /* Media queries */
 @media (max-width: 768px) {

@@ -13,19 +13,11 @@ router.post("/", requireAuth, async (req, res) => {
     const { atractivo_id, comentario, puntaje } = req.body;
     const user_id = req.auth.userId;
 
-    console.log("-------------------------------------");
-    console.log("Recibida petición de reseña:");
-    console.log("- ID de atractivo recibido:", atractivo_id);
-    console.log("- ID de usuario:", user_id);
-    console.log("- Puntaje:", puntaje);
     console.log(
         "- Comentario:",
         comentario?.substring(0, 30) + (comentario?.length > 30 ? "..." : "")
     );
-    console.log("-------------------------------------");
-
     if (!atractivo_id || !comentario || !puntaje) {
-        console.log("Error: Faltan datos obligatorios");
         return res
             .status(400)
             .json({ error: "Se requieren atractivo_id, comentario y puntaje" });
@@ -43,11 +35,9 @@ router.post("/", requireAuth, async (req, res) => {
             console.error(
                 `ERROR: El ID ${atractivo_id} no tiene el formato correcto para un atractivo (debe empezar con 'atr')`
             );
-            return res
-                .status(400)
-                .json({
-                    error: `El ID ${atractivo_id} no tiene el formato correcto para un atractivo`,
-                });
+            return res.status(400).json({
+                error: `El ID ${atractivo_id} no tiene el formato correcto para un atractivo`,
+            });
         }
 
         // Verificar si existe el atractivo en la base de datos
@@ -71,11 +61,9 @@ router.post("/", requireAuth, async (req, res) => {
                 atractivos.rows.map((row) => row.id)
             );
 
-            return res
-                .status(400)
-                .json({
-                    error: `El atractivo con ID ${atractivo_id} no existe en la base de datos`,
-                });
+            return res.status(400).json({
+                error: `El atractivo con ID ${atractivo_id} no existe en la base de datos`,
+            });
         }
 
         // Verificar si el usuario ya ha reseñado este atractivo
@@ -119,9 +107,6 @@ router.get("/:atractivo_id", async (req, res) => {
     const { atractivo_id } = req.params;
 
     try {
-        console.log("-------------------------------------");
-        console.log(`Buscando reseñas para atractivo: ${atractivo_id}`);
-
         const result = await db.execute({
             sql: `
                 SELECT r.id, r.atractivo_id, r.user_id, r.comentario, r.puntaje, r.fecha,
@@ -136,7 +121,6 @@ router.get("/:atractivo_id", async (req, res) => {
         console.log(
             `Se encontraron ${result.rows.length} reseñas para el atractivo ${atractivo_id}`
         );
-        console.log("-------------------------------------");
         res.json(result.rows);
     } catch (err) {
         console.error(

@@ -1,5 +1,6 @@
 ---
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 interface Empresa {
     id: string;
@@ -99,8 +100,6 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     .filter((categoria) => categoria.empresasCount > 0);
 ---
 
-<link rel="stylesheet" href="/src/style/hospedaje.css" />
-
 <section class="hospedaje-hero">
     <h1 class="hospedaje-title">Hospedaje</h1>
     <div class="hospedaje-underline"></div>
@@ -165,4 +164,3 @@ const categoriasConImagen: CategoriaConImagen[] = categoriasFiltradas
     </p>
     <a href="/" class="hospedaje-btn-principal">Principal</a>
 </section>
-

@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import EmergenciasComponent from "../components/Emergencias.astro";
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -54,8 +55,6 @@ if (categoriaId) {
 }
 ---
 
-<link rel="stylesheet" href="/src/style/hospedaje.css" />
-
 <MainLayout>
     <section class="emergencias-section">
         <div class="header">
@@ -65,18 +64,6 @@ if (categoriaId) {
         {
             categoriaId && categoriaSeleccionada ? (
                 <div class="container">
-                    <div class="breadcrumb">
-                        <a href="/">Inicio</a>
-                        <span>›</span>
-                        <a href="/emergencias">Emergencias</a>
-                        <span>›</span>
-                        <span>{categoriaSeleccionada.nombre}</span>
-                    </div>
-                    <button
-                        onclick="window.location.href='/emergencias'"
-                        class="btn-volver">
-                        ← Volver a categorías
-                    </button>
                     <h2 class="titulo-categoria">
                         {categoriaSeleccionada.nombre}
                     </h2>

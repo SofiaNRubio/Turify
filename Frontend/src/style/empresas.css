@@ -13,6 +13,31 @@
     margin: 0 auto;
 }
 
+/* Estructura principal con filtro lateral */
+.main-content-wrapper {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    min-height: 60vh;
+    position: relative;
+}
+
+.filtro-sidebar {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    padding-left: 1rem;
+}
+
+.content-main {
+    flex: 1;
+    margin-left: 200px;
+    /* Espacio para el filtro fijo */
+    min-height: 60vh;
+}
+
 .header {
     text-align: center;
     margin-bottom: 3rem;
@@ -93,6 +118,26 @@
 
     .header h1 {
         font-size: 2rem;
+    }
+
+    /* En móviles, cambiar a layout vertical */
+    .main-content-wrapper {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .filtro-sidebar {
+        position: static;
+        transform: none;
+        left: auto;
+        padding-left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-main {
+        margin-left: 0;
     }
 }
 

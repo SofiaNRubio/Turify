@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import MoverteComponent from "../components/Moverte.astro";
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 // Definir tipos TypeScript
 interface Empresa {
@@ -54,19 +55,10 @@ if (categoriaId) {
 }
 ---
 
-<link rel="stylesheet" href="/src/style/hospedaje.css" />
-
 <MainLayout>
     {
         categoriaId && categoriaSeleccionada ? (
             <div class="servicios-filtrados">
-                <div class="header-transporte">
-                    <a href="/moverte" class="volver-btn">
-                        ← Volver a servicios de transporte
-                    </a>
-                    <h2>Servicios de {categoriaSeleccionada.nombre}</h2>
-                </div>
-
                 {serviciosFiltrados.length > 0 ? (
                     <div class="empresas-grid">
                         {serviciosFiltrados.map((servicio: Empresa) => (

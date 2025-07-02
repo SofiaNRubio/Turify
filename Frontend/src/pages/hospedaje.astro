@@ -2,6 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import HospedajeComponent from "../components/Hospedaje.astro";
 import { apiFetch } from "../utils/api";
+import "../style/hospedaje.css";
 
 interface Empresa {
     id: string;
@@ -48,17 +49,10 @@ if (categoriaId) {
 }
 ---
 
-<link rel="stylesheet" href="/src/style/hospedaje.css" />
 <MainLayout>
     {
         categoriaId && categoriaSeleccionada ? (
             <div class="hospedaje-filtrados">
-                <div class="header-hospedaje">
-                    <a href="/hospedaje" class="volver-btn">
-                        ← Volver a hospedaje
-                    </a>
-                    <h2>Hospedaje: {categoriaSeleccionada.nombre}</h2>
-                </div>
                 {hospedajesFiltrados.length > 0 ? (
                     <div class="empresas-grid">
                         {hospedajesFiltrados.map((hospedaje: Empresa) => (

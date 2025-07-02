@@ -1,8 +1,7 @@
 ---
 // ChatModal.astro - Modal de chat flotante
+import "../style/chat-modal.css";
 ---
-
-<link rel="stylesheet" href="/src/style/chat-modal.css" />
 
 <div id="chat-modal" class="chat-modal hidden">
     <div class="chat-modal-content">
@@ -35,7 +34,6 @@
         const url = endpoint.startsWith("http")
             ? endpoint
             : `${backendUrl}${endpoint}`;
-        console.log("ChatModal: Haciendo petición a:", url);
         return fetch(url, {
             method,
             ...options,
@@ -44,9 +42,6 @@
 
     // Esperar a que el DOM esté completamente cargado
     document.addEventListener("DOMContentLoaded", function () {
-        console.log("ChatModal: DOM cargado, inicializando...");
-        console.log("ChatModal: Backend URL:", backendUrl);
-
         // Variables globales
         let messages = [];
         let typingMessage = null;
@@ -73,8 +68,6 @@
             );
             return;
         }
-
-        console.log("ChatModal: Todos los elementos encontrados");
 
         // ID único por sesión
         const sessionId =
@@ -209,7 +202,6 @@
         chatToggle.addEventListener("click", function (e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log("ChatModal: Botón de chat clickeado");
             chatModal.classList.remove("hidden");
             userInput.focus();
         });
@@ -217,14 +209,12 @@
         closeChat.addEventListener("click", function (e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log("ChatModal: Cerrando chat");
             chatModal.classList.add("hidden");
         });
 
         // Cerrar modal al hacer clic fuera
         chatModal.addEventListener("click", function (e) {
             if (e.target === chatModal) {
-                console.log("ChatModal: Cerrando chat (clic fuera)");
                 chatModal.classList.add("hidden");
             }
         });
@@ -235,8 +225,6 @@
 
             const userMessage = userInput.value.trim();
             if (!userMessage) return;
-
-            console.log("ChatModal: Enviando mensaje:", userMessage);
 
             // Mostrar mensaje del usuario
             appendMessage(userMessage, "user");
@@ -275,7 +263,5 @@
                 );
             }
         });
-
-        console.log("ChatModal: Inicialización completada");
     });
 </script>
